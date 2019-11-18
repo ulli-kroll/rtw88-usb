@@ -393,7 +393,8 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 	pkt_info.qsel = qsel;
 	if (qsel == HALMAC_TXDESC_QSEL_BEACON) {
 		if (rtwusb->bulkout_size == 0) {
-			rtw_err(rtwdev, "%s: ERROR: bulkout_size is 0\n", __func__);
+			rtw_err(rtwdev, "%s: ERROR: bulkout_size is 0\n",
+				__func__);
 			return -EINVAL;
 		}
 		if (len % rtwusb->bulkout_size == 0) {
@@ -514,7 +515,7 @@ exit:
 }
 
 static int rtw_usb_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
-			u32 size)
+					u32 size)
 {
 	rtw_dbg(rtwdev, RTW_DBG_USB, "%s: enter\n", __func__);
 	if (!rtwdev) {
@@ -727,9 +728,8 @@ static void rtw_usb_inirp_deinit(struct rtw_dev *rtwdev)
 	rtw_usb_list_kill_all_urbs(rtwusb);
 }
 
-static int rtw_usb_tx(struct rtw_dev *rtwdev,
-		struct rtw_tx_pkt_info *pkt_info,
-		struct sk_buff *skb)
+static int rtw_usb_tx(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
+		      struct sk_buff *skb)
 {
 	u8 queue = rtw_usb_hw_queue_mapping(skb);
 	int ret;
@@ -744,7 +744,6 @@ static int rtw_usb_tx(struct rtw_dev *rtwdev,
 static int rtw_usb_setup(struct rtw_dev *rtwdev)
 {
 	pr_debug("%s ===>\n", __func__);
-	
 	return 0;
 }
 
@@ -757,7 +756,7 @@ enum usb_burst_size {
 };
 
 #define REG_SYS_CFG2		0x00FC
-#define REG_USB_USBSTAT 	0xFE11
+#define REG_USB_USBSTAT		0xFE11
 #define REG_RXDMA_MODE		0x785
 #define REG_TXDMA_OFFSET_CHK	0x20C
 #define BIT_DROP_DATA_EN	BIT(9)
@@ -788,7 +787,6 @@ static int rtw_usb_start(struct rtw_dev *rtwdev)
 	rtw_write8(rtwdev, REG_RXDMA_MODE, val8);
 	rtw_write16_set(rtwdev, REG_TXDMA_OFFSET_CHK, BIT_DROP_DATA_EN);
 
-
 #if 0
 	/* TODO: turn off rx agg switch first
 	 * need to turn on after implementing USB RX Aggregation
@@ -796,8 +794,7 @@ static int rtw_usb_start(struct rtw_dev *rtwdev)
 	ret = chip->ops->set_rx_agg_switch(rtwdev, false, RTW_USB_RXAGG_SIZE,
 					 RTW_USB_RXAGG_TIMEOUT);
 	if (ret) {
-		pr_err("%s: set_rx_agg_switch failed, ret=%d\n",
-			__func__, ret);
+		pr_err("%s: set_rx_agg_switch failed, ret=%d\n", __func__, ret);
 		return ret;
 	}
 #endif
@@ -1061,7 +1058,7 @@ static void usb_interface_configure(struct rtw_dev *rtwdev)
 	rtwusb->txagg_desc_num = chip->ops->get_tx_agg_num(rtwdev);
 
 	pr_debug("%s : TX Agg desc num: %d \r\n", __func__,
-		rtwusb->txagg_desc_num);
+		 rtwusb->txagg_desc_num);
 
 	rtw_usb_set_queue_pipe_mapping(rtwdev, rtwusb->num_in_pipes,
 				       rtwusb->num_out_pipes);
