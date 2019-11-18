@@ -10,6 +10,7 @@
 #include "coex.h"
 #include "ps.h"
 #include "reg.h"
+#include "bf.h"
 #include "debug.h"
 
 static void rtw_ops_tx(struct ieee80211_hw *hw,
@@ -157,6 +158,7 @@ static int rtw_ops_add_interface(struct ieee80211_hw *hw,
 	rtwvif->stats.tx_cnt = 0;
 	rtwvif->stats.rx_cnt = 0;
 	rtwvif->in_lps = false;
+	memset(&rtwvif->bfee, 0, sizeof(struct rtw_bfee));
 	rtwvif->conf = &rtw_vif_port[port];
 	rtw_txq_init(rtwdev, vif->txq);
 
@@ -348,11 +350,14 @@ static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
 			rtw_fw_download_rsvd_page(rtwdev, vif);
 			rtw_send_rsvd_page_h2c(rtwdev);
 			rtw_coex_media_status_notify(rtwdev, conf->assoc);
+			if (rtw_bf_support)
+				rtw_bf_assoc(rtwdev, vif, conf);
 		} else {
 			rtw_leave_lps(rtwdev);
 			net_type = RTW_NET_NO_LINK;
 			rtwvif->aid = 0;
 			rtw_reset_rsvd_page(rtwdev);
+			rtw_bf_disassoc(rtwdev, vif, conf);
 		}
 
 		rtwvif->net_type = net_type;
@@ -367,6 +372,12 @@ static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
 
 	if (changed & BSS_CHANGED_BEACON)
 		rtw_fw_download_rsvd_page(rtwdev, vif);
+
+	if (changed & BSS_CHANGED_MU_GROUPS) {
+		struct rtw_chip_info *chip = rtwdev->chip;
+
+		chip->ops->set_gid_table(rtwdev, vif, conf);
+	}
 
 	if (changed & BSS_CHANGED_ERP_SLOT)
 		rtw_conf_tx(rtwdev, rtwvif);
@@ -464,6 +475,8 @@ static int rtw_ops_sta_remove(struct ieee80211_hw *hw,
 	for (i = 0; i < ARRAY_SIZE(sta->txq); i++)
 		rtw_txq_cleanup(rtwdev, sta->txq[i]);
 
+	kfree(si->mask);
+
 	rtwdev->sta_cnt--;
 
 	rtw_info(rtwdev, "sta %pM with macid %d left\n",
@@ -533,6 +546,7 @@ static int rtw_ops_set_key(struct ieee80211_hw *hw, enum set_key_cmd cmd,
 				  hw_key_type, hw_key_idx);
 		break;
 	case DISABLE_KEY:
+		rtw_mac_flush_all_queues(rtwdev, false);
 		rtw_sec_clear_cam(rtwdev, sec, key->hw_key_idx);
 		break;
 	}
@@ -672,6 +686,56 @@ static void rtw_ops_flush(struct ieee80211_hw *hw,
 	mutex_unlock(&rtwdev->mutex);
 }
 
+struct rtw_iter_bitrate_mask_data {
+	struct rtw_dev *rtwdev;
+	struct ieee80211_vif *vif;
+	const struct cfg80211_bitrate_mask *mask;
+};
+
+static void rtw_ra_mask_info_update_iter(void *data, struct ieee80211_sta *sta)
+{
+	struct rtw_iter_bitrate_mask_data *br_data = data;
+	struct rtw_sta_info *si = (struct rtw_sta_info *)sta->drv_priv;
+
+	if (si->vif != br_data->vif)
+		return;
+
+	/* free previous mask setting */
+	kfree(si->mask);
+	si->mask = kmemdup(br_data->mask, sizeof(struct cfg80211_bitrate_mask),
+			   GFP_ATOMIC);
+	if (!si->mask) {
+		si->use_cfg_mask = false;
+		return;
+	}
+
+	si->use_cfg_mask = true;
+	rtw_update_sta_info(br_data->rtwdev, si);
+}
+
+static void rtw_ra_mask_info_update(struct rtw_dev *rtwdev,
+				    struct ieee80211_vif *vif,
+				    const struct cfg80211_bitrate_mask *mask)
+{
+	struct rtw_iter_bitrate_mask_data br_data;
+
+	br_data.rtwdev = rtwdev;
+	br_data.vif = vif;
+	br_data.mask = mask;
+	rtw_iterate_stas_atomic(rtwdev, rtw_ra_mask_info_update_iter, &br_data);
+}
+
+static int rtw_ops_set_bitrate_mask(struct ieee80211_hw *hw,
+				    struct ieee80211_vif *vif,
+				    const struct cfg80211_bitrate_mask *mask)
+{
+	struct rtw_dev *rtwdev = hw->priv;
+
+	rtw_ra_mask_info_update(rtwdev, vif, mask);
+
+	return 0;
+}
+
 const struct ieee80211_ops rtw_ops = {
 	.tx			= rtw_ops_tx,
 	.wake_tx_queue		= rtw_ops_wake_tx_queue,
@@ -693,5 +757,6 @@ const struct ieee80211_ops rtw_ops = {
 	.set_rts_threshold	= rtw_ops_set_rts_threshold,
 	.sta_statistics		= rtw_ops_sta_statistics,
 	.flush			= rtw_ops_flush,
+	.set_bitrate_mask	= rtw_ops_set_bitrate_mask,
 };
 EXPORT_SYMBOL(rtw_ops);

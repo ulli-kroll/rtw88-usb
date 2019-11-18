@@ -47,7 +47,7 @@ void rtw_set_channel_mac(struct rtw_dev *rtwdev, u8 channel, u8 bw,
 
 	value8 = rtw_read8(rtwdev, REG_CCK_CHECK);
 	value8 = value8 & ~BIT_CHECK_CCK_EN;
-	if (channel > 35)
+	if (IS_CH_5G_BAND(channel))
 		value8 |= BIT_CHECK_CCK_EN;
 	rtw_write8(rtwdev, REG_CCK_CHECK, value8);
 }
@@ -239,15 +239,13 @@ static int rtw_mac_power_switch(struct rtw_dev *rtwdev, bool pwr_on)
 		rtw_write8(rtwdev, rtwdev->hci.rpwm_addr, rpwm);
 	}
 
-	if (rtw_read8(rtwdev, REG_CR) == 0xea) 
+	if (rtw_read8(rtwdev, REG_CR) == 0xea)
 		cur_pwr = false;
 	else if (rtw_hci_type(rtwdev) == RTW_HCI_TYPE_USB &&
 		 (rtw_read8(rtwdev, REG_SYS_STATUS1 + 1) & BIT(0)))
 		cur_pwr = false;
-	else 
+	else
 		cur_pwr = true;
-	
-	pr_info("%s: cur_pwr:%d\n", __func__, cur_pwr);
 
 	if (pwr_on && cur_pwr)
 		return -EALREADY;
@@ -269,7 +267,7 @@ static int rtw_mac_init_system_cfg(struct rtw_dev *rtwdev)
 	value |= BIT_WL_PLATFORM_RST | BIT_DDMA_EN;
 	rtw_write32(rtwdev, REG_CPU_DMEM_CON, value);
 
-	rtw_write8(rtwdev, REG_SYS_FUNC_EN + 1, sys_func_en);
+	rtw_write8_set(rtwdev, REG_SYS_FUNC_EN + 1, sys_func_en);
 	value8 = (rtw_read8(rtwdev, REG_CR_EXT + 3) & 0xF0) | 0x0C;
 	rtw_write8(rtwdev, REG_CR_EXT + 3, value8);
 
@@ -575,21 +573,6 @@ download_firmware_to_mem(struct rtw_dev *rtwdev, const u8 *data,
 	return 0;
 }
 
-static void update_firmware_info(struct rtw_dev *rtwdev,
-				 struct rtw_fw_state *fw)
-{
-	const struct rtw_fw_hdr *fw_hdr =
-				(const struct rtw_fw_hdr *)fw->firmware->data;
-
-	fw->h2c_version = le16_to_cpu(fw_hdr->h2c_fmt_ver);
-	fw->version = le16_to_cpu(fw_hdr->version);
-	fw->sub_version = fw_hdr->subversion;
-	fw->sub_index = fw_hdr->subindex;
-
-	rtw_info(rtwdev, "Firmware version %u.%u.%u, H2C version %u\n",
-		 fw->version, fw->sub_version, fw->sub_index, fw->h2c_version);
-}
-
 static int
 start_download_firmware(struct rtw_dev *rtwdev, const u8 *data, u32 size)
 {
@@ -706,8 +689,6 @@ int rtw_download_firmware(struct rtw_dev *rtwdev, struct rtw_fw_state *fw)
 	if (ret)
 		goto dlfw_fail;
 
-	update_firmware_info(rtwdev, fw);
-
 	/* reset desc and index */
 	rtw_hci_setup(rtwdev);
 
@@ -716,7 +697,6 @@ int rtw_download_firmware(struct rtw_dev *rtwdev, struct rtw_fw_state *fw)
 
 	set_bit(RTW_FLAG_FW_RUNNING, rtwdev->flags);
 
-	pr_info("%s: FW running\n", __func__);
 	return 0;
 
 dlfw_fail:
