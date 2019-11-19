@@ -490,7 +490,7 @@ static int rtw_usb_xmit(struct rtw_dev *rtwdev,
 	rtw_tx_fill_tx_desc(pkt_info, skb);
 
 	status = chip->ops->fill_txdesc_checksum(rtwdev, skb->data);
-	if (!status) {
+	if (status) {
 		pr_err("%s : halmac txdesc checksum failed, status = %d\n",
 		       __func__, status);
 		goto exit;
