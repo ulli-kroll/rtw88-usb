@@ -1181,12 +1181,16 @@ static void rtw_usb_remove(struct usb_interface *intf)
 	ieee80211_free_hw(hw);
 }
 
-#define RTW_USB_VENDOR_ID_REALTEK 0x0bda
-#define RTW_USB_PRODUCT_ID_REALTEK 0xB82C
+#define RTW_USB_VENDOR_ID_REALTEK 		0x0bda
+#define RTW_USB_PRODUCT_ID_REALTEK_8822B 	0xB82C
+#define RTW_USB_PRODUCT_ID_REALTEK_8812B 	0xB812
 
 const struct usb_device_id rtw_usb_id_table[] = {
 	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
-					RTW_USB_PRODUCT_ID_REALTEK,
+					RTW_USB_PRODUCT_ID_REALTEK_8822B,
+					0xff, 0xff, 0xff),
+	  USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
+					RTW_USB_PRODUCT_ID_REALTEK_8812B,
 					0xff, 0xff, 0xff),
 		.driver_info = (kernel_ulong_t)&rtw8822b_hw_spec },
 	{}
