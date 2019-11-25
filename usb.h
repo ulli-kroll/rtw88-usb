@@ -8,14 +8,29 @@ enum RTW_USB_SPEED {
 	RTW_USB_SPEED_3		= 3,
 };
 
-struct rtw_usb_urb {
-	struct list_head list;
-	bool urb_is_tx;
-	struct urb *urb;
-	struct sk_buff *skb;
+struct rtw_event {
+	atomic_t event_condition;
+	wait_queue_head_t event_queue;
+};
+
+struct rtw_thread {
+	void (*thread_function)(void *);
+	struct completion completion;
+	struct task_struct *task;
+	struct rtw_event event;
+	atomic_t thread_done;
+};
+
+
+struct rx_usb_ctrl_block {
+	u8 *data;
+	struct urb *rx_urb;
+	struct sk_buff *rx_skb;
+	u8 ep_num;
 };
 
 struct rtw_usb {
+	struct rtw_dev *rtwdev;
 	struct usb_device *udev;
 
 	struct mutex usb_buf_mutex; /* mutex for usb_buf */
@@ -45,9 +60,15 @@ struct rtw_usb {
 	u32 txdesc_size;
 	u32 txdesc_offset;
 
-	struct list_head urb_list;
+	struct rx_usb_ctrl_block rx_cb[8];
+	//struct list_head urb_list;
 
 	atomic_t is_bus_drv_ready;
+
+	// common
+	struct rtw_thread tx_thread;
+	bool init_done;
+	struct sk_buff_head tx_queue;
 };
 
 #define rtw_get_usb_priv(rtwdev) ((struct rtw_usb *)rtwdev->priv)
