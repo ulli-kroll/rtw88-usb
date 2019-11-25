@@ -1155,7 +1155,7 @@ err_release_hw:
 	return ret;
 }
 
-static void rtw_usb_remove(struct usb_interface *intf)
+static void rtw_usb_disconnect(struct usb_interface *intf)
 {
 	struct ieee80211_hw *hw = usb_get_intfdata(intf);
 	struct rtw_dev *rtwdev;
@@ -1200,7 +1200,7 @@ static struct usb_driver rtw_usb_driver = {
 	.name = "rtwifi_usb",
 	.id_table = rtw_usb_id_table,
 	.probe = rtw_usb_probe,
-	.disconnect = rtw_usb_remove,
+	.disconnect = rtw_usb_disconnect,
 };
 
 module_usb_driver(rtw_usb_driver);
