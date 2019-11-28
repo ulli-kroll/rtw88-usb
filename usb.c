@@ -594,7 +594,6 @@ static void rtw_usb_recv_handler(struct rtw_dev *rtwdev, struct sk_buff *skb)
 	struct ieee80211_rx_status rx_status;
 	u32 pkt_desc_sz = chip->rx_pkt_desc_sz;
 	u32 pkt_offset;
-	struct sk_buff *new_skb;
 
 	rx_desc = skb->data;
 	chip->ops->query_rx_desc(rtwdev, rx_desc, &pkt_stat, &rx_status);
@@ -610,22 +609,15 @@ static void rtw_usb_recv_handler(struct rtw_dev *rtwdev, struct sk_buff *skb)
 	} else {
 		if (skb_queue_len(&rtwusb->rx_queue) >= 64) {
 			pr_err("%s: rx_queue overflow\n", __func__);
+			dev_kfree_skb(skb);
 		} else {
 			skb_put(skb, pkt_stat.pkt_len);
 			skb_reserve(skb, pkt_offset);
-			new_skb = dev_alloc_skb(pkt_stat.pkt_len);
-			if (!new_skb) {
-				pr_err("%s: dev_alloc_skb failed\n", __func__);
-				return;
-			}
-			skb_put(new_skb, skb->len);
-			memcpy(new_skb->data, skb->data, skb->len);
-			memcpy(new_skb->cb, &rx_status, sizeof(rx_status));
+			memcpy(skb->cb, &rx_status, sizeof(rx_status));
 
-			skb_queue_tail(&rtwusb->rx_queue, new_skb);
+			skb_queue_tail(&rtwusb->rx_queue, skb);
 			rtw_set_event(&rtwusb->rx_thread.event);
 		}
-		dev_kfree_skb(skb);
 	}
 
 }

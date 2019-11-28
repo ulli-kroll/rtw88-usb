@@ -191,6 +191,10 @@ static void rtw_watch_dog_work(struct work_struct *work)
 	ieee80211_queue_delayed_work(rtwdev->hw, &rtwdev->watch_dog_work,
 				     RTW_WATCH_DOG_DELAY_TIME);
 
+#if 1
+	set_bit(RTW_FLAG_BUSY_TRAFFIC, rtwdev->flags);
+	ps_active = true;
+#else
 	if (rtwdev->stats.tx_cnt > 100 || rtwdev->stats.rx_cnt > 100)
 		set_bit(RTW_FLAG_BUSY_TRAFFIC, rtwdev->flags);
 	else
@@ -204,6 +208,7 @@ static void rtw_watch_dog_work(struct work_struct *work)
 		ps_active = true;
 	else
 		ps_active = false;
+#endif
 
 	ewma_tp_add(&stats->tx_ewma_tp,
 		    (u32)(stats->tx_unicast >> RTW_TP_SHIFT));
