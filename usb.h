@@ -49,26 +49,27 @@ struct rtw_usb {
 	u8 out_ep_queue_sel;
 	//u8 out_ep_num;
 	int nr_out_eps;
-
 	u8 queue_to_pipe[8];
-
 	u32 bulkout_size;
 	u8  usb_speed;
 
-	u8 txagg_desc_num;
-
-	u32 txdesc_size;
-	u32 txdesc_offset;
-
-	struct rx_usb_ctrl_block rx_cb[8];
 	//struct list_head urb_list;
-
 	atomic_t is_bus_drv_ready;
 
-	// common
+	// TX
+	u8 txagg_desc_num;
+	u32 txdesc_size;
+	u32 txdesc_offset;
+	// TX - Thread
 	struct rtw_thread tx_thread;
 	bool init_done;
 	struct sk_buff_head tx_queue;
+
+	// RX
+	struct rx_usb_ctrl_block rx_cb[8];
+	// RX - Thread
+	struct rtw_thread rx_thread;
+	struct sk_buff_head rx_queue;
 };
 
 #define rtw_get_usb_priv(rtwdev) ((struct rtw_usb *)rtwdev->priv)
