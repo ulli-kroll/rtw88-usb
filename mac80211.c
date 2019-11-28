@@ -738,7 +738,7 @@ static int rtw_ops_set_bitrate_mask(struct ieee80211_hw *hw,
 
 const struct ieee80211_ops rtw_ops = {
 	.tx			= rtw_ops_tx,
-	.wake_tx_queue		= rtw_ops_wake_tx_queue,
+//	.wake_tx_queue		= rtw_ops_wake_tx_queue,
 	.start			= rtw_ops_start,
 	.stop			= rtw_ops_stop,
 	.config			= rtw_ops_config,

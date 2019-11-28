@@ -64,6 +64,7 @@ struct rtw_usb {
 	struct rtw_thread tx_thread;
 	bool init_done;
 	struct sk_buff_head tx_queue;
+	struct mutex tx_lock;
 
 	// RX
 	struct rx_usb_ctrl_block rx_cb[8];

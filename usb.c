@@ -230,16 +230,6 @@ static void rtw_reset_event(struct rtw_event *event)
 	atomic_set(&event->event_condition, 1);
 }
 
-static void rtw_core_queue_pkt(struct rtw_usb *rtwusb, struct sk_buff *skb)
-{
-	skb_queue_tail(&rtwusb->tx_queue, skb);
-}
-
-static struct sk_buff *rtw_core_dequeue_pkt(struct rtw_usb *rtwusb)
-{
-	return skb_dequeue(&rtwusb->tx_queue);
-}
-
 static int rtw_create_kthread(struct rtw_dev *rtwdev,
 			      struct rtw_thread *thread,
 			      void *func_ptr,
@@ -302,6 +292,8 @@ static void rtw_usb_rx_thread(struct rtw_dev *rtwdev)
 
 			ieee80211_rx_irqsafe(rtwdev->hw, skb);
 		}
+	
+		rtw_usb_read_port(rtwdev, RTW_USB_BULK_IN_ADDR);
 
 	} while (1);
 
@@ -338,78 +330,21 @@ unsigned int rtw_usb_get_pipe(struct rtw_usb *rtwusb, u32 addr)
 	return pipe;
 }
 
-static void rtw_indicate_tx_status(struct rtw_dev *rtwdev, struct sk_buff *skb,
-				   int status)
+static void rtw_indicate_tx_status(struct rtw_dev *rtwdev, struct sk_buff *skb)
 {
 	struct ieee80211_hw *hw = rtwdev->hw;
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
 
-	//ieee80211_tx_info_clear_status(info);
-	if (!status)
-		info->flags |= IEEE80211_TX_STAT_ACK;
+	ieee80211_tx_info_clear_status(info);
+	info->flags |= IEEE80211_TX_STAT_ACK;
 	ieee80211_tx_status_irqsafe(hw, skb);
 }
 
-#if 0
-static void rtw_usb_write_port_complete(struct urb *urb)
-{
-	struct rtw_dev *rtwdev;
-	struct rtw_usb *rtwusb;
-	//struct rtw_usb_urb *rtwurb;
-	struct sk_buff *skb;
-	bool urb_is_tx;
-
-	rtwdev = (struct rtw_dev *)urb->context;
-	rtwusb = (struct rtw_usb *)rtwdev->priv;
-	//rtwurb = rtw_usb_list_get_rtwurb(rtwusb, urb);
-	//if (!rtwurb)
-	//	return;
-
-	//skb = rtwurb->skb;
-	//urb_is_tx = rtwurb->urb_is_tx;
-
-	if (urb->status == 0) {
-		;
-	} else {
-		pr_info("###=> %s status(%d)\n", __func__, urb->status);
-		if ((urb->status == -EPIPE) || (urb->status == -EPROTO)) {
-			pr_err("%s: -EPIPE or -EPROTO\n", __func__);
-		} else if (urb->status == -EINPROGRESS) {
-			pr_err("%s: -EINPROGRESS\n", __func__);
-		} else if (urb->status == -ENOENT) {
-			pr_err("%s: -ENOENT\n", __func__);
-		} else if (urb->status == -ECONNRESET) {
-			pr_err("%s: -ECONNRESET\n", __func__);
-		} else if (urb->status == -ESHUTDOWN) {
-			pr_err("%s: -ESHUTDOWN\n", __func__);
-		} else {
-			pr_err("%s: unknown : status=%d\n", __func__,
-			       urb->status);
-		}
-	}
-
-	if (urb_is_tx) {
-		struct ieee80211_hw *hw = rtwdev->hw;
-		struct ieee80211_tx_info *info;
-
-		info = IEEE80211_SKB_CB(skb);
-		ieee80211_tx_info_clear_status(info);
-		info->flags |= IEEE80211_TX_STAT_ACK;
-		ieee80211_tx_status_irqsafe(hw, skb);
-	} else {
-		dev_kfree_skb(skb);
-	}
-
-	//rtw_usb_list_free_urb(rtwusb, urb);
-}
-#endif
-
-static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, bool urb_is_tx, u8 addr,
-			      u32 cnt, struct sk_buff *skb)
+static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
+			      struct sk_buff *skb)
 {
 	unsigned int pipe;
 	int ret = -1;
-	//struct urb *urb = NULL;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	struct usb_device *usbd = rtwusb->udev;
 	int transfer;
@@ -431,33 +366,43 @@ void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
 	struct rtw_chip_info *chip = rtwdev->chip;
 	struct sk_buff *skb;
-	//unsigned long tstamp_1, tstamp_2;
 	u8 qsel;
 	u8 addr;
 	int status;
+	//unsigned long tstamp_1, tstamp_2;
 
 	//tstamp_1 = jiffies;
 	while (1) {
-		skb = rtw_core_dequeue_pkt(rtwusb);
-		if (skb == NULL)
+		mutex_lock(&rtwusb->tx_lock);
+
+		skb = skb_dequeue(&rtwusb->tx_queue);
+		if (skb == NULL) {
+			mutex_unlock(&rtwusb->tx_lock);
 			break;
+		}
 
 		qsel = le32_get_bits(*((__le32 *)(skb->data) + 0x1),
 				     GENMASK(12, 8));	
 		addr = chip->ops->get_usb_bulkout_id(rtwdev, qsel);
 		if (addr < 0) {
+			mutex_unlock(&rtwusb->tx_lock);
 			pr_err("%s : halmac_get_usb_bulkout_id failed, qsel=%d\n",
 			       __func__, qsel);
 			break;
 		}
 
-		status = rtw_usb_write_port(rtwdev, true, addr, skb->len, skb);
+		status = rtw_usb_write_port(rtwdev, addr, skb->len, skb);
 		if (status) {
 			pr_err("%s, rtw_usb_write_xmit failed, ret=%d\n",
 			       __func__, status);
 		}
 
-		rtw_indicate_tx_status(rtwdev, skb, status);
+		rtw_indicate_tx_status(rtwdev, skb);
+
+		mutex_unlock(&rtwusb->tx_lock);
+		//tstamp_2 = jiffies;
+		//if (time_after(tstamp_2, tstamp_1 + (300 * HZ) / 1000))
+		//	schedule();
 	}
 }
 
@@ -534,7 +479,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 		goto exit;
 	}
 
-	ret = rtw_usb_write_port(rtwdev, false, addr, len, skb);
+	ret = rtw_usb_write_port(rtwdev, addr, len, skb);
 	if (ret) {
 		pr_err("%s ,rtw_usb_write_port failed, ret=%d\n",
 		       __func__, ret);
@@ -570,7 +515,6 @@ static int rtw_usb_xmit(struct rtw_dev *rtwdev,
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
-	//u8 addr;
 	u32 len;
 	u8 *pkt_desc;
 	int status;
@@ -592,25 +536,8 @@ static int rtw_usb_xmit(struct rtw_dev *rtwdev,
 		goto exit;
 	}
 
-#if 1
-	rtw_core_queue_pkt(rtwusb, skb);
+	skb_queue_tail(&rtwusb->tx_queue, skb);
 	rtw_set_event(&rtwusb->tx_thread.event);
-#else
-	addr = chip->ops->get_usb_bulkout_id(rtwdev, pkt_info->qsel);
-	if (addr < 0) {
-		pr_err("%s : halmac_get_usb_bulkout_id failed, status = %d\n",
-		       __func__, status);
-		goto exit;
-	}
-
-	status = rtw_usb_write_port(rtwdev, true, addr, skb->len, skb);
-	if (status) {
-		pr_err("%s, rtw_usb_write_xmit failed, ret=%d\n",
-		       __func__, status);
-	}
-
-	rtw_indicate_tx_status(rtwdev, skb, status);
-#endif
 
 exit:
 	return status;
@@ -694,17 +621,13 @@ static void rtw_usb_recv_handler(struct rtw_dev *rtwdev, struct sk_buff *skb)
 			skb_put(new_skb, skb->len);
 			memcpy(new_skb->data, skb->data, skb->len);
 			memcpy(new_skb->cb, &rx_status, sizeof(rx_status));
-#if 0
-			ieee80211_rx_irqsafe(rtwdev->hw, new_skb);
-#else
+
 			skb_queue_tail(&rtwusb->rx_queue, new_skb);
 			rtw_set_event(&rtwusb->rx_thread.event);
-#endif
 		}
 		dev_kfree_skb(skb);
 	}
 
-	rtw_usb_read_port(rtwdev, RTW_USB_BULK_IN_ADDR);
 }
 
 static void rtw_usb_read_port_complete(struct urb *urb)
@@ -764,7 +687,6 @@ static u32 rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr)
 	u32 len;
 	size_t buf_addr;
 	size_t alignment = 0;
-	//bool urb_is_tx = false;
 	// Suppose only one read_port first 
 	struct rx_usb_ctrl_block *rxcb = &(rtwusb->rx_cb[0]); 
 
@@ -773,15 +695,7 @@ static u32 rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr)
 		return 0;
 	}
 
-#if 1
 	urb = rxcb->rx_urb;
-#else
-	urb = usb_alloc_urb(0, GFP_KERNEL);
-	if (!urb) {
-		pr_err("%s cannot allocate urb\n", __func__);
-		return -ENOMEM;
-	}
-#endif
 	rxcb->data = (u8*)rtwdev;
 
 	pipe = rtw_usb_get_pipe(rtwusb, RTW_USB_BULK_IN_ADDR);
@@ -805,11 +719,9 @@ static u32 rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr)
 			  rtw_usb_read_port_complete,
 			  rxcb);
 
-	//rtw_usb_list_add_urb(rtwusb, urb, urb_is_tx, skb);
 	ret = usb_submit_urb(urb, GFP_ATOMIC);
 	if (ret) {
 		pr_err("%s: usb_submit_urb failed, ret=%d\n", __func__, ret);
-		//rtw_usb_list_free_urb(rtwusb, urb);
 	}
 	return ret;
 }
@@ -1291,7 +1203,7 @@ static int rtw_usb_probe(struct usb_interface *intf,
 	rtwusb->udev = udev;
 	mutex_init(&rtwusb->usb_buf_mutex);
 
-	//INIT_LIST_HEAD(&rtwusb->urb_list);
+	mutex_init(&rtwusb->tx_lock);
 
 	pr_info("%s: rtw_usb_parse\n", __func__);
 	ret = rtw_usb_parse(rtwdev, intf);
@@ -1303,12 +1215,12 @@ static int rtw_usb_probe(struct usb_interface *intf,
 
 	pr_info("%s: usb_interface_configure\n", __func__);
 	usb_interface_configure(rtwdev);
-#if 1 
+
 	ret = rtw_usb_init_rx(rtwdev);
 	if (ret) {
 		goto err_deinit_core;
 	}
-#endif
+
 	SET_IEEE80211_DEV(rtwdev->hw, &intf->dev);
 
 	pr_info("%s: rtw_chip_info_setup\n", __func__);
@@ -1336,6 +1248,7 @@ err_destroy_usb:
 err_deinit_core:
 	rtw_core_deinit(rtwdev);
 	mutex_destroy(&rtwusb->usb_buf_mutex);
+	mutex_destroy(&rtwusb->tx_lock);
 finish:
 	return ret;
 }
@@ -1366,6 +1279,7 @@ static void rtw_usb_disconnect(struct usb_interface *intf)
 	usb_set_intfdata(intf, NULL);
 	rtw_core_deinit(rtwdev);
 	mutex_destroy(&rtwusb->usb_buf_mutex);
+	mutex_destroy(&rtwusb->tx_lock);
 	ieee80211_free_hw(hw);
 }
 
