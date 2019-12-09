@@ -13,14 +13,10 @@ struct rtw_event {
 	wait_queue_head_t event_queue;
 };
 
-struct rtw_thread {
-	void (*thread_function)(void *);
-	struct completion completion;
-	struct task_struct *task;
+struct rtw_handler {
 	struct rtw_event event;
-	atomic_t thread_done;
+	atomic_t handler_done;
 };
-
 
 struct rx_usb_ctrl_block {
 	u8 *data;
@@ -56,21 +52,26 @@ struct rtw_usb {
 	//struct list_head urb_list;
 	atomic_t is_bus_drv_ready;
 
+	// workqueue
+	struct workqueue_struct *txwq, *rxwq;
+
 	// TX
 	u8 txagg_desc_num;
 	u32 txdesc_size;
 	u32 txdesc_offset;
-	// TX - Thread
-	struct rtw_thread tx_thread;
+	// TX - workqueue
 	bool init_done;
-	struct sk_buff_head tx_queue;
 	struct mutex tx_lock;
+	struct sk_buff_head tx_queue;
+	struct rtw_handler tx_handler;
+	struct work_data *tx_handler_data;
 
 	// RX
+	// RX - workqueue
 	struct rx_usb_ctrl_block rx_cb[8];
-	// RX - Thread
-	struct rtw_thread rx_thread;
 	struct sk_buff_head rx_queue;
+	struct rtw_handler rx_handler;
+	struct work_data *rx_handler_data;
 };
 
 #define rtw_get_usb_priv(rtwdev) ((struct rtw_usb *)rtwdev->priv)

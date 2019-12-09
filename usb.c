@@ -72,6 +72,12 @@ enum halmac_txdesc_queue_tid {
 	HALMAC_TXDESC_QSEL_UNDEFINE = 0x7F,
 };
 
+/* work queue */
+struct work_data {
+	struct work_struct work;
+	struct rtw_dev *rtwdev;
+};
+
 /*
  * driver status relative functions
  */
@@ -230,60 +236,53 @@ static void rtw_reset_event(struct rtw_event *event)
 	atomic_set(&event->event_condition, 1);
 }
 
-static int rtw_create_kthread(struct rtw_dev *rtwdev,
-			      struct rtw_thread *thread,
-			      void *func_ptr,
-			      u8 *name)
+static void rtw_create_handler(struct rtw_handler *handler)
 {
-	init_completion(&thread->completion);
-	atomic_set(&thread->thread_done, 0);
-	thread->task = kthread_run(func_ptr, rtwdev, "%s", name);
-	if (IS_ERR(thread->task))
-		return (int)PTR_ERR(thread->task);
-
-	return 0;
+	atomic_set(&handler->handler_done, 0);
 }
 
-static int rtw_kill_thread(struct rtw_thread *handle)
+static void rtw_kill_handler(struct rtw_handler *handler)
 {
-	atomic_inc(&handle->thread_done);
-	rtw_set_event(&handle->event);
-
-	return kthread_stop(handle->task);
+	atomic_inc(&handler->handler_done);
+	rtw_set_event(&handler->event);
 }
-
 
 void rtw_core_qos_processor(struct rtw_usb *rtwusb);
-static void rtw_usb_tx_thread(struct rtw_dev *rtwdev)
+static void rtw_usb_tx_handler(struct work_struct *work)
 {
+	struct work_data *my_data = container_of(work, struct work_data,
+						 work);
+	struct rtw_dev *rtwdev = my_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	u32 timeout = 0;
 
 	do {
-		rtw_wait_event(&rtwusb->tx_thread.event, timeout);
-		rtw_reset_event(&rtwusb->tx_thread.event);
+		rtw_wait_event(&rtwusb->tx_handler.event, timeout);
+		rtw_reset_event(&rtwusb->tx_handler.event);
 
 		if (rtwusb->init_done)
 			rtw_core_qos_processor(rtwusb);
-	} while (atomic_read(&rtwusb->tx_thread.thread_done) == 0);
-	complete_and_exit(&rtwusb->tx_thread.completion, 0);
+	} while (atomic_read(&rtwusb->tx_handler.handler_done) == 0);
 }
 
 // RX functions
 static u32 rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr);
 
-static void rtw_usb_rx_thread(struct rtw_dev *rtwdev)
+static void rtw_usb_rx_handler(struct work_struct *work)
 {
+	struct work_data *my_data = container_of(work, struct work_data,
+						 work);
+	struct rtw_dev *rtwdev = my_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	u32 timeout = 0;
 	struct sk_buff *skb;
 
 	do {
-		rtw_wait_event(&rtwusb->rx_thread.event, timeout);
-		rtw_reset_event(&rtwusb->rx_thread.event);
+		rtw_wait_event(&rtwusb->rx_handler.event, timeout);
+		rtw_reset_event(&rtwusb->rx_handler.event);
 
 		while (true) {
-			if (atomic_read(&rtwusb->rx_thread.thread_done))
+			if (atomic_read(&rtwusb->rx_handler.handler_done))
 				goto out;
 
 			skb = skb_dequeue(&rtwusb->rx_queue);
@@ -294,13 +293,10 @@ static void rtw_usb_rx_thread(struct rtw_dev *rtwdev)
 		}
 	
 		rtw_usb_read_port(rtwdev, RTW_USB_BULK_IN_ADDR);
-
 	} while (1);
 
 out:
-	pr_info("%s: Terminated thread\n", __func__);
 	skb_queue_purge(&rtwusb->rx_queue);
-	complete_and_exit(&rtwusb->tx_thread.completion, 0);
 }
 
 static
@@ -369,9 +365,6 @@ void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 	u8 qsel;
 	u8 addr;
 	int status;
-	//unsigned long tstamp_1, tstamp_2;
-
-	//tstamp_1 = jiffies;
 	while (1) {
 		mutex_lock(&rtwusb->tx_lock);
 
@@ -400,9 +393,6 @@ void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 		rtw_indicate_tx_status(rtwdev, skb);
 
 		mutex_unlock(&rtwusb->tx_lock);
-		//tstamp_2 = jiffies;
-		//if (time_after(tstamp_2, tstamp_1 + (300 * HZ) / 1000))
-		//	schedule();
 	}
 }
 
@@ -537,7 +527,7 @@ static int rtw_usb_xmit(struct rtw_dev *rtwdev,
 	}
 
 	skb_queue_tail(&rtwusb->tx_queue, skb);
-	rtw_set_event(&rtwusb->tx_thread.event);
+	rtw_set_event(&rtwusb->tx_handler.event);
 
 exit:
 	return status;
@@ -616,7 +606,7 @@ static void rtw_usb_recv_handler(struct rtw_dev *rtwdev, struct sk_buff *skb)
 			memcpy(skb->cb, &rx_status, sizeof(rx_status));
 
 			skb_queue_tail(&rtwusb->rx_queue, skb);
-			rtw_set_event(&rtwusb->rx_thread.event);
+			rtw_set_event(&rtwusb->rx_handler.event);
 		}
 	}
 
@@ -1125,44 +1115,80 @@ static int rtw_os_core_init(struct rtw_dev **prtwdev,
 	rtwusb = rtw_get_usb_priv(rtwdev);
 	rtwusb->rtwdev = rtwdev;
 
-	skb_queue_head_init(&rtwusb->tx_queue);
-	rtw_init_event(&rtwusb->tx_thread.event);
-	ret = rtw_create_kthread(rtwdev, &rtwusb->tx_thread,
-			       rtw_usb_tx_thread, "TX-Thread");
-	if (ret) {
-		pr_err("%s: unable to init tx thread\n", __func__);
+	rtwusb->txwq = create_singlethread_workqueue("rtw88-usb : TX work queue");
+	if (!rtwusb->txwq) {
+		pr_err("%s: create_singlethread_workqueue failed\n", __func__);
+		ret = -ENOMEM;
 		goto err_deinit_core;
 	}
 
+	rtwusb->tx_handler_data = kmalloc(sizeof(struct work_data), GFP_KERNEL);
+	if (!rtwusb->tx_handler_data) {
+		pr_err("%s: tx_handler_data allocation failed\n", __func__);
+		ret = -ENOMEM;
+		goto err_destroy_wq;
+	}
+
+	rtwusb->tx_handler_data->rtwdev = rtwdev; 
+
+	skb_queue_head_init(&rtwusb->tx_queue);
+	rtw_create_handler(&rtwusb->tx_handler);
+	rtw_init_event(&rtwusb->tx_handler.event);
+	INIT_WORK(&rtwusb->tx_handler_data->work, rtw_usb_tx_handler);
+	queue_work(rtwusb->txwq, &rtwusb->tx_handler_data->work);
+
 	rtwusb->init_done = true;
-	goto finish;
+	*prtwdev = rtwdev;
+	return 0;
+
+err_destroy_wq:
+	flush_workqueue(rtwusb->txwq);
+	destroy_workqueue(rtwusb->txwq);
 
 err_deinit_core:
 	skb_queue_purge(&rtwusb->tx_queue);
 	rtw_core_deinit(rtwdev);
+
 err_release_hw:
 	ieee80211_free_hw(hw);
+
 finish:
-	*prtwdev = rtwdev;
 	return ret;
 }
 
 static int rtw_usb_init_rx(struct rtw_dev *rtwdev)
 {
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
-	
-	skb_queue_head_init(&rtwusb->rx_queue);
-	rtw_init_event(&rtwusb->rx_thread.event);
-	if (rtw_create_kthread(rtwdev, &rtwusb->rx_thread, rtw_usb_rx_thread,
-			       "RX-Thread")) {
-		pr_err("%s: unable to init rx thread\n", __func__);
+
+	rtwusb->rxwq = create_singlethread_workqueue("rtw88-usb : RX work queue");
+	if (!rtwusb->txwq) {
+		pr_err("%s: create_singlethread_workqueue failed\n", __func__);
 		goto err;
 	}
 
+	skb_queue_head_init(&rtwusb->rx_queue);
+	rtw_create_handler(&rtwusb->rx_handler);
+	rtw_init_event(&rtwusb->rx_handler.event);
+
+	rtwusb->rx_handler_data = kmalloc(sizeof(struct work_data), GFP_KERNEL);
+	if (!rtwusb->rx_handler_data) {
+		pr_err("%s: rx_handler_data allocation failed\n", __func__);
+		goto err_destroy_wq;
+	}
+
+	rtwusb->rx_handler_data->rtwdev = rtwdev; 
+
+	INIT_WORK(&rtwusb->rx_handler_data->work, rtw_usb_rx_handler);
+	queue_work(rtwusb->rxwq, &rtwusb->rx_handler_data->work);
+
 	return 0;
 
+err_destroy_wq:
+	flush_workqueue(rtwusb->rxwq);
+	destroy_workqueue(rtwusb->rxwq);
+
 err:
-	return -1;
+	return -ENOMEM;
 
 }
 
@@ -1258,8 +1284,17 @@ static void rtw_usb_disconnect(struct usb_interface *intf)
 	rtwusb = rtw_get_usb_priv(rtwdev);
 
 	rtwusb->init_done = false;
-	rtw_kill_thread(&rtwusb->tx_thread);
 	skb_queue_purge(&rtwusb->tx_queue);
+	skb_queue_purge(&rtwusb->rx_queue);
+	rtw_kill_handler(&rtwusb->tx_handler);
+	rtw_kill_handler(&rtwusb->rx_handler);
+	cancel_work_sync(&rtwusb->rx_handler_data->work);
+	cancel_work_sync(&rtwusb->tx_handler_data->work);
+	destroy_workqueue(rtwusb->rxwq);
+	destroy_workqueue(rtwusb->txwq);
+
+	kfree(rtwusb->tx_handler_data);
+	kfree(rtwusb->rx_handler_data);
 	ieee80211_unregister_hw(hw);
 
 	if (rtwusb->udev->state != USB_STATE_NOTATTACHED) {
