@@ -20,6 +20,8 @@ static void rtw_fw_c2h_cmd_handle_ext(struct rtw_dev *rtwdev,
 	c2h = get_c2h_from_skb(skb);
 	sub_cmd_id = c2h->payload[0];
 
+	pr_info("%s: sub_cmd_id: %d\n", __func__, sub_cmd_id);
+
 	switch (sub_cmd_id) {
 	case C2H_CCX_RPT:
 		rtw_tx_report_handle(rtwdev, skb);
@@ -133,6 +135,8 @@ void rtw_fw_c2h_cmd_handle(struct rtw_dev *rtwdev, struct sk_buff *skb)
 	c2h = (struct rtw_c2h_cmd *)(skb->data + pkt_offset);
 	len = skb->len - pkt_offset - 2;
 
+	pr_info("%s: id=%d\n", __func__, c2h->id);
+
 	mutex_lock(&rtwdev->mutex);
 
 	switch (c2h->id) {
@@ -191,8 +195,7 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 	u32 h2c_wait;
 	int idx;
 
-	rtw_dbg(rtwdev, RTW_DBG_FW,
-		"send H2C content %02x%02x%02x%02x %02x%02x%02x%02x\n",
+	pr_info("send H2C content %02x%02x%02x%02x %02x%02x%02x%02x\n",
 		h2c[3], h2c[2], h2c[1], h2c[0],
 		h2c[7], h2c[6], h2c[5], h2c[4]);
 
@@ -481,6 +484,17 @@ void rtw_fw_set_pwr_mode(struct rtw_dev *rtwdev)
 
 	rtw_fw_send_h2c_command(rtwdev, h2c_pkt);
 }
+
+//NeoJou
+void rtw_fw_send_h2c2h_loopback(struct rtw_dev *rtwdev)
+{
+	u8 h2c_pkt[H2C_PKT_SIZE] = {0};
+
+	SET_H2C_CMD_ID_CLASS(h2c_pkt, H2C_CMD_H2C2HLB);
+
+	rtw_fw_send_h2c_command(rtwdev, h2c_pkt);
+}
+EXPORT_SYMBOL(rtw_fw_send_h2c2h_loopback);
 
 static u8 rtw_get_rsvd_page_location(struct rtw_dev *rtwdev,
 				     enum rtw_rsvd_packet_type type)

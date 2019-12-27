@@ -713,7 +713,7 @@ static void rtw_usb_inirp_init(struct rtw_dev *rtwdev)
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	struct rx_usb_ctrl_block *rxcb = &(rtwusb->rx_cb[0]); 
 
-	rtw_dbg(rtwdev, RTW_DBG_USB, "%s ===>\n", __func__);
+	pr_info("%s ===>\n", __func__);
 
 	// TODO: will change to call 8 read port
 	rtw_usb_set_bus_ready(rtwdev, true);
@@ -725,6 +725,9 @@ static void rtw_usb_inirp_init(struct rtw_dev *rtwdev)
 	}
 
 	rtw_usb_read_port(rtwdev, RTW_USB_BULK_IN_ADDR);
+
+	//NeoJou - Loopback
+	rtw_fw_send_h2c2h_loopback(rtwdev);
 }
 
 static void rtw_usb_inirp_deinit(struct rtw_dev *rtwdev)
