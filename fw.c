@@ -195,9 +195,9 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 	u32 h2c_wait;
 	int idx;
 
-	pr_info("send H2C content %02x%02x%02x%02x %02x%02x%02x%02x\n",
-		h2c[3], h2c[2], h2c[1], h2c[0],
-		h2c[7], h2c[6], h2c[5], h2c[4]);
+	//pr_debug("send H2C content %02x%02x%02x%02x %02x%02x%02x%02x\n",
+	//	h2c[3], h2c[2], h2c[1], h2c[0],
+	//	h2c[7], h2c[6], h2c[5], h2c[4]);
 
 	spin_lock(&rtwdev->h2c.lock);
 

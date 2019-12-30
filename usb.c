@@ -292,7 +292,6 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 			ieee80211_rx_irqsafe(rtwdev->hw, skb);
 		}
 	
-		rtw_usb_read_port(rtwdev, RTW_USB_BULK_IN_ADDR);
 	} while (1);
 
 out:
@@ -609,7 +608,6 @@ static void rtw_usb_recv_handler(struct rtw_dev *rtwdev, struct sk_buff *skb)
 			rtw_set_event(&rtwusb->rx_handler.event);
 		}
 	}
-
 }
 
 static void rtw_usb_read_port_complete(struct urb *urb)
@@ -628,6 +626,8 @@ static void rtw_usb_read_port_complete(struct urb *urb)
 		} else {
 			rtw_usb_recv_handler(rtwdev, skb);
 		}
+
+		rtw_usb_read_port(rtwdev, RTW_USB_BULK_IN_ADDR);
 	} else {
 		pr_info("###=> %s status(%d)\n", __func__, urb->status);
 
@@ -725,9 +725,6 @@ static void rtw_usb_inirp_init(struct rtw_dev *rtwdev)
 	}
 
 	rtw_usb_read_port(rtwdev, RTW_USB_BULK_IN_ADDR);
-
-	//NeoJou - Loopback
-	rtw_fw_send_h2c2h_loopback(rtwdev);
 }
 
 static void rtw_usb_inirp_deinit(struct rtw_dev *rtwdev)
@@ -1316,7 +1313,8 @@ static void rtw_usb_disconnect(struct usb_interface *intf)
 
 	kfree(rtwusb->tx_handler_data);
 	kfree(rtwusb->rx_handler_data);
-	ieee80211_unregister_hw(hw);
+
+	rtw_unregister_hw(rtwdev, hw);
 
 	if (rtwusb->udev->state != USB_STATE_NOTATTACHED) {
 		pr_info("Device still attached, trying to reset\n");

@@ -227,7 +227,8 @@ static void rtw_watch_dog_work(struct work_struct *work)
 		goto unlock;
 
 	/* make sure BB/RF is working for dynamic mech */
-	rtw_leave_lps(rtwdev);
+	//NeoJou : force no LPS
+	//rtw_leave_lps(rtwdev);
 
 	rtw_phy_dynamic_mechanism(rtwdev);
 
@@ -244,8 +245,8 @@ static void rtw_watch_dog_work(struct work_struct *work)
 	 * get that vif and check if device is having traffic more than the
 	 * threshold.
 	 */
-	if (rtwdev->ps_enabled && data.rtwvif && !ps_active)
-		rtw_enter_lps(rtwdev, data.rtwvif->port);
+	//if (rtwdev->ps_enabled && data.rtwvif && !ps_active)
+	//	rtw_enter_lps(rtwdev, data.rtwvif->port);
 
 	rtwdev->watch_dog_cnt++;
 
@@ -1362,6 +1363,7 @@ int rtw_core_init(struct rtw_dev *rtwdev)
 
 	spin_lock_init(&rtwdev->dm_lock);
 	spin_lock_init(&rtwdev->rf_lock);
+	pr_info("%s: lock at %p\n", __func__, &rtwdev->h2c.lock);
 	spin_lock_init(&rtwdev->h2c.lock);
 	spin_lock_init(&rtwdev->txq_lock);
 	spin_lock_init(&rtwdev->tx_report.q_lock);
@@ -1491,6 +1493,7 @@ void rtw_unregister_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
 
+	rtw_debugfs_deinit(rtwdev);
 	ieee80211_unregister_hw(hw);
 	rtw_unset_supported_band(hw, chip);
 }
