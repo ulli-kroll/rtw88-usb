@@ -20,7 +20,7 @@ static void rtw_fw_c2h_cmd_handle_ext(struct rtw_dev *rtwdev,
 	c2h = get_c2h_from_skb(skb);
 	sub_cmd_id = c2h->payload[0];
 
-	pr_info("%s: sub_cmd_id: %d\n", __func__, sub_cmd_id);
+	//pr_info("%s: sub_cmd_id: %d\n", __func__, sub_cmd_id);
 
 	switch (sub_cmd_id) {
 	case C2H_CCX_RPT:
@@ -135,7 +135,7 @@ void rtw_fw_c2h_cmd_handle(struct rtw_dev *rtwdev, struct sk_buff *skb)
 	c2h = (struct rtw_c2h_cmd *)(skb->data + pkt_offset);
 	len = skb->len - pkt_offset - 2;
 
-	pr_info("%s: id=%d\n", __func__, c2h->id);
+	//pr_info("%s: id=%d, seq=%d\n", __func__, c2h->id, c2h->seq);
 
 	mutex_lock(&rtwdev->mutex);
 

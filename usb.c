@@ -364,6 +364,7 @@ void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 	u8 qsel;
 	u8 addr;
 	int status;
+
 	while (1) {
 		mutex_lock(&rtwusb->tx_lock);
 
@@ -475,6 +476,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 		goto exit;
 	}
 	dev_kfree_skb(skb);
+
 	return 0;
 
 exit:
@@ -504,7 +506,6 @@ static int rtw_usb_xmit(struct rtw_dev *rtwdev,
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
-	u32 len;
 	u8 *pkt_desc;
 	int status;
 
@@ -514,7 +515,6 @@ static int rtw_usb_xmit(struct rtw_dev *rtwdev,
 	pkt_desc = skb_push(skb, chip->tx_pkt_desc_sz);
 	memset(pkt_desc, 0, chip->tx_pkt_desc_sz);
 	pkt_info->qsel = rtw_usb_get_tx_queue(skb, queue);
-	len = skb->len;
 
 	rtw_tx_fill_tx_desc(pkt_info, skb);
 

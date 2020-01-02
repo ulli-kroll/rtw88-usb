@@ -4,12 +4,15 @@
 
 #include <linux/debugfs.h>
 #include <linux/seq_file.h>
+#include <linux/sched.h>
+#include <linux/workqueue.h>
 #include "main.h"
 #include "coex.h"
 #include "sec.h"
 #include "fw.h"
 #include "debug.h"
 #include "phy.h"
+
 
 struct rtw_debugfs_priv {
 	struct rtw_dev *rtwdev;
@@ -21,12 +24,20 @@ struct rtw_debugfs_priv {
 
 static int rtw_debugfs_do_tx_perf(struct seq_file *s, void *data)
 {
-
+	int i;
 	struct rtw_debugfs_priv *priv = s->private;
 	struct rtw_dev *rtwdev = priv->rtwdev;
+	u64 start_time, delta;
 
-	rtw_fw_send_h2c2h_loopback(rtwdev);
-	seq_printf(s, "do_tx_perf\n");
+	start_time = ktime_get_ns();
+
+	for (i=0; i<1000; i++)
+		rtw_fw_send_h2c2h_loopback(rtwdev);
+
+	delta = ktime_get_ns() - start_time;
+	seq_printf(s, "H2C loopback 1000, total time: %llu, average: %llu ns\n",
+		delta, delta/1000);
+
 	return 0;
 }
 
