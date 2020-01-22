@@ -11,6 +11,75 @@
 #include "debug.h"
 #include "util.h"
 
+
+#define C2H_DBG_CONTENT_MAX_LENGTH	228
+#define C2H_DBG_HDR_LEN			4
+
+struct rtw_c2h_cmd_ext {
+	u8 cmdid;
+	u8 cmdseq;
+	u8 subid;
+	u8 cmdlen;
+	u8 payload[0];
+};
+
+static void rtw_fw_dbg_cmd_handle(struct rtw_dev *rtwdev,
+				  struct sk_buff *skb)
+{
+	struct rtw_c2h_cmd_ext *buf;
+	int i;
+	u8 cur_msg = 0;
+	u8 next_msg = 0;
+	u8 msg_len = 0;
+	char *c2h_buf;
+	u8 len;
+
+	buf = (struct rtw_c2h_cmd_ext *)get_c2h_from_skb(skb);
+	len = buf->cmdlen;
+
+	if (len > C2H_DBG_CONTENT_MAX_LENGTH) {
+		pr_err("[ERR]c2h size > max len!\n");
+		return;
+	}
+
+	for (i = 0; i < len; i++) {
+		if (buf->payload[i] == '\n') {
+			if ((buf->payload[i+1] == '\0') ||
+			    (buf->payload[i+1] == 0xFF)) {
+				msg_len = i + 1;
+				break;
+			}
+		}
+	}
+
+	c2h_buf = (char *)kmalloc(msg_len, GFP_KERNEL);
+	if (!c2h_buf)
+		return;
+
+	memcpy(c2h_buf, buf->payload, msg_len);
+	c2h_buf[msg_len - 1] = '\0';
+	pr_info("[RTKFW, SEQ=%d]: %s", c2h_buf[0], (char *)(&(c2h_buf[1])));
+	kfree(c2h_buf);
+
+	next_msg = msg_len + C2H_DBG_HDR_LEN;
+
+	while (*((u8 *)(buf) + next_msg) != '\0') {
+		cur_msg = next_msg;
+
+		msg_len = (u8)(*((u8 *)(buf) + cur_msg + 3)) - 1;
+		next_msg += C2H_DBG_HDR_LEN + msg_len;
+
+		c2h_buf = (char *)kmalloc(msg_len, GFP_KERNEL);
+		if (!c2h_buf)
+			return;
+
+		memcpy(c2h_buf, (u8 *)(buf) + cur_msg + C2H_DBG_HDR_LEN, msg_len);
+		*(c2h_buf + msg_len - 1) = '\0';
+		pr_info("[RTKFW, SEQ=%d]: %s", c2h_buf[0], (char *)(&(c2h_buf[1])));
+		kfree(c2h_buf);
+	}
+}
+
 static void rtw_fw_c2h_cmd_handle_ext(struct rtw_dev *rtwdev,
 				      struct sk_buff *skb)
 {
@@ -20,9 +89,10 @@ static void rtw_fw_c2h_cmd_handle_ext(struct rtw_dev *rtwdev,
 	c2h = get_c2h_from_skb(skb);
 	sub_cmd_id = c2h->payload[0];
 
-	//pr_info("%s: sub_cmd_id: %d\n", __func__, sub_cmd_id);
-
 	switch (sub_cmd_id) {
+	case C2H_DEBUG_RPT:
+		rtw_fw_dbg_cmd_handle(rtwdev, skb);
+		break;
 	case C2H_CCX_RPT:
 		rtw_tx_report_handle(rtwdev, skb);
 		break;
@@ -434,6 +504,7 @@ void rtw_fw_send_ra_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si)
 	u8 h2c_pkt[H2C_PKT_SIZE] = {0};
 	bool no_update = si->updated;
 	bool disable_pt = true;
+
 
 	SET_H2C_CMD_ID_CLASS(h2c_pkt, H2C_CMD_RA_INFO);
 

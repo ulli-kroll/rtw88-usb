@@ -831,6 +831,11 @@ static int txdma_queue_mapping(struct rtw_dev *rtwdev)
 	rtw_write8(rtwdev, REG_CR, MAC_TRX_ENABLE);
 	rtw_write32(rtwdev, REG_H2CQ_CSR, BIT_H2CQ_FULL);
 
+	if (rtw_hci_type(rtwdev) == RTW_HCI_TYPE_USB) {
+		rtw_write8(rtwdev, REG_TXDMA_PQ_MAP,
+			   rtw_read8(rtwdev, REG_TXDMA_PQ_MAP) | BIT(0));
+	}
+
 	return 0;
 }
 

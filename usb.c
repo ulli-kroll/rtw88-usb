@@ -356,12 +356,54 @@ static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 	return ret;
 }
 
+static u8 rtw_usb_ac_to_hwq[] = {
+	[IEEE80211_AC_VO] = RTW_TX_QUEUE_VO,
+	[IEEE80211_AC_VI] = RTW_TX_QUEUE_VI,
+	[IEEE80211_AC_BE] = RTW_TX_QUEUE_BE,
+	[IEEE80211_AC_BK] = RTW_TX_QUEUE_BK,
+};
+
+static u8 rtw_usb_hw_queue_mapping(struct sk_buff *skb)
+{
+	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
+	__le16 fc = hdr->frame_control;
+	u8 q_mapping = skb_get_queue_mapping(skb);
+	u8 queue;
+
+	if (unlikely(ieee80211_is_beacon(fc)))
+		queue = RTW_TX_QUEUE_BCN;
+	else if (unlikely(ieee80211_is_mgmt(fc) || ieee80211_is_ctl(fc)))
+		queue = RTW_TX_QUEUE_MGMT;
+	else
+		queue = rtw_usb_ac_to_hwq[q_mapping];
+
+	return queue;
+}
+
+static u8 rtw_usb_get_tx_queue(struct sk_buff *skb, u8 queue)
+{
+	switch (queue) {
+	case RTW_TX_QUEUE_BCN:
+		return TX_DESC_QSEL_BEACON;
+	case RTW_TX_QUEUE_H2C:
+		return TX_DESC_QSEL_H2C;
+	case RTW_TX_QUEUE_MGMT:
+		return TX_DESC_QSEL_MGMT;
+	case RTW_TX_QUEUE_HI0:
+		return TX_DESC_QSEL_HIGH;
+	default:
+		// acm / qos
+		return RTW_TX_QUEUE_VO;
+		//return skb->priority;
+	}
+}
+
 void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 {
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
 	struct rtw_chip_info *chip = rtwdev->chip;
 	struct sk_buff *skb;
-	u8 qsel;
+	u8 queue, qsel;
 	u8 addr;
 	int status;
 
@@ -374,8 +416,9 @@ void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 			break;
 		}
 
-		qsel = le32_get_bits(*((__le32 *)(skb->data) + 0x1),
-				     GENMASK(12, 8));	
+		queue = rtw_usb_hw_queue_mapping(skb);
+		qsel = rtw_usb_get_tx_queue(skb, queue);
+
 		addr = chip->ops->get_usb_bulkout_id(rtwdev, qsel);
 		if (addr < 0) {
 			mutex_unlock(&rtwusb->tx_lock);
@@ -484,22 +527,6 @@ exit:
 	return -EIO;
 }
 
-static u8 rtw_usb_get_tx_queue(struct sk_buff *skb, u8 queue)
-{
-	switch (queue) {
-	case RTW_TX_QUEUE_BCN:
-		return TX_DESC_QSEL_BEACON;
-	case RTW_TX_QUEUE_H2C:
-		return TX_DESC_QSEL_H2C;
-	case RTW_TX_QUEUE_MGMT:
-		return TX_DESC_QSEL_MGMT;
-	case RTW_TX_QUEUE_HI0:
-		return TX_DESC_QSEL_HIGH;
-	default:
-		return skb->priority;
-	}
-}
-
 static int rtw_usb_xmit(struct rtw_dev *rtwdev,
 			struct rtw_tx_pkt_info *pkt_info,
 			struct sk_buff *skb, u8 queue)
@@ -550,29 +577,6 @@ static int rtw_usb_write_data_h2c(struct rtw_dev *rtwdev, u8 *buf, u32 size)
 				  HALMAC_TXDESC_QSEL_H2C_CMD);
 }
 
-static u8 rtw_usb_ac_to_hwq[] = {
-	[0] = RTW_TX_QUEUE_VO,
-	[1] = RTW_TX_QUEUE_VI,
-	[2] = RTW_TX_QUEUE_BE,
-	[3] = RTW_TX_QUEUE_BK,
-};
-
-static u8 rtw_usb_hw_queue_mapping(struct sk_buff *skb)
-{
-	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
-	__le16 fc = hdr->frame_control;
-	u8 q_mapping = skb_get_queue_mapping(skb);
-	u8 queue;
-
-	if (unlikely(ieee80211_is_beacon(fc)))
-		queue = RTW_TX_QUEUE_BCN;
-	else if (unlikely(ieee80211_is_mgmt(fc) || ieee80211_is_ctl(fc)))
-		queue = RTW_TX_QUEUE_MGMT;
-	else
-		queue = rtw_usb_ac_to_hwq[q_mapping];
-
-	return queue;
-}
 
 static void rtw_usb_recv_handler(struct rtw_dev *rtwdev, struct sk_buff *skb)
 {
@@ -736,6 +740,7 @@ static void rtw_usb_inirp_deinit(struct rtw_dev *rtwdev)
 	rtw_usb_set_bus_ready(rtwdev, false);
 	usb_kill_urb(rxcb->rx_urb);
 }
+
 
 static int rtw_usb_tx(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
 		      struct sk_buff *skb)
@@ -1337,7 +1342,8 @@ const struct usb_device_id rtw_usb_id_table[] = {
 	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
 					RTW_USB_PRODUCT_ID_REALTEK_8822B,
 					0xff, 0xff, 0xff),
-	  USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
+		.driver_info = (kernel_ulong_t)&rtw8822b_hw_spec },
+	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
 					RTW_USB_PRODUCT_ID_REALTEK_8812B,
 					0xff, 0xff, 0xff),
 		.driver_info = (kernel_ulong_t)&rtw8822b_hw_spec },

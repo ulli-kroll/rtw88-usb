@@ -227,7 +227,13 @@ static void rtw8822b_phy_set_param(struct rtw_dev *rtwdev)
 
 static int rtw8822b_mac_init(struct rtw_dev *rtwdev)
 {
+	u8 value8;
 	u32 value32;
+
+	/* txq control */
+	value8 = rtw_read8(rtwdev, REG_FWHW_TXQ_CTRL + 1);
+	value8 |= BIT(4);
+	rtw_write8(rtwdev, REG_FWHW_TXQ_CTRL + 1, value8);
 
 	/* protocol configuration */
 	rtw_write8_clr(rtwdev, REG_SW_AMPDU_BURST_MODE_CTRL, BIT_PRE_TX_CMD);
@@ -710,7 +716,6 @@ static void rtw8822b_set_channel(struct rtw_dev *rtwdev, u8 channel, u8 bw,
 		 "rfe_option %d is out of boundary\n", efuse->rfe_option))
 		return;
 
-	pr_info("%s: rfe_option=%d\n", __func__, efuse->rfe_option);
 	rfe_info = &rtw8822b_rfe_info[efuse->rfe_option];
 
 	rtw8822b_set_channel_bb(rtwdev, channel, bw, primary_chan_idx);
@@ -1638,7 +1643,7 @@ static int rtw8822bu_get_usb_bulkout_id(struct rtw_dev *rtwdev, u8 qsel)
 		return -EINVAL;
 	}
 
-	return 0;
+	return id;
 }
 
 
