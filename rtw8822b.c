@@ -232,7 +232,7 @@ static int rtw8822b_mac_init(struct rtw_dev *rtwdev)
 
 	/* txq control */
 	value8 = rtw_read8(rtwdev, REG_FWHW_TXQ_CTRL + 1);
-	value8 |= BIT(4);
+	value8 |= BIT(4)|BIT(5);
 	rtw_write8(rtwdev, REG_FWHW_TXQ_CTRL + 1, value8);
 
 	/* protocol configuration */

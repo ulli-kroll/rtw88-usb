@@ -15,6 +15,7 @@
 #include "tx.h"
 #include "debug.h"
 #include "bf.h"
+#include "hal8822b_fw.h"
 
 unsigned int rtw_fw_lps_deep_mode;
 EXPORT_SYMBOL(rtw_fw_lps_deep_mode);
@@ -180,7 +181,7 @@ static void rtw_watch_dog_work(struct work_struct *work)
 					      watch_dog_work.work);
 	struct rtw_traffic_stats *stats = &rtwdev->stats;
 	struct rtw_watch_dog_iter_data data = {};
-	bool busy_traffic = test_bit(RTW_FLAG_BUSY_TRAFFIC, rtwdev->flags);
+	//bool busy_traffic = test_bit(RTW_FLAG_BUSY_TRAFFIC, rtwdev->flags);
 	bool ps_active;
 
 	mutex_lock(&rtwdev->mutex);
@@ -839,16 +840,13 @@ static int rtw_power_on(struct rtw_dev *rtwdev)
 		goto err_off;
 	}
 
-	pr_info("%s: before set phy_set_param\n", __func__);
 	chip->ops->phy_set_param(rtwdev);
-	pr_info("%s: After set phy_set_param\n", __func__);
 
 	ret = rtw_hci_start(rtwdev);
 	if (ret) {
 		rtw_err(rtwdev, "failed to start hci\n");
 		goto err_off;
 	}
-	pr_info("%s: rtw_hci_start, ret=%d\n", __func__, ret);
 
 	/* send H2C after HCI has started */
 	rtw_fw_send_general_info(rtwdev);
@@ -857,7 +855,6 @@ static int rtw_power_on(struct rtw_dev *rtwdev)
 	wifi_only = !rtwdev->efuse.btcoex;
 	rtw_coex_power_on_setting(rtwdev);
 	rtw_coex_init_hw_config(rtwdev, wifi_only);
-	pr_info("%s: return 0\n", __func__);
 
 	return 0;
 
@@ -1028,6 +1025,7 @@ static void rtw_unset_supported_band(struct ieee80211_hw *hw,
 	kfree(hw->wiphy->bands[NL80211_BAND_5GHZ]);
 }
 
+#if 0
 static void rtw_load_firmware_cb(const struct firmware *firmware, void *context)
 {
 	struct rtw_dev *rtwdev = context;
@@ -1052,10 +1050,39 @@ static void rtw_load_firmware_cb(const struct firmware *firmware, void *context)
 	rtw_info(rtwdev, "Firmware version %u.%u.%u, H2C version %u\n",
 		 fw->version, fw->sub_version, fw->sub_index, fw->h2c_version);
 }
+#endif
 
 static int rtw_load_firmware(struct rtw_dev *rtwdev, const char *fw_name)
 {
 	struct rtw_fw_state *fw = &rtwdev->fw;
+#if 1
+	const struct rtw_fw_hdr *fw_hdr;
+	struct firmware *firmware;
+
+	init_completion(&fw->completion);
+
+	firmware = kzalloc(sizeof(struct firmware), GFP_KERNEL);
+	if (!firmware) {
+		pr_err("%s: kzalloc for struct firmware failed\n", __func__);
+		return -ENOMEM;
+	}
+
+	firmware->data = (const u8 *)array_mp_8822b_fw_nic;
+	firmware->size = array_length_mp_8822b_fw_nic;
+
+	fw_hdr = (const struct rtw_fw_hdr *)firmware->data;
+	fw->h2c_version = le16_to_cpu(fw_hdr->h2c_fmt_ver);
+	fw->version = le16_to_cpu(fw_hdr->version);
+	fw->sub_version = fw_hdr->subversion;
+	fw->sub_index = fw_hdr->subindex;
+
+	fw->firmware = firmware;
+	complete_all(&fw->completion);
+
+	pr_info("Firmware version %u.%u.%u, H2C version %u\n",
+		 fw->version, fw->sub_version, fw->sub_index, fw->h2c_version);
+
+#else
 	int ret;
 
 	init_completion(&fw->completion);
@@ -1066,7 +1093,7 @@ static int rtw_load_firmware(struct rtw_dev *rtwdev, const char *fw_name)
 		rtw_err(rtwdev, "async firmware request failed\n");
 		return ret;
 	}
-
+#endif
 	return 0;
 }
 
@@ -1139,9 +1166,7 @@ static int rtw_chip_efuse_enable(struct rtw_dev *rtwdev)
 	}
 
 	val8 = rtw_read8(rtwdev, REG_TXPKT_EMPTY);
-	pr_info("%s: REG_TXPKT_EMPTY = 0x%x, expected 0xFF\n", __func__, val8);
 	val8 = rtw_read8(rtwdev, REG_TXPKT_EMPTY+1);
-	pr_info("%s: REG_TXPKT_EMPTY+1 = 0x%x, expected 0x06\n", __func__, val8);
 
 	rtw_write8(rtwdev, REG_C2HEVT, C2H_HW_FEATURE_DUMP);
 
@@ -1363,7 +1388,6 @@ int rtw_core_init(struct rtw_dev *rtwdev)
 
 	spin_lock_init(&rtwdev->dm_lock);
 	spin_lock_init(&rtwdev->rf_lock);
-	pr_info("%s: lock at %p\n", __func__, &rtwdev->h2c.lock);
 	spin_lock_init(&rtwdev->h2c.lock);
 	spin_lock_init(&rtwdev->txq_lock);
 	spin_lock_init(&rtwdev->tx_report.q_lock);
@@ -1409,8 +1433,13 @@ void rtw_core_deinit(struct rtw_dev *rtwdev)
 	struct rtw_rsvd_page *rsvd_pkt, *tmp;
 	unsigned long flags;
 
+#if 1
+	if (fw->firmware)
+		kfree(fw->firmware);
+#else
 	if (fw->firmware)
 		release_firmware(fw->firmware);
+#endif
 
 	tasklet_kill(&rtwdev->tx_tasklet);
 	spin_lock_irqsave(&rtwdev->tx_report.q_lock, flags);

@@ -277,11 +277,19 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 	u32 timeout = 0;
 	struct sk_buff *skb;
 
+
 	do {
 		rtw_wait_event(&rtwusb->rx_handler.event, timeout);
 		rtw_reset_event(&rtwusb->rx_handler.event);
 
 		while (true) {
+			u8 *rx_desc;
+			struct rtw_chip_info *chip = rtwdev->chip;
+			struct ieee80211_rx_status rx_status;
+			struct rtw_rx_pkt_stat pkt_stat;
+			u32 pkt_desc_sz = chip->rx_pkt_desc_sz;
+			u32 pkt_offset;
+
 			if (atomic_read(&rtwusb->rx_handler.handler_done))
 				goto out;
 
@@ -289,7 +297,30 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 			if (!skb)
 				break;
 
-			ieee80211_rx_irqsafe(rtwdev->hw, skb);
+			rx_desc = skb->data;
+			chip->ops->query_rx_desc(rtwdev, rx_desc, &pkt_stat,
+						 &rx_status);
+
+			/* offset from rx_desc to payload */
+			pkt_offset = pkt_desc_sz + pkt_stat.drv_info_sz + pkt_stat.shift;
+
+			if (pkt_stat.is_c2h) {
+				skb_put(skb, pkt_stat.pkt_len + pkt_offset);
+				*((u32 *)skb->cb) = pkt_offset;
+				rtw_fw_c2h_cmd_handle(rtwdev, skb);
+				dev_kfree_skb_any(skb);	
+			} else {
+				if (skb_queue_len(&rtwusb->rx_queue) >= 64) {
+					pr_err("%s: rx_queue overflow\n", __func__);
+					dev_kfree_skb(skb);
+				} else {
+					skb_put(skb, pkt_stat.pkt_len);
+					skb_reserve(skb, pkt_offset);
+					memcpy(skb->cb, &rx_status, sizeof(rx_status));
+
+					ieee80211_rx_irqsafe(rtwdev->hw, skb);
+				}
+			}
 		}
 	
 	} while (1);
@@ -539,10 +570,11 @@ static int rtw_usb_xmit(struct rtw_dev *rtwdev,
 	if (!pkt_info)
 		return -EINVAL;
 
+
 	pkt_desc = skb_push(skb, chip->tx_pkt_desc_sz);
 	memset(pkt_desc, 0, chip->tx_pkt_desc_sz);
-	pkt_info->qsel = rtw_usb_get_tx_queue(skb, queue);
-
+	//pkt_info->qsel = rtw_usb_get_tx_queue(skb, queue);
+	pkt_info->qsel = 0;
 	rtw_tx_fill_tx_desc(pkt_info, skb);
 
 	status = chip->ops->fill_txdesc_checksum(rtwdev, skb->data);
@@ -577,48 +609,12 @@ static int rtw_usb_write_data_h2c(struct rtw_dev *rtwdev, u8 *buf, u32 size)
 				  HALMAC_TXDESC_QSEL_H2C_CMD);
 }
 
-
-static void rtw_usb_recv_handler(struct rtw_dev *rtwdev, struct sk_buff *skb)
-{
-	u8 *rx_desc;
-	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
-	struct rtw_chip_info *chip = rtwdev->chip;
-	struct rtw_rx_pkt_stat pkt_stat;
-	struct ieee80211_rx_status rx_status;
-	u32 pkt_desc_sz = chip->rx_pkt_desc_sz;
-	u32 pkt_offset;
-
-	rx_desc = skb->data;
-	chip->ops->query_rx_desc(rtwdev, rx_desc, &pkt_stat, &rx_status);
-
-	/* offset from rx_desc to payload */
-	pkt_offset = pkt_desc_sz + pkt_stat.drv_info_sz + pkt_stat.shift;
-
-	if (pkt_stat.is_c2h) {
-		skb_put(skb, pkt_stat.pkt_len + pkt_offset);
-		*((u32 *)skb->cb) = pkt_offset;
-		skb_queue_tail(&rtwdev->c2h_queue, skb);
-		ieee80211_queue_work(rtwdev->hw, &rtwdev->c2h_work);
-	} else {
-		if (skb_queue_len(&rtwusb->rx_queue) >= 64) {
-			pr_err("%s: rx_queue overflow\n", __func__);
-			dev_kfree_skb(skb);
-		} else {
-			skb_put(skb, pkt_stat.pkt_len);
-			skb_reserve(skb, pkt_offset);
-			memcpy(skb->cb, &rx_status, sizeof(rx_status));
-
-			skb_queue_tail(&rtwusb->rx_queue, skb);
-			rtw_set_event(&rtwusb->rx_handler.event);
-		}
-	}
-}
-
 static void rtw_usb_read_port_complete(struct urb *urb)
 {
 	struct rx_usb_ctrl_block *rxcb = urb->context;
 	struct rtw_dev *rtwdev = (struct rtw_dev *)rxcb->data;
 	struct sk_buff *skb = rxcb->rx_skb;
+	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
 
 	if (urb->status == 0) {
 		if (urb->actual_length >= RTW_USB_MAX_RECVBUF_SZ ||
@@ -628,7 +624,8 @@ static void rtw_usb_read_port_complete(struct urb *urb)
 			if (skb)
 				dev_kfree_skb(skb);
 		} else {
-			rtw_usb_recv_handler(rtwdev, skb);
+			skb_queue_tail(&rtwusb->rx_queue, skb);
+			rtw_set_event(&rtwusb->rx_handler.event);
 		}
 
 		rtw_usb_read_port(rtwdev, RTW_USB_BULK_IN_ADDR);
@@ -709,6 +706,7 @@ static u32 rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr)
 	if (ret) {
 		pr_err("%s: usb_submit_urb failed, ret=%d\n", __func__, ret);
 	}
+
 	return ret;
 }
 

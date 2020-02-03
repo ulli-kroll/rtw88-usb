@@ -27,6 +27,7 @@ static void rtw_ops_tx(struct ieee80211_hw *hw,
 	rtw_tx(rtwdev, control, skb);
 }
 
+#if 0
 static void rtw_ops_wake_tx_queue(struct ieee80211_hw *hw,
 				  struct ieee80211_txq *txq)
 {
@@ -43,6 +44,7 @@ static void rtw_ops_wake_tx_queue(struct ieee80211_hw *hw,
 
 	tasklet_schedule(&rtwdev->tx_tasklet);
 }
+#endif
 
 static int rtw_ops_start(struct ieee80211_hw *hw)
 {
@@ -102,7 +104,7 @@ static int rtw_ops_config(struct ieee80211_hw *hw, u32 changed)
 	if (changed & IEEE80211_CONF_CHANGE_CHANNEL)
 		rtw_set_channel(rtwdev);
 
-out:
+//out:
 	mutex_unlock(&rtwdev->mutex);
 	return ret;
 }

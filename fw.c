@@ -228,6 +228,7 @@ void rtw_fw_c2h_cmd_handle(struct rtw_dev *rtwdev, struct sk_buff *skb)
 
 	mutex_unlock(&rtwdev->mutex);
 }
+EXPORT_SYMBOL(rtw_fw_c2h_cmd_handle);
 
 void rtw_fw_c2h_cmd_rx_irqsafe(struct rtw_dev *rtwdev, u32 pkt_offset,
 			       struct sk_buff *skb)
@@ -264,12 +265,22 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 	u32 box_reg, box_ex_reg;
 	u32 h2c_wait;
 	int idx;
+	//static u16 pre_seq = 0;
+	//u16 seq;
 
-	//pr_debug("send H2C content %02x%02x%02x%02x %02x%02x%02x%02x\n",
+	//pr_info("send H2C content %02x%02x%02x%02x %02x%02x%02x%02x\n",
 	//	h2c[3], h2c[2], h2c[1], h2c[0],
 	//	h2c[7], h2c[6], h2c[5], h2c[4]);
 
+	// before sending H2C
+	//do {
+	//seq = rtw_read32(rtwdev, 0x1c8);
+	//pr_info("%s: seq=%x, pre_seq=%x\n", __func__, seq, pre_seq);
+	//} while (seq == pre_seq);
+
 	spin_lock(&rtwdev->h2c.lock);
+
+	//pre_seq = seq;
 
 	box = rtwdev->h2c.last_box_num;
 	switch (box) {
@@ -305,9 +316,10 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 	}
 
 	for (idx = 0; idx < 4; idx++)
-		rtw_write8(rtwdev, box_reg + idx, h2c[idx]);
-	for (idx = 0; idx < 4; idx++)
 		rtw_write8(rtwdev, box_ex_reg + idx, h2c[idx + 4]);
+
+	rtw_write32(rtwdev, box_reg, le32_to_cpu(*(u32*)h2c));
+
 
 	if (++rtwdev->h2c.last_box_num >= 4)
 		rtwdev->h2c.last_box_num = 0;
