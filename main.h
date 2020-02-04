@@ -797,8 +797,6 @@ struct rtw_chip_ops {
 	int (*set_rx_agg_switch)(struct rtw_dev *rtwdev, bool enable,
 				 u8 rx_agg_size, u8 rx_agg_timeout);
 	int (*fill_txdesc_checksum)(struct rtw_dev *rtwdev, u8 *txdesc);
-	int (*get_usb_bulkout_id)(struct rtw_dev *rtwdev, u8 qsel);
-	//int (*set_bulkout_num)(struct rtw_dev *rtwdev, u8 num);
 };
 
 #define RTW_PWR_POLLING_CNT	20000

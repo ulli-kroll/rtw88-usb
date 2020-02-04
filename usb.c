@@ -557,15 +557,6 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 		goto exit;
 	}
 
-/*
-	addr = chip->ops->get_usb_bulkout_id(rtwdev, qsel);
-	if (addr < 0) {
-		pr_err("%s : halmac_get_usb_bulkout_id failed, status=%d\n",
-		       __func__, addr);
-		goto exit;
-	}
-*/
-
 	addr = rtw_usb_txqueue_to_addr(skb, qsel);
 
 	ret = rtw_usb_write_port(rtwdev, addr, len, skb);

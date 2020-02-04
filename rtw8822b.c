@@ -1603,49 +1603,6 @@ static int rtw8822bu_fill_txdesc_checksum(struct rtw_dev *rtwdev,
 	return 0;
 }
 
-static int rtw8822bu_get_usb_bulkout_id(struct rtw_dev *rtwdev, u8 qsel)
-{
-	int id;
-
-	switch (qsel) {
-	case TX_DESC_QSEL_TID6:
-	case TX_DESC_QSEL_TID7:
-		//dma_mapping = adapter->pq_map[HALMAC_PQ_MAP_VO];
-		id = 1;
-		break;
-	case TX_DESC_QSEL_TID4:
-	case TX_DESC_QSEL_TID5:
-		//dma_mapping = adapter->pq_map[HALMAC_PQ_MAP_VI];
-		id = 1;
-		break;
-	case TX_DESC_QSEL_TID0:
-	case TX_DESC_QSEL_TID3:
-		//dma_mapping = adapter->pq_map[HALMAC_PQ_MAP_BE];
-		id = 2;
-		break;
-	case TX_DESC_QSEL_TID1:
-	case TX_DESC_QSEL_TID2:
-		//dma_mapping = adapter->pq_map[HALMAC_PQ_MAP_BK];
-		id = 2;
-		break;
-	case TX_DESC_QSEL_MGMT:
-		//dma_mapping = adapter->pq_map[HALMAC_PQ_MAP_MG];
-		//id = 0;
-		//break;
-	case TX_DESC_QSEL_HIGH:
-	case TX_DESC_QSEL_BEACON:
-	case TX_DESC_QSEL_H2C:
-		//dma_mapping = HALMAC_DMA_MAPPING_HIGH;
-		id = 0;
-		break;
-	default:
-		rtw_err(rtwdev, "%s: [ERR]Qsel is out of range\n", __func__);
-		return -EINVAL;
-	}
-
-	return id;
-}
-
 
 static struct rtw_pwr_seq_cmd trans_carddis_to_cardemu_8822b[] = {
 	{0x0086,
@@ -2211,8 +2168,6 @@ static struct rtw_chip_ops rtw8822b_ops = {
 	.get_tx_agg_num		= rtw8822bu_get_tx_agg_num,
 	.set_rx_agg_switch	= rtw8822bu_set_rx_agg_switch,
 	.fill_txdesc_checksum	= rtw8822bu_fill_txdesc_checksum,
-	.get_usb_bulkout_id	= rtw8822bu_get_usb_bulkout_id,
-	//.set_bulkout_num	= rtw8822bu_set_bulkout_num,
 };
 
 /* Shared-Antenna Coex Table */
