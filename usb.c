@@ -243,17 +243,6 @@ static u8 rtw_queue_to_qsel(struct sk_buff *skb, u8 queue)
 	}
 }
 
-static const int rtw_txqueue_to_ac[8] = {
-	RTW_TX_QUEUE_BE,
-	RTW_TX_QUEUE_BK,
-	RTW_TX_QUEUE_BK,
-	RTW_TX_QUEUE_BE,
-	RTW_TX_QUEUE_VI,
-	RTW_TX_QUEUE_VI,
-	RTW_TX_QUEUE_VO,
-	RTW_TX_QUEUE_VO
-};
-
 static int rtw_qsel_to_queue(struct sk_buff *skb, u8 queue)
 {
 	switch (queue) {
@@ -266,17 +255,17 @@ static int rtw_qsel_to_queue(struct sk_buff *skb, u8 queue)
 	case TX_DESC_QSEL_HIGH:
 		return RTW_TX_QUEUE_HI0;
 	/* skb->priority */
-	case 6:
-	case 7:
+	case TX_DESC_QSEL_TID6:
+	case TX_DESC_QSEL_TID7:
 		return RTW_TX_QUEUE_VO;
-	case 4:
-	case 5:
+	case TX_DESC_QSEL_TID4:
+	case TX_DESC_QSEL_TID5:
 		return RTW_TX_QUEUE_VI;
-	case 0:
-	case 3:
+	case TX_DESC_QSEL_TID0:
+	case TX_DESC_QSEL_TID3:
 		return RTW_TX_QUEUE_BE;
-	case 1:
-	case 2:
+	case TX_DESC_QSEL_TID1:
+	case TX_DESC_QSEL_TID2:
 		return RTW_TX_QUEUE_BK;
 	default:
 		pr_err("%s: queue(%d) is out of range\n", __func__, queue);
