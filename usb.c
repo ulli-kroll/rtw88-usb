@@ -202,7 +202,108 @@ void rtw_usb_write32(struct rtw_dev *rtwdev, u32 addr, u32 val)
 	mutex_unlock(&rtwusb->usb_buf_mutex);
 }
 
-/* RTW TX Thread */
+/* RTW queue / pipe functions */
+static u8 rtw_usb_ac_to_hwq[] = {
+	[IEEE80211_AC_VO] = RTW_TX_QUEUE_VO,
+	[IEEE80211_AC_VI] = RTW_TX_QUEUE_VI,
+	[IEEE80211_AC_BE] = RTW_TX_QUEUE_BE,
+	[IEEE80211_AC_BK] = RTW_TX_QUEUE_BK,
+};
+
+static u8 rtw_tx_queue_mapping(struct sk_buff *skb)
+{
+	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
+	__le16 fc = hdr->frame_control;
+	u8 q_mapping = skb_get_queue_mapping(skb);
+	u8 queue;
+
+	if (unlikely(ieee80211_is_beacon(fc)))
+		queue = RTW_TX_QUEUE_BCN;
+	else if (unlikely(ieee80211_is_mgmt(fc) || ieee80211_is_ctl(fc)))
+		queue = RTW_TX_QUEUE_MGMT;
+	else
+		queue = rtw_usb_ac_to_hwq[q_mapping];
+
+	return queue;
+}
+
+static u8 rtw_queue_to_qsel(struct sk_buff *skb, u8 queue)
+{
+	switch (queue) {
+	case RTW_TX_QUEUE_BCN:
+		return TX_DESC_QSEL_BEACON;
+	case RTW_TX_QUEUE_H2C:
+		return TX_DESC_QSEL_H2C;
+	case RTW_TX_QUEUE_MGMT:
+		return TX_DESC_QSEL_MGMT;
+	case RTW_TX_QUEUE_HI0:
+		return TX_DESC_QSEL_HIGH;
+	default:
+		return skb->priority;
+	}
+}
+
+static const int rtw_txqueue_to_ac[8] = {
+	RTW_TX_QUEUE_BE,
+	RTW_TX_QUEUE_BK,
+	RTW_TX_QUEUE_BK,
+	RTW_TX_QUEUE_BE,
+	RTW_TX_QUEUE_VI,
+	RTW_TX_QUEUE_VI,
+	RTW_TX_QUEUE_VO,
+	RTW_TX_QUEUE_VO
+};
+
+static int rtw_qsel_to_queue(struct sk_buff *skb, u8 queue)
+{
+	switch (queue) {
+	case TX_DESC_QSEL_BEACON:
+		return RTW_TX_QUEUE_BCN;
+	case TX_DESC_QSEL_H2C:
+		return RTW_TX_QUEUE_H2C;
+	case TX_DESC_QSEL_MGMT:
+		return RTW_TX_QUEUE_MGMT;
+	case TX_DESC_QSEL_HIGH:
+		return RTW_TX_QUEUE_HI0;
+	/* skb->priority */
+	case 6:
+	case 7:
+		return RTW_TX_QUEUE_VO;
+	case 4:
+	case 5:
+		return RTW_TX_QUEUE_VI;
+	case 0:
+	case 3:
+		return RTW_TX_QUEUE_BE;
+	case 1:
+	case 2:
+		return RTW_TX_QUEUE_BK;
+	default:
+		pr_err("%s: queue(%d) is out of range\n", __func__, queue);
+		return -1;
+	}
+}
+
+static unsigned int rtw_usb_get_pipe(struct rtw_usb *rtwusb, u32 addr)
+{
+	unsigned int pipe = 0, ep_num = 0;
+	struct usb_device *usbd = rtwusb->udev;
+
+	if (addr == RTW_USB_BULK_IN_ADDR) {
+		pipe = usb_rcvbulkpipe(usbd, rtwusb->pipe_in);
+	} else if (addr == RTW_USB_INT_IN_ADDR) {
+		pipe = usb_rcvintpipe(usbd, rtwusb->pipe_interrupt);
+	} else if (addr < RTW_USB_HW_QUEUE_ENTRY) {
+		ep_num = rtwusb->queue_to_pipe[addr];
+		pipe = usb_sndbulkpipe(usbd, ep_num);
+	} else {
+		pr_err("%s : addr error: %d\n", __func__, addr);
+	}
+
+	return pipe;
+}
+
+/* RTW Thread functions */
 
 static int rtw_init_event(struct rtw_event *event)
 {
@@ -247,6 +348,7 @@ static void rtw_kill_handler(struct rtw_handler *handler)
 	rtw_set_event(&handler->event);
 }
 
+// TX functions
 void rtw_core_qos_processor(struct rtw_usb *rtwusb);
 static void rtw_usb_tx_handler(struct work_struct *work)
 {
@@ -329,26 +431,6 @@ out:
 	skb_queue_purge(&rtwusb->rx_queue);
 }
 
-static
-unsigned int rtw_usb_get_pipe(struct rtw_usb *rtwusb, u32 addr)
-{
-	unsigned int pipe = 0, ep_num = 0;
-	struct usb_device *usbd = rtwusb->udev;
-
-	if (addr == RTW_USB_BULK_IN_ADDR) {
-		pipe = usb_rcvbulkpipe(usbd, rtwusb->pipe_in);
-	} else if (addr == RTW_USB_INT_IN_ADDR) {
-		pipe = usb_rcvintpipe(usbd, rtwusb->pipe_interrupt);
-	} else if (addr < RTW_USB_HW_QUEUE_ENTRY) {
-		ep_num = rtwusb->queue_to_pipe[addr];
-		pipe = usb_sndbulkpipe(usbd, ep_num);
-	} else {
-		pr_err("%s : addr error: %d\n", __func__, addr);
-	}
-
-	return pipe;
-}
-
 static void rtw_indicate_tx_status(struct rtw_dev *rtwdev, struct sk_buff *skb)
 {
 	struct ieee80211_hw *hw = rtwdev->hw;
@@ -380,86 +462,6 @@ static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 	return ret;
 }
 
-static u8 rtw_usb_ac_to_hwq[] = {
-	[IEEE80211_AC_VO] = RTW_TX_QUEUE_VO,
-	[IEEE80211_AC_VI] = RTW_TX_QUEUE_VI,
-	[IEEE80211_AC_BE] = RTW_TX_QUEUE_BE,
-	[IEEE80211_AC_BK] = RTW_TX_QUEUE_BK,
-};
-
-static u8 rtw_tx_queue_mapping(struct sk_buff *skb)
-{
-	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
-	__le16 fc = hdr->frame_control;
-	u8 q_mapping = skb_get_queue_mapping(skb);
-	u8 queue;
-
-	if (unlikely(ieee80211_is_beacon(fc)))
-		queue = RTW_TX_QUEUE_BCN;
-	else if (unlikely(ieee80211_is_mgmt(fc) || ieee80211_is_ctl(fc)))
-		queue = RTW_TX_QUEUE_MGMT;
-	else
-		queue = rtw_usb_ac_to_hwq[q_mapping];
-
-	return queue;
-}
-
-static u8 rtw_usb_get_tx_queue(struct sk_buff *skb, u8 queue)
-{
-	switch (queue) {
-	case RTW_TX_QUEUE_BCN:
-		return TX_DESC_QSEL_BEACON;
-	case RTW_TX_QUEUE_H2C:
-		return TX_DESC_QSEL_H2C;
-	case RTW_TX_QUEUE_MGMT:
-		return TX_DESC_QSEL_MGMT;
-	case RTW_TX_QUEUE_HI0:
-		return TX_DESC_QSEL_HIGH;
-	default:
-		return skb->priority;
-	}
-}
-
-static const int rtw_txqueue_to_ac[8] = {
-	RTW_TX_QUEUE_BE,
-	RTW_TX_QUEUE_BK,
-	RTW_TX_QUEUE_BK,
-	RTW_TX_QUEUE_BE,
-	RTW_TX_QUEUE_VI,
-	RTW_TX_QUEUE_VI,
-	RTW_TX_QUEUE_VO,
-	RTW_TX_QUEUE_VO
-};
-
-static int rtw_usb_txqueue_to_addr(struct sk_buff *skb, u8 queue)
-{
-	switch (queue) {
-	case TX_DESC_QSEL_BEACON:
-		return RTW_TX_QUEUE_BCN;
-	case TX_DESC_QSEL_H2C:
-		return RTW_TX_QUEUE_H2C;
-	case TX_DESC_QSEL_MGMT:
-		return RTW_TX_QUEUE_MGMT;
-	case TX_DESC_QSEL_HIGH:
-		return RTW_TX_QUEUE_HI0;
-	/* skb->priority */
-	case 6:
-	case 7:
-		return RTW_TX_QUEUE_VO;
-	case 4:
-	case 5:
-		return RTW_TX_QUEUE_VI;
-	case 0:
-	case 3:
-		return RTW_TX_QUEUE_BE;
-	case 1:
-	case 2:
-		return RTW_TX_QUEUE_BK;
-	default:
-		pr_err("%s: queue(%d) is out of range\n", __func__, queue);
-		return -1;
-	}
-}
 
 void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 {
@@ -557,7 +559,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 		goto exit;
 	}
 
-	addr = rtw_usb_txqueue_to_addr(skb, qsel);
+	addr = rtw_qsel_to_queue(skb, qsel);
 
 	ret = rtw_usb_write_port(rtwdev, addr, len, skb);
 	if (ret) {
@@ -737,7 +739,7 @@ static int rtw_usb_tx(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
 
 	pkt_desc = skb_push(skb, chip->tx_pkt_desc_sz);
 	memset(pkt_desc, 0, chip->tx_pkt_desc_sz);
-	pkt_info->qsel = rtw_usb_get_tx_queue(skb, queue);
+	pkt_info->qsel = rtw_queue_to_qsel(skb, queue);
 	rtw_tx_fill_tx_desc(pkt_info, skb);
 
 	ret = chip->ops->fill_txdesc_checksum(rtwdev, skb->data);
