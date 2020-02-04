@@ -340,17 +340,10 @@ unsigned int rtw_usb_get_pipe(struct rtw_usb *rtwusb, u32 addr)
 	} else if (addr == RTW_USB_INT_IN_ADDR) {
 		pipe = usb_rcvintpipe(usbd, rtwusb->pipe_interrupt);
 	} else if (addr < RTW_USB_HW_QUEUE_ENTRY) {
-		/* halmac already translate queue id to bulk out id */
-		if (addr < 4)
-			ep_num = rtwusb->out_ep[addr];
-		else
-			pr_err("%s : TODO addr(%d) >=4\n", __func__, addr);
-
-		/* TODO : the below is for no HALMAC
-		 * ep_num = pdvobj->Queue2Pipe[addr];
-		 */
-
+		ep_num = rtwusb->queue_to_pipe[addr];
 		pipe = usb_sndbulkpipe(usbd, ep_num);
+	} else {
+		pr_err("%s : addr error: %d\n", __func__, addr);
 	}
 
 	return pipe;
@@ -394,7 +387,7 @@ static u8 rtw_usb_ac_to_hwq[] = {
 	[IEEE80211_AC_BK] = RTW_TX_QUEUE_BK,
 };
 
-static u8 rtw_usb_hw_queue_mapping(struct sk_buff *skb)
+static u8 rtw_tx_queue_mapping(struct sk_buff *skb)
 {
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
 	__le16 fc = hdr->frame_control;
@@ -423,19 +416,56 @@ static u8 rtw_usb_get_tx_queue(struct sk_buff *skb, u8 queue)
 	case RTW_TX_QUEUE_HI0:
 		return TX_DESC_QSEL_HIGH;
 	default:
-		// acm / qos
+		return skb->priority;
+	}
+}
+
+static const int rtw_txqueue_to_ac[8] = {
+	RTW_TX_QUEUE_BE,
+	RTW_TX_QUEUE_BK,
+	RTW_TX_QUEUE_BK,
+	RTW_TX_QUEUE_BE,
+	RTW_TX_QUEUE_VI,
+	RTW_TX_QUEUE_VI,
+	RTW_TX_QUEUE_VO,
+	RTW_TX_QUEUE_VO
+};
+
+static int rtw_usb_txqueue_to_addr(struct sk_buff *skb, u8 queue)
+{
+	switch (queue) {
+	case TX_DESC_QSEL_BEACON:
+		return RTW_TX_QUEUE_BCN;
+	case TX_DESC_QSEL_H2C:
+		return RTW_TX_QUEUE_H2C;
+	case TX_DESC_QSEL_MGMT:
+		return RTW_TX_QUEUE_MGMT;
+	case TX_DESC_QSEL_HIGH:
+		return RTW_TX_QUEUE_HI0;
+	/* skb->priority */
+	case 6:
+	case 7:
 		return RTW_TX_QUEUE_VO;
-		//return skb->priority;
+	case 4:
+	case 5:
+		return RTW_TX_QUEUE_VI;
+	case 0:
+	case 3:
+		return RTW_TX_QUEUE_BE;
+	case 1:
+	case 2:
+		return RTW_TX_QUEUE_BK;
+	default:
+		pr_err("%s: queue(%d) is out of range\n", __func__, queue);
+		return -1;
 	}
 }
 
 void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 {
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
-	struct rtw_chip_info *chip = rtwdev->chip;
 	struct sk_buff *skb;
-	u8 queue, qsel;
-	u8 addr;
+	u8 queue;
 	int status;
 
 	while (1) {
@@ -447,18 +477,9 @@ void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 			break;
 		}
 
-		queue = rtw_usb_hw_queue_mapping(skb);
-		qsel = rtw_usb_get_tx_queue(skb, queue);
+		queue = rtw_tx_queue_mapping(skb);
 
-		addr = chip->ops->get_usb_bulkout_id(rtwdev, qsel);
-		if (addr < 0) {
-			mutex_unlock(&rtwusb->tx_lock);
-			pr_err("%s : halmac_get_usb_bulkout_id failed, qsel=%d\n",
-			       __func__, qsel);
-			break;
-		}
-
-		status = rtw_usb_write_port(rtwdev, addr, skb->len, skb);
+		status = rtw_usb_write_port(rtwdev, queue, skb->len, skb);
 		if (status) {
 			pr_err("%s, rtw_usb_write_xmit failed, ret=%d\n",
 			       __func__, status);
@@ -536,12 +557,16 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 		goto exit;
 	}
 
+/*
 	addr = chip->ops->get_usb_bulkout_id(rtwdev, qsel);
 	if (addr < 0) {
 		pr_err("%s : halmac_get_usb_bulkout_id failed, status=%d\n",
 		       __func__, addr);
 		goto exit;
 	}
+*/
+
+	addr = rtw_usb_txqueue_to_addr(skb, qsel);
 
 	ret = rtw_usb_write_port(rtwdev, addr, len, skb);
 	if (ret) {
@@ -556,39 +581,6 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 exit:
 	dev_kfree_skb(skb);
 	return -EIO;
-}
-
-static int rtw_usb_xmit(struct rtw_dev *rtwdev,
-			struct rtw_tx_pkt_info *pkt_info,
-			struct sk_buff *skb, u8 queue)
-{
-	struct rtw_chip_info *chip = rtwdev->chip;
-	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
-	u8 *pkt_desc;
-	int status;
-
-	if (!pkt_info)
-		return -EINVAL;
-
-
-	pkt_desc = skb_push(skb, chip->tx_pkt_desc_sz);
-	memset(pkt_desc, 0, chip->tx_pkt_desc_sz);
-	//pkt_info->qsel = rtw_usb_get_tx_queue(skb, queue);
-	pkt_info->qsel = 0;
-	rtw_tx_fill_tx_desc(pkt_info, skb);
-
-	status = chip->ops->fill_txdesc_checksum(rtwdev, skb->data);
-	if (status) {
-		pr_err("%s : halmac txdesc checksum failed, status = %d\n",
-		       __func__, status);
-		goto exit;
-	}
-
-	skb_queue_tail(&rtwusb->tx_queue, skb);
-	rtw_set_event(&rtwusb->tx_handler.event);
-
-exit:
-	return status;
 }
 
 static int rtw_usb_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
@@ -743,13 +735,29 @@ static void rtw_usb_inirp_deinit(struct rtw_dev *rtwdev)
 static int rtw_usb_tx(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
 		      struct sk_buff *skb)
 {
-	u8 queue = rtw_usb_hw_queue_mapping(skb);
+	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+	struct rtw_chip_info *chip = rtwdev->chip;
+	u8 *pkt_desc;
+	u8 queue = rtw_tx_queue_mapping(skb);
 	int ret;
 
-	ret = rtw_usb_xmit(rtwdev, pkt_info, skb, queue);
-	if (ret)
-		return ret;
+	if (!pkt_info)
+		return -EINVAL;
 
+	pkt_desc = skb_push(skb, chip->tx_pkt_desc_sz);
+	memset(pkt_desc, 0, chip->tx_pkt_desc_sz);
+	pkt_info->qsel = rtw_usb_get_tx_queue(skb, queue);
+	rtw_tx_fill_tx_desc(pkt_info, skb);
+
+	ret = chip->ops->fill_txdesc_checksum(rtwdev, skb->data);
+	if (ret) {
+		pr_err("%s : halmac txdesc checksum failed, status = %d\n",
+		       __func__, ret);
+		return -EINVAL;
+	}
+
+	skb_queue_tail(&rtwusb->tx_queue, skb);
+	rtw_set_event(&rtwusb->tx_handler.event);
 	return 0;
 }
 
@@ -960,41 +968,41 @@ exit:
 
 static void rtw_usb_one_outpipe_mapping(struct rtw_usb *rtwusb)
 {
-	rtwusb->queue_to_pipe[0] = rtwusb->out_ep[0];/* VO */
-	rtwusb->queue_to_pipe[1] = rtwusb->out_ep[0];/* VI */
-	rtwusb->queue_to_pipe[2] = rtwusb->out_ep[0];/* BE */
-	rtwusb->queue_to_pipe[3] = rtwusb->out_ep[0];/* BK */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_VO] = rtwusb->out_ep[0];/* VO */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_VI] = rtwusb->out_ep[0];/* VI */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BE] = rtwusb->out_ep[0];/* BE */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BK] = rtwusb->out_ep[0];/* BK */
 
-	rtwusb->queue_to_pipe[4] = rtwusb->out_ep[0];/* BCN */
-	rtwusb->queue_to_pipe[5] = rtwusb->out_ep[0];/* MGT */
-	rtwusb->queue_to_pipe[6] = rtwusb->out_ep[0];/* HIGH */
-	rtwusb->queue_to_pipe[7] = rtwusb->out_ep[0];/* TXCMD */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BCN]	= rtwusb->out_ep[0];/* BCN */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_MGMT]= rtwusb->out_ep[0];/* MGT */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_HI0] = rtwusb->out_ep[0];/* HIGH */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_H2C] = rtwusb->out_ep[0];/* TXCMD */
 }
 
 static void rtw_usb_two_outpipe_mapping(struct rtw_usb *rtwusb)
 {
-	rtwusb->queue_to_pipe[0] = rtwusb->out_ep[0];/* VO */
-	rtwusb->queue_to_pipe[1] = rtwusb->out_ep[0];/* VI */
-	rtwusb->queue_to_pipe[2] = rtwusb->out_ep[1];/* BE */
-	rtwusb->queue_to_pipe[3] = rtwusb->out_ep[1];/* BK */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_VO] = rtwusb->out_ep[0];/* VO */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_VI] = rtwusb->out_ep[0];/* VI */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BE] = rtwusb->out_ep[1];/* BE */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BK] = rtwusb->out_ep[1];/* BK */
 
-	rtwusb->queue_to_pipe[4] = rtwusb->out_ep[0];/* BCN */
-	rtwusb->queue_to_pipe[5] = rtwusb->out_ep[0];/* MGT */
-	rtwusb->queue_to_pipe[6] = rtwusb->out_ep[0];/* HIGH */
-	rtwusb->queue_to_pipe[7] = rtwusb->out_ep[0];/* TXCMD */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BCN]	= rtwusb->out_ep[0];/* BCN */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_MGMT]= rtwusb->out_ep[0];/* MGT */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_HI0] = rtwusb->out_ep[0];/* HIGH */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_H2C] = rtwusb->out_ep[0];/* TXCMD */
 }
 
 static void rtw_usb_three_outpipe_mapping(struct rtw_usb *rtwusb)
 {
-	rtwusb->queue_to_pipe[0] = rtwusb->out_ep[0];/* VO */
-	rtwusb->queue_to_pipe[1] = rtwusb->out_ep[1];/* VI */
-	rtwusb->queue_to_pipe[2] = rtwusb->out_ep[2];/* BE */
-	rtwusb->queue_to_pipe[3] = rtwusb->out_ep[2];/* BK */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_VO] = rtwusb->out_ep[0];/* VO */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_VI] = rtwusb->out_ep[1];/* VI */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BE] = rtwusb->out_ep[2];/* BE */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BK] = rtwusb->out_ep[2];/* BK */
 
-	rtwusb->queue_to_pipe[4] = rtwusb->out_ep[0];/* BCN */
-	rtwusb->queue_to_pipe[5] = rtwusb->out_ep[0];/* MGT */
-	rtwusb->queue_to_pipe[6] = rtwusb->out_ep[0];/* HIGH */
-	rtwusb->queue_to_pipe[7] = rtwusb->out_ep[0];/* TXCMD */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BCN]	= rtwusb->out_ep[0];/* BCN */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_MGMT]= rtwusb->out_ep[0];/* MGT */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_HI0] = rtwusb->out_ep[0];/* HIGH */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_H2C] = rtwusb->out_ep[0];/* TXCMD */
 }
 
 static u8 rtw_usb_set_queue_pipe_mapping(struct rtw_dev *rtwdev, u8 in_pipes,
