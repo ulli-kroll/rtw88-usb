@@ -264,7 +264,6 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 	u8 box_state;
 	u32 box_reg, box_ex_reg;
 	u32 h2c_wait;
-	int idx;
 	//static u16 pre_seq = 0;
 	//u16 seq;
 
@@ -315,11 +314,8 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 		goto out;
 	}
 
-	for (idx = 0; idx < 4; idx++)
-		rtw_write8(rtwdev, box_ex_reg + idx, h2c[idx + 4]);
-
+	rtw_write32(rtwdev, box_ex_reg, le32_to_cpu(*(u32*)(h2c + 4)));
 	rtw_write32(rtwdev, box_reg, le32_to_cpu(*(u32*)h2c));
-
 
 	if (++rtwdev->h2c.last_box_num >= 4)
 		rtwdev->h2c.last_box_num = 0;
