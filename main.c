@@ -15,7 +15,11 @@
 #include "tx.h"
 #include "debug.h"
 #include "bf.h"
+
+#define LOAD_FW_BY_BIN_FILE
+#ifndef LOAD_FW_BY_BIN_FILE
 #include "hal8822b_fw.h"
+#endif
 
 unsigned int rtw_fw_lps_deep_mode;
 EXPORT_SYMBOL(rtw_fw_lps_deep_mode);
@@ -1025,7 +1029,7 @@ static void rtw_unset_supported_band(struct ieee80211_hw *hw,
 	kfree(hw->wiphy->bands[NL80211_BAND_5GHZ]);
 }
 
-#if 0
+#ifdef LOAD_FW_BY_BIN_FILE
 static void rtw_load_firmware_cb(const struct firmware *firmware, void *context)
 {
 	struct rtw_dev *rtwdev = context;
@@ -1055,7 +1059,18 @@ static void rtw_load_firmware_cb(const struct firmware *firmware, void *context)
 static int rtw_load_firmware(struct rtw_dev *rtwdev, const char *fw_name)
 {
 	struct rtw_fw_state *fw = &rtwdev->fw;
-#if 1
+#ifdef LOAD_FW_BY_BIN_FILE
+	int ret;
+
+	init_completion(&fw->completion);
+
+	ret = request_firmware_nowait(THIS_MODULE, true, fw_name, rtwdev->dev,
+				      GFP_KERNEL, rtwdev, rtw_load_firmware_cb);
+	if (ret) {
+		rtw_err(rtwdev, "async firmware request failed\n");
+		return ret;
+	}
+#else
 	const struct rtw_fw_hdr *fw_hdr;
 	struct firmware *firmware;
 
@@ -1081,18 +1096,6 @@ static int rtw_load_firmware(struct rtw_dev *rtwdev, const char *fw_name)
 
 	pr_info("Firmware version %u.%u.%u, H2C version %u\n",
 		 fw->version, fw->sub_version, fw->sub_index, fw->h2c_version);
-
-#else
-	int ret;
-
-	init_completion(&fw->completion);
-
-	ret = request_firmware_nowait(THIS_MODULE, true, fw_name, rtwdev->dev,
-				      GFP_KERNEL, rtwdev, rtw_load_firmware_cb);
-	if (ret) {
-		rtw_err(rtwdev, "async firmware request failed\n");
-		return ret;
-	}
 #endif
 	return 0;
 }
@@ -1433,12 +1436,12 @@ void rtw_core_deinit(struct rtw_dev *rtwdev)
 	struct rtw_rsvd_page *rsvd_pkt, *tmp;
 	unsigned long flags;
 
-#if 1
-	if (fw->firmware)
-		kfree(fw->firmware);
-#else
+#ifdef LOAD_FW_BY_BIN_FILE
 	if (fw->firmware)
 		release_firmware(fw->firmware);
+#else
+	if (fw->firmware)
+		kfree(fw->firmware);
 #endif
 
 	tasklet_kill(&rtwdev->tx_tasklet);
