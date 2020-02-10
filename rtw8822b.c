@@ -1577,8 +1577,8 @@ static int rtw8822bu_set_rx_agg_switch(struct rtw_dev *rtwdev, bool enable,
 static int rtw8822bu_fill_txdesc_checksum(struct rtw_dev *rtwdev,
 					u8 *txdesc)
 {
-	u16 chksum = 0;
-	u16 *data = (u16 *)NULL;
+	__le16 chksum = 0;
+	__le16 *data;
 	u32 i;
 
 	if (!txdesc) {
@@ -1588,7 +1588,7 @@ static int rtw8822bu_fill_txdesc_checksum(struct rtw_dev *rtwdev,
 
 	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, 0x0000);
 
-	data = (u16 *)(txdesc);
+	data = (__le16 *)(txdesc);
 
 	/* HW clculates only 32byte */
 	for (i = 0; i < 8; i++)
@@ -1596,9 +1596,8 @@ static int rtw8822bu_fill_txdesc_checksum(struct rtw_dev *rtwdev,
 
 	/* *(data + 2 * i) & *(data + (2 * i + 1) have endain issue*/
 	/* Process eniadn issue after checksum calculation */
-	chksum = le16_to_cpu(chksum);
 
-	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, chksum);
+	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, le16_to_cpu(chksum));
 
 	return 0;
 }

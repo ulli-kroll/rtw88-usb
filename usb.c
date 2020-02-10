@@ -1,4 +1,4 @@
-
+				
 // SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
 /* Copyright(c) 2018-2019  Realtek Corporation
  */
@@ -102,7 +102,7 @@ void rtw_usb_set_bus_ready(struct rtw_dev *rtwdev, bool ready)
  * usb read/write register functions
  */
 
-u8 rtw_usb_read8(struct rtw_dev *rtwdev, u32 addr)
+static u8 rtw_usb_read8(struct rtw_dev *rtwdev, u32 addr)
 {
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
 	struct usb_device *udev = rtwusb->udev;
@@ -114,13 +114,13 @@ u8 rtw_usb_read8(struct rtw_dev *rtwdev, u32 addr)
 			      RTW_USB_CMD_REQ, RTW_USB_CMD_READ,
 			      addr, 0, &rtwusb->usb_buf.val8, sizeof(u8),
 			      RTW_USB_CONTROL_MSG_TIMEOUT);
-	data = le32_to_cpu(rtwusb->usb_buf.val8);
+	data = rtwusb->usb_buf.val8;
 	mutex_unlock(&rtwusb->usb_buf_mutex);
 
 	return data;
 }
 
-u16 rtw_usb_read16(struct rtw_dev *rtwdev, u32 addr)
+static u16 rtw_usb_read16(struct rtw_dev *rtwdev, u32 addr)
 {
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
 	struct usb_device *udev = rtwusb->udev;
@@ -132,13 +132,13 @@ u16 rtw_usb_read16(struct rtw_dev *rtwdev, u32 addr)
 			      RTW_USB_CMD_REQ, RTW_USB_CMD_READ,
 			      addr, 0, &rtwusb->usb_buf.val16, sizeof(u16),
 			      RTW_USB_CONTROL_MSG_TIMEOUT);
-	data = le32_to_cpu(rtwusb->usb_buf.val16);
+	data = le16_to_cpu(rtwusb->usb_buf.val16);
 	mutex_unlock(&rtwusb->usb_buf_mutex);
 
 	return data;
 }
 
-u32 rtw_usb_read32(struct rtw_dev *rtwdev, u32 addr)
+static u32 rtw_usb_read32(struct rtw_dev *rtwdev, u32 addr)
 {
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
 	struct usb_device *udev = rtwusb->udev;
@@ -156,7 +156,7 @@ u32 rtw_usb_read32(struct rtw_dev *rtwdev, u32 addr)
 	return data;
 }
 
-void rtw_usb_write8(struct rtw_dev *rtwdev, u32 addr, u8 val)
+static void rtw_usb_write8(struct rtw_dev *rtwdev, u32 addr, u8 val)
 {
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
 	struct usb_device *udev = rtwusb->udev;
@@ -172,7 +172,7 @@ void rtw_usb_write8(struct rtw_dev *rtwdev, u32 addr, u8 val)
 	mutex_unlock(&rtwusb->usb_buf_mutex);
 }
 
-void rtw_usb_write16(struct rtw_dev *rtwdev, u32 addr, u16 val)
+static void rtw_usb_write16(struct rtw_dev *rtwdev, u32 addr, u16 val)
 {
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
 	struct usb_device *udev = rtwusb->udev;
@@ -187,7 +187,7 @@ void rtw_usb_write16(struct rtw_dev *rtwdev, u32 addr, u16 val)
 	mutex_unlock(&rtwusb->usb_buf_mutex);
 }
 
-void rtw_usb_write32(struct rtw_dev *rtwdev, u32 addr, u32 val)
+static void rtw_usb_write32(struct rtw_dev *rtwdev, u32 addr, u32 val)
 {
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
 	struct usb_device *udev = rtwusb->udev;
@@ -815,7 +815,7 @@ static void rtw_usb_deep_ps(struct rtw_dev *rtwdev, bool enter)
 	pr_debug("%s ===>\n", __func__);
 }
 
-struct rtw_hci_ops rtw_usb_ops = {
+static struct rtw_hci_ops rtw_usb_ops = {
 	.tx = rtw_usb_tx,
 	.setup = rtw_usb_setup,
 	.start = rtw_usb_start,
@@ -870,7 +870,7 @@ static int rtw_usb_parse(struct rtw_dev *rtwdev,
 		pr_debug("bDescriptorType=%x\n", endpoint->bDescriptorType);
 		pr_debug("bEndpointAddress=%x\n", endpoint->bEndpointAddress);
 		pr_debug("wMaxPacketSize=%d\n",
-			 __le16_to_cpu(endpoint->wMaxPacketSize));
+			 le16_to_cpu(endpoint->wMaxPacketSize));
 		pr_debug("bInterval=%x\n", endpoint->bInterval);
 
 		if (usb_endpoint_dir_in(endpoint) &&
@@ -1326,7 +1326,7 @@ static void rtw_usb_disconnect(struct usb_interface *intf)
 #define RTW_USB_PRODUCT_ID_REALTEK_8822B 	0xB82C
 #define RTW_USB_PRODUCT_ID_REALTEK_8812B 	0xB812
 
-const struct usb_device_id rtw_usb_id_table[] = {
+static const struct usb_device_id rtw_usb_id_table[] = {
 	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
 					RTW_USB_PRODUCT_ID_REALTEK_8822B,
 					0xff, 0xff, 0xff),

@@ -314,8 +314,8 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 		goto out;
 	}
 
-	rtw_write32(rtwdev, box_ex_reg, le32_to_cpu(*(u32*)(h2c + 4)));
-	rtw_write32(rtwdev, box_reg, le32_to_cpu(*(u32*)h2c));
+	rtw_write32(rtwdev, box_ex_reg, le32_to_cpu(*(__le32 *)(h2c + 4)));
+	rtw_write32(rtwdev, box_reg, le32_to_cpu(*(__le32 *)h2c));
 
 	if (++rtwdev->h2c.last_box_num >= 4)
 		rtwdev->h2c.last_box_num = 0;

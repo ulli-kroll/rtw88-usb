@@ -44,7 +44,7 @@ rtwusb-objs			:= usb.o
 ########### section above is for upstream kernel ###########
 
 all:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD)
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) C=2
 
 cscope:
 	find ./ -name "*.[ch]" > cscope.files
