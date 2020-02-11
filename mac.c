@@ -798,23 +798,47 @@ static int txdma_queue_mapping(struct rtw_dev *rtwdev)
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
 	struct rtw_rqpn *rqpn = NULL;
+	enum rtw_trx_mode trx_mode = rtwdev->trx_mode;
 	u16 txdma_pq_map = 0;
 
-	switch (rtw_hci_type(rtwdev)) {
-	case RTW_HCI_TYPE_PCIE:
-		rqpn = &chip->rqpn_table[1];
-		break;
-	case RTW_HCI_TYPE_USB:
-		if (rtwdev->hci.bulkout_num == 2)
-			rqpn = &chip->rqpn_table[2];
-		else if (rtwdev->hci.bulkout_num == 3)
-			rqpn = &chip->rqpn_table[3];
-		else if (rtwdev->hci.bulkout_num == 4)
-			rqpn = &chip->rqpn_table[4];
-		else
+	if (trx_mode == RTW_TRX_MODE_NORMAL) {
+		switch (rtw_hci_type(rtwdev)) {
+		case RTW_HCI_TYPE_PCIE:
+			rqpn = &chip->rqpn_table[1];
+			break;
+		case RTW_HCI_TYPE_USB:
+			if (rtwdev->hci.bulkout_num == 2)
+				rqpn = &chip->rqpn_table[2];
+			else if (rtwdev->hci.bulkout_num == 3)
+				rqpn = &chip->rqpn_table[3];
+			else if (rtwdev->hci.bulkout_num == 4)
+				rqpn = &chip->rqpn_table[4];
+			else
+				return -EINVAL;
+			break;
+		default:
 			return -EINVAL;
-		break;
-	default:
+		}
+	} else if (trx_mode == RTW_TRX_MODE_LOOPBACK) {
+		switch (rtw_hci_type(rtwdev)) {
+		case RTW_HCI_TYPE_PCIE:
+			rqpn = &chip->rqpn_table_loopback[1];
+			break;
+		case RTW_HCI_TYPE_USB:
+			if (rtwdev->hci.bulkout_num == 2)
+				rqpn = &chip->rqpn_table_loopback[2];
+			else if (rtwdev->hci.bulkout_num == 3)
+				rqpn = &chip->rqpn_table_loopback[3];
+			else if (rtwdev->hci.bulkout_num == 4)
+				rqpn = &chip->rqpn_table_loopback[4];
+			else
+				return -EINVAL;
+			break;
+		default:
+			return -EINVAL;
+		}
+
+	} else {
 		return -EINVAL;
 	}
 
@@ -892,6 +916,7 @@ static int priority_queue_cfg(struct rtw_dev *rtwdev)
 	struct rtw_fifo_conf *fifo = &rtwdev->fifo;
 	struct rtw_chip_info *chip = rtwdev->chip;
 	struct rtw_page_table *pg_tbl = NULL;
+	enum rtw_trx_mode trx_mode = rtwdev->trx_mode;
 	u16 pubq_num;
 	int ret;
 
@@ -938,7 +963,11 @@ static int priority_queue_cfg(struct rtw_dev *rtwdev)
 	if (!check_hw_ready(rtwdev, REG_AUTO_LLT_V1, BIT_AUTO_INIT_LLT_V1, 0))
 		return -EBUSY;
 
-	rtw_write8(rtwdev, REG_CR + 3, 0);
+	if (likely(trx_mode == RTW_TRX_MODE_NORMAL)) {
+		rtw_write8(rtwdev, REG_CR + 3, 0);
+	} else if (trx_mode == RTW_TRX_MODE_LOOPBACK) {
+		rtw_write8(rtwdev, REG_CR + 3, 0xB);
+	}
 
 	return 0;
 }

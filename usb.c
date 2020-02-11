@@ -378,6 +378,7 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 			struct rtw_chip_info *chip = rtwdev->chip;
 			struct ieee80211_rx_status rx_status;
 			struct rtw_rx_pkt_stat pkt_stat;
+			struct rtw_loopback *loopback = &rtwdev->loopback;
 			u32 pkt_desc_sz = chip->rx_pkt_desc_sz;
 			u32 pkt_offset;
 
@@ -387,6 +388,7 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 			skb = skb_dequeue(&rtwusb->rx_queue);
 			if (!skb)
 				break;
+
 
 			rx_desc = skb->data;
 			chip->ops->query_rx_desc(rtwdev, rx_desc, &pkt_stat,
@@ -407,9 +409,16 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 				} else {
 					skb_put(skb, pkt_stat.pkt_len);
 					skb_reserve(skb, pkt_offset);
-					memcpy(skb->cb, &rx_status, sizeof(rx_status));
-
-					ieee80211_rx_irqsafe(rtwdev->hw, skb);
+					if (loopback->start) {
+						if (loopback->rx_buf && (skb->len > 24)) {
+							memcpy(loopback->rx_buf, skb->data + 24, min(skb->len - 24, loopback->pktsize));
+						}
+						dev_kfree_skb(skb);
+						up(&loopback->sema);
+					} else {
+						memcpy(skb->cb, &rx_status, sizeof(rx_status));
+						ieee80211_rx_irqsafe(rtwdev->hw, skb);
+					}
 				}
 			}
 		}
@@ -455,6 +464,7 @@ static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 {
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
+	struct rtw_loopback *loopback = &rtwdev->loopback;
 	struct sk_buff *skb;
 	u8 queue;
 	int status;
@@ -476,7 +486,8 @@ void rtw_core_qos_processor(struct rtw_usb *rtwusb)
 			       __func__, status);
 		}
 
-		rtw_indicate_tx_status(rtwdev, skb);
+		if (likely(!loopback->start))
+			rtw_indicate_tx_status(rtwdev, skb);
 
 		mutex_unlock(&rtwusb->tx_lock);
 	}

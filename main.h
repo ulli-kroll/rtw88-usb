@@ -61,6 +61,13 @@ struct rtw_hci {
 	u8 bulkout_num;
 };
 
+enum rtw_trx_mode {
+	RTW_TRX_MODE_NORMAL,
+	RTW_TRX_MODE_LOOPBACK,
+
+	RTW_TRX_MODE_UNDEFINE,
+};
+
 #define IS_CH_5G_BAND_1(channel) ((channel) >= 36 && (channel <= 48))
 #define IS_CH_5G_BAND_2(channel) ((channel) >= 52 && (channel <= 64))
 #define IS_CH_5G_BAND_3(channel) ((channel) >= 100 && (channel <= 144))
@@ -1024,6 +1031,7 @@ struct rtw_chip_info {
 	struct rtw_pwr_seq_cmd **pwr_on_seq;
 	struct rtw_pwr_seq_cmd **pwr_off_seq;
 	struct rtw_rqpn *rqpn_table;
+	struct rtw_rqpn *rqpn_table_loopback;
 	struct rtw_page_table *page_table;
 	struct rtw_intf_phy_para_table *intf_table;
 
@@ -1534,6 +1542,14 @@ struct rtw_hal {
 		     [DESC_RATE_MAX];
 };
 
+struct rtw_loopback {
+	struct semaphore	sema;
+	bool			start;
+	u32			pktsize;
+	u8			*tx_buf;
+	u8			*rx_buf;
+};
+
 struct rtw_dev {
 	struct ieee80211_hw *hw;
 	struct device *dev;
@@ -1552,6 +1568,8 @@ struct rtw_dev {
 
 	struct rtw_dm_info dm_info;
 	struct rtw_coex coex;
+
+	enum rtw_trx_mode trx_mode;
 
 	/* ensures exclusive access from mac80211 callbacks */
 	struct mutex mutex;
@@ -1601,6 +1619,9 @@ struct rtw_dev {
 	DECLARE_BITMAP(flags, NUM_OF_RTW_FLAGS);
 
 	u8 mp_mode;
+
+	/* loopback */
+	struct rtw_loopback loopback;
 
 	/* hci related data, must be last */
 	u8 priv[0] __aligned(sizeof(void *));

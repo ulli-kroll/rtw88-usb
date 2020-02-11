@@ -13,48 +13,50 @@
 	le32p_replace_bits((__le32 *)(txdesc) + 0x00, value, GENMASK(15, 0))
 #define SET_TX_DESC_OFFSET(txdesc, value)                                      \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x00, value, GENMASK(23, 16))
+#define SET_TX_DESC_BMC(txdesc, value)                                         \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x00, value, BIT(24))
+#define SET_TX_DESC_LS(txdesc, value)                                          \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x00, value, BIT(26))
+#define SET_TX_DESC_DISQSELSEQ(txdesc, value)                                          \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x00, value, BIT(31))
 #define SET_TX_DESC_PKT_OFFSET(txdesc, value)                                  \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x01, value, GENMASK(28, 24))
 #define SET_TX_DESC_QSEL(txdesc, value)                                        \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x01, value, GENMASK(12, 8))
-#define SET_TX_DESC_BMC(txdesc, value)                                         \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x00, value, BIT(24))
 #define SET_TX_DESC_RATE_ID(txdesc, value)                                     \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x01, value, GENMASK(20, 16))
-#define SET_TX_DESC_DATARATE(txdesc, value)                                    \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x04, value, GENMASK(6, 0))
-#define SET_TX_DESC_DISDATAFB(txdesc, value)                                   \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x03, value, BIT(10))
-#define SET_TX_DESC_USE_RATE(txdesc, value)                                    \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x03, value, BIT(8))
 #define SET_TX_DESC_SEC_TYPE(txdesc, value)                                    \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x01, value, GENMASK(23, 22))
-#define SET_TX_DESC_DATA_BW(txdesc, value)                                     \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x05, value, GENMASK(6, 5))
-#define SET_TX_DESC_SW_SEQ(txdesc, value)                                      \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x09, value, GENMASK(23, 12))
-#define SET_TX_DESC_MAX_AGG_NUM(txdesc, value)                                 \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x03, value, GENMASK(21, 17))
-#define SET_TX_DESC_USE_RTS(tx_desc, value)                                    \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x03, value, BIT(12))
+#define SET_TX_DESC_AGG_EN(txdesc, value)                                      \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x02, value, BIT(12))
+#define SET_TX_DESC_SPE_RPT(tx_desc, value)                                    \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x02, value, BIT(19))
 #define SET_TX_DESC_AMPDU_DENSITY(txdesc, value)                               \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x02, value, GENMASK(22, 20))
+#define SET_TX_DESC_USE_RATE(txdesc, value)                                    \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x03, value, BIT(8))
+#define SET_TX_DESC_DISDATAFB(txdesc, value)                                   \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x03, value, BIT(10))
+#define SET_TX_DESC_USE_RTS(tx_desc, value)                                    \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x03, value, BIT(12))
+#define SET_TX_DESC_MAX_AGG_NUM(txdesc, value)                                 \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x03, value, GENMASK(21, 17))
+#define SET_TX_DESC_DATARATE(txdesc, value)                                    \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x04, value, GENMASK(6, 0))
+#define SET_TX_DESC_DATA_BW(txdesc, value)                                     \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x05, value, GENMASK(6, 5))
 #define SET_TX_DESC_DATA_STBC(txdesc, value)                                   \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x05, value, GENMASK(9, 8))
 #define SET_TX_DESC_DATA_LDPC(txdesc, value)                                   \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x05, value, BIT(7))
-#define SET_TX_DESC_AGG_EN(txdesc, value)                                      \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x02, value, BIT(12))
-#define SET_TX_DESC_LS(txdesc, value)                                          \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x00, value, BIT(26))
 #define SET_TX_DESC_DATA_SHORT(txdesc, value)				       \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x05, value, BIT(4))
-#define SET_TX_DESC_SPE_RPT(tx_desc, value)                                    \
-	le32p_replace_bits((__le32 *)(txdesc) + 0x02, value, BIT(19))
 #define SET_TX_DESC_SW_DEFINE(tx_desc, value)                                  \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x06, value, GENMASK(11, 0))
 #define SET_TX_DESC_TXDESC_CHECKSUM(txdesc, value)                             \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x07, value, GENMASK(15, 0))
+#define SET_TX_DESC_SW_SEQ(txdesc, value)                                      \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x09, value, GENMASK(23, 12))
 
 enum rtw_tx_desc_queue_select {
 	TX_DESC_QSEL_TID0	= 0,
