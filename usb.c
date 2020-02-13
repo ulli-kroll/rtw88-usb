@@ -319,10 +319,14 @@ static void rtw_usb_tx_handler(struct work_struct *work)
 	struct rtw_dev *rtwdev = my_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	u32 timeout = 0;
+	u32 queue_len;
 
 	do {
 		rtw_wait_event(&rtwusb->tx_handler.event, timeout);
 		rtw_reset_event(&rtwusb->tx_handler.event);
+
+		queue_len = skb_queue_len(&rtwusb->tx_queue);
+		pr_info("%s: skb queue len=%d\n", __func__, queue_len);
 
 		if (rtwusb->init_done)
 			rtw_tx_func(rtwusb);
@@ -1218,16 +1222,6 @@ static int rtw_usb_probe(struct usb_interface *intf,
 	pr_info("%s: usb_interface_configure\n", __func__);
 	usb_interface_configure(rtwdev);
 
-	ret = rtw_usb_init_rx(rtwdev);
-	if (ret) {
-		goto err_deinit_core;
-	}
-
-	ret = rtw_usb_init_tx(rtwdev);
-	if (ret) {
-		goto err_destroy_rxwq;
-	}
-
 	rtwusb->init_done = true;
 	SET_IEEE80211_DEV(rtwdev->hw, &intf->dev);
 
@@ -1243,11 +1237,17 @@ static int rtw_usb_probe(struct usb_interface *intf,
 		goto err_destroy_usb;
 	}
 
-	goto finish;
+	ret = rtw_usb_init_rx(rtwdev);
+	if (ret) {
+		goto err_destroy_hw;
+	}
 
-err_destroy_usb:
-	usb_put_dev(rtwusb->udev);
-	usb_set_intfdata(intf, NULL);
+	ret = rtw_usb_init_tx(rtwdev);
+	if (ret) {
+		goto err_destroy_rxwq;
+	}
+
+	goto finish;
 
 //err_destroy_txwq:
 	flush_workqueue(rtwusb->txwq);
@@ -1256,6 +1256,13 @@ err_destroy_usb:
 err_destroy_rxwq:
 	flush_workqueue(rtwusb->rxwq);
 	destroy_workqueue(rtwusb->rxwq);
+
+err_destroy_hw:
+	rtw_unregister_hw(rtwdev, rtwdev->hw);
+
+err_destroy_usb:
+	usb_put_dev(rtwusb->udev);
+	usb_set_intfdata(intf, NULL);
 
 err_deinit_core:
 	rtw_core_deinit(rtwdev);
@@ -1279,6 +1286,7 @@ static void rtw_usb_disconnect(struct usb_interface *intf)
 	rtwusb = rtw_get_usb_priv(rtwdev);
 
 	rtwusb->init_done = false;
+
 	skb_queue_purge(&rtwusb->tx_queue);
 	skb_queue_purge(&rtwusb->rx_queue);
 	rtw_kill_handler(&rtwusb->tx_handler);
