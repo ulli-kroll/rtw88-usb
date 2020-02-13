@@ -68,8 +68,7 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	struct rtw_tx_pkt_info pkt_info = {0};
 	struct rtw_loopback *loopback = &rtwdev->loopback;
 	int size;
-	int cnt = 10;
-	//int pktsize = 20352;
+	int cnt = 100;
 	u32 pktsize = 2000;
 	ktime_t t1, spend;
 	int ret = 0;

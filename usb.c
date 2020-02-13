@@ -428,7 +428,7 @@ static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 		pr_err("usb_bulk_msg error, ret=%d\n", ret);
 	}
 
-	if (loopback->start) {
+	if (unlikely(loopback->start)) {
 		loopback->cur++;
 		if (loopback->cur >= loopback->total)
 			up(&loopback->sema);
@@ -726,6 +726,7 @@ static int rtw_usb_tx(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
 
 	skb_queue_tail(&rtwusb->tx_queue, skb);
 	rtw_set_event(&rtwusb->tx_handler.event);
+
 	return 0;
 }
 
