@@ -1548,6 +1548,8 @@ struct rtw_loopback {
 	u32			pktsize;
 	u8			*tx_buf;
 	u8			*rx_buf;
+	int			total;
+	int			cur;
 };
 
 struct rtw_dev {

@@ -45,33 +45,6 @@
 #define RTW_USB_RXAGG_SIZE		6
 #define RTW_USB_RXAGG_TIMEOUT		10
 
-enum halmac_txdesc_queue_tid {
-	HALMAC_TXDESC_QSEL_TID0 = 0,
-	HALMAC_TXDESC_QSEL_TID1 = 1,
-	HALMAC_TXDESC_QSEL_TID2 = 2,
-	HALMAC_TXDESC_QSEL_TID3 = 3,
-	HALMAC_TXDESC_QSEL_TID4 = 4,
-	HALMAC_TXDESC_QSEL_TID5 = 5,
-	HALMAC_TXDESC_QSEL_TID6 = 6,
-	HALMAC_TXDESC_QSEL_TID7 = 7,
-	HALMAC_TXDESC_QSEL_TID8 = 8,
-	HALMAC_TXDESC_QSEL_TID9 = 9,
-	HALMAC_TXDESC_QSEL_TIDA = 10,
-	HALMAC_TXDESC_QSEL_TIDB = 11,
-	HALMAC_TXDESC_QSEL_TIDC = 12,
-	HALMAC_TXDESC_QSEL_TIDD = 13,
-	HALMAC_TXDESC_QSEL_TIDE = 14,
-	HALMAC_TXDESC_QSEL_TIDF = 15,
-
-	HALMAC_TXDESC_QSEL_BEACON = 0x10,
-	HALMAC_TXDESC_QSEL_HIGH = 0x11,
-	HALMAC_TXDESC_QSEL_MGT = 0x12,
-	HALMAC_TXDESC_QSEL_H2C_CMD = 0x13,
-	HALMAC_TXDESC_QSEL_FWCMD = 0x14,
-
-	HALMAC_TXDESC_QSEL_UNDEFINE = 0x7F,
-};
-
 /* work queue */
 struct work_data {
 	struct work_struct work;
@@ -243,9 +216,9 @@ static u8 rtw_queue_to_qsel(struct sk_buff *skb, u8 queue)
 	}
 }
 
-static int rtw_qsel_to_queue(struct sk_buff *skb, u8 queue)
+static u8 rtw_qsel_to_queue(u8 qsel)
 {
-	switch (queue) {
+	switch (qsel) {
 	case TX_DESC_QSEL_BEACON:
 		return RTW_TX_QUEUE_BCN;
 	case TX_DESC_QSEL_H2C:
@@ -268,7 +241,7 @@ static int rtw_qsel_to_queue(struct sk_buff *skb, u8 queue)
 	case TX_DESC_QSEL_TID2:
 		return RTW_TX_QUEUE_BK;
 	default:
-		pr_err("%s: queue(%d) is out of range\n", __func__, queue);
+		pr_err("%s: qsel(%d) is out of range\n", __func__, qsel);
 		return -1;
 	}
 }
@@ -338,7 +311,7 @@ static void rtw_kill_handler(struct rtw_handler *handler)
 }
 
 // TX functions
-void rtw_core_qos_processor(struct rtw_usb *rtwusb);
+void rtw_tx_func(struct rtw_usb *rtwusb);
 static void rtw_usb_tx_handler(struct work_struct *work)
 {
 	struct work_data *my_data = container_of(work, struct work_data,
@@ -352,7 +325,7 @@ static void rtw_usb_tx_handler(struct work_struct *work)
 		rtw_reset_event(&rtwusb->tx_handler.event);
 
 		if (rtwusb->init_done)
-			rtw_core_qos_processor(rtwusb);
+			rtw_tx_func(rtwusb);
 	} while (atomic_read(&rtwusb->tx_handler.handler_done) == 0);
 }
 
@@ -413,8 +386,6 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 						if (loopback->rx_buf && (skb->len > 24)) {
 							memcpy(loopback->rx_buf, skb->data + 24, min(skb->len - 24, loopback->pktsize));
 						}
-						dev_kfree_skb(skb);
-						up(&loopback->sema);
 					} else {
 						memcpy(skb->cb, &rx_status, sizeof(rx_status));
 						ieee80211_rx_irqsafe(rtwdev->hw, skb);
@@ -442,26 +413,30 @@ static void rtw_indicate_tx_status(struct rtw_dev *rtwdev, struct sk_buff *skb)
 static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 			      struct sk_buff *skb)
 {
-	unsigned int pipe;
-	int ret = -1;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	struct usb_device *usbd = rtwusb->udev;
+	struct rtw_loopback *loopback = &rtwdev->loopback;
+	unsigned int pipe;
+	int ret;
 	int transfer;
-
 
 	pipe = rtw_usb_get_pipe(rtwusb, addr);
 
-	ret = usb_bulk_msg(usbd, pipe, (void *)skb->data, (int)cnt, &transfer,
-			   HZ * 5);
+	// 0 : MAX_SCHEDULE_TIMEOUT
+	ret = usb_bulk_msg(usbd, pipe, (void *)skb->data, (int)cnt, &transfer, 0);
 	if (ret < 0) {
 		pr_err("usb_bulk_msg error, ret=%d\n", ret);
 	}
 
+	if (loopback->start) {
+		loopback->cur++;
+		if (loopback->cur >= loopback->total)
+			up(&loopback->sema);
+	}
 	return ret;
 }
 
-
-void rtw_core_qos_processor(struct rtw_usb *rtwusb)
+void rtw_tx_func(struct rtw_usb *rtwusb)
 {
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
 	struct rtw_loopback *loopback = &rtwdev->loopback;
@@ -518,7 +493,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 	memset(&pkt_info, 0, sizeof(pkt_info));
 	pkt_info.tx_pkt_size = size;
 	pkt_info.qsel = qsel;
-	if (qsel == HALMAC_TXDESC_QSEL_BEACON) {
+	if (qsel == TX_DESC_QSEL_BEACON) {
 		if (rtwusb->bulkout_size == 0) {
 			rtw_err(rtwdev, "%s: ERROR: bulkout_size is 0\n",
 				__func__);
@@ -532,7 +507,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 		} else {
 			pkt_info.offset = desclen;
 		}
-	} else if (qsel == HALMAC_TXDESC_QSEL_H2C_CMD) {
+	} else if (qsel == TX_DESC_QSEL_H2C) {
 		;
 	} else {
 		rtw_err(rtwdev, "%s: qsel may be error(%d)\n", __func__, qsel);
@@ -559,7 +534,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 		goto exit;
 	}
 
-	addr = rtw_qsel_to_queue(skb, qsel);
+	addr = rtw_qsel_to_queue(qsel);
 
 	ret = rtw_usb_write_port(rtwdev, addr, len, skb);
 	if (ret) {
@@ -584,14 +559,12 @@ static int rtw_usb_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
 		pr_err("%s: rtwdev is NULL\n", __func__);
 		return -EINVAL;
 	}
-	return rtw_usb_write_data(rtwdev, buf, size,
-				  HALMAC_TXDESC_QSEL_BEACON);
+	return rtw_usb_write_data(rtwdev, buf, size, TX_DESC_QSEL_BEACON);
 }
 
 static int rtw_usb_write_data_h2c(struct rtw_dev *rtwdev, u8 *buf, u32 size)
 {
-	return rtw_usb_write_data(rtwdev, buf, size,
-				  HALMAC_TXDESC_QSEL_H2C_CMD);
+	return rtw_usb_write_data(rtwdev, buf, size, TX_DESC_QSEL_H2C);
 }
 
 static void rtw_usb_read_port_complete(struct urb *urb)
@@ -1239,7 +1212,6 @@ static int rtw_usb_probe(struct usb_interface *intf,
 		goto err_deinit_core;
 	}
 
-
 	pr_info("%s: usb_interface_configure\n", __func__);
 	usb_interface_configure(rtwdev);
 
@@ -1256,28 +1228,25 @@ static int rtw_usb_probe(struct usb_interface *intf,
 	rtwusb->init_done = true;
 	SET_IEEE80211_DEV(rtwdev->hw, &intf->dev);
 
-	pr_info("%s: rtw_chip_info_setup\n", __func__);
 	ret = rtw_chip_info_setup(rtwdev);
 	if (ret) {
 		rtw_err(rtwdev, "failed to setup chip information\n");
 		goto err_destroy_usb;
 	}
 
-	pr_info("%s: rtw_register_hw\n", __func__);
 	ret = rtw_register_hw(rtwdev, rtwdev->hw);
 	if (ret) {
 		pr_err("%s : rtw_register_hw failed: ret=%d\n", __func__, ret);
 		goto err_destroy_usb;
 	}
 
-
-	pr_debug("rtw_info: %s <===\n", __func__);
 	goto finish;
 
 err_destroy_usb:
 	usb_put_dev(rtwusb->udev);
 	usb_set_intfdata(intf, NULL);
 
+//err_destroy_txwq:
 	flush_workqueue(rtwusb->txwq);
 	destroy_workqueue(rtwusb->txwq);
 
@@ -1289,6 +1258,7 @@ err_deinit_core:
 	rtw_core_deinit(rtwdev);
 	mutex_destroy(&rtwusb->usb_buf_mutex);
 	mutex_destroy(&rtwusb->tx_lock);
+
 finish:
 	return ret;
 }

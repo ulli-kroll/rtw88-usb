@@ -68,8 +68,12 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	struct rtw_tx_pkt_info pkt_info = {0};
 	struct rtw_loopback *loopback = &rtwdev->loopback;
 	int size;
-	int pktsize = 1600;
+	int cnt = 1;
+	//int pktsize = 20352;
+	u32 pktsize = 2000;
+	ktime_t t1, spend;
 	int ret = 0;
+	int i;
 
 	/* rf_supportability :
 	   rtw_phydm_ability_backup()
@@ -77,6 +81,7 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	 */
 
 	sema_init(&loopback->sema, 0);
+	loopback->total = cnt;
 	loopback->pktsize = pktsize;
 
 	rtwdev->trx_mode = RTW_TRX_MODE_LOOPBACK;
@@ -98,7 +103,7 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	if (!loopback->rx_buf) {
 		rtw_err(rtwdev, "rx_buf alloc failed\n");
 		ret = -ENOMEM;
-		goto trxmode_deinit;
+		goto skb_deinit;
 	}
 
 	loopback->tx_buf = kmalloc(pktsize, GFP_KERNEL);
@@ -125,15 +130,37 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	pkt_info.qsel = 0;
 	pkt_info.ls = true;
 
+	loopback->cur = 0;
 	loopback->start = true;
 
-	ret = rtw_hci_tx(rtwdev, &pkt_info, skb);
-	if (ret) {
-		rtw_err(rtwdev, "rtw_hci_tx() failed\n");
-		goto skb_deinit;
+	t1 = ktime_get();
+
+	for (i = 0; i < loopback->total; i++) {
+		struct sk_buff *skb1;
+
+		skb1 = skb;
+		//skb1 = skb_copy(skb, GFP_ATOMIC);
+		if (!skb1) {
+			rtw_err(rtwdev, "skb_copy failed\n");
+			ret = -ENOMEM;
+			goto txbuf_deinit;
+		}
+
+		ret = rtw_hci_tx(rtwdev, &pkt_info, skb1);
+		if (ret) {
+			rtw_err(rtwdev, "rtw_hci_tx() failed\n");
+			goto txbuf_deinit;
+		}
 	}
 
 	down(&loopback->sema);
+
+	spend = ktime_to_ns(ktime_sub(ktime_get(), t1))/(cnt *1000);
+	seq_printf(s, "pktsize:%d, spend: %lldus, throughput=%lldMbps\n",
+		   pktsize, spend, pktsize * 8 / spend );
+
+	msleep(100);
+
 	if (memcmp(loopback->tx_buf, loopback->rx_buf, pktsize) == 0) {
 		seq_printf(s, "loopback success, pktsize=%d\n", pktsize);
 	} else {
@@ -142,7 +169,7 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 
 	loopback->start = false;
 
-//txbuf_deinit:
+txbuf_deinit:
 	kfree(loopback->tx_buf);
 
 rxbuf_deinit:
