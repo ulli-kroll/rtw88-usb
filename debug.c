@@ -68,7 +68,7 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	struct rtw_tx_pkt_info pkt_info = {0};
 	struct rtw_loopback *loopback = &rtwdev->loopback;
 	int size;
-	int cnt = 1;
+	int cnt = 10;
 	//int pktsize = 20352;
 	u32 pktsize = 2000;
 	ktime_t t1, spend;
@@ -138,8 +138,7 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	for (i = 0; i < loopback->total; i++) {
 		struct sk_buff *skb1;
 
-		skb1 = skb;
-		//skb1 = skb_copy(skb, GFP_ATOMIC);
+		skb1 = skb_copy(skb, GFP_ATOMIC);
 		if (!skb1) {
 			rtw_err(rtwdev, "skb_copy failed\n");
 			ret = -ENOMEM;

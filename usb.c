@@ -463,6 +463,8 @@ void rtw_tx_func(struct rtw_usb *rtwusb)
 
 		if (likely(!loopback->start))
 			rtw_indicate_tx_status(rtwdev, skb);
+		else
+			dev_kfree_skb(skb);
 
 		mutex_unlock(&rtwusb->tx_lock);
 	}
