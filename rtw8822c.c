@@ -25,6 +25,12 @@ static void rtw8822ce_efuse_parsing(struct rtw_efuse *efuse,
 	ether_addr_copy(efuse->addr, map->e.mac_addr);
 }
 
+static void rtw8822cu_efuse_parsing(struct rtw_efuse *efuse,
+				    struct rtw8822c_efuse *map)
+{
+	ether_addr_copy(efuse->addr, map->u.mac_addr);
+}
+
 static int rtw8822c_read_efuse(struct rtw_dev *rtwdev, u8 *log_map)
 {
 	struct rtw_efuse *efuse = &rtwdev->efuse;
@@ -53,6 +59,9 @@ static int rtw8822c_read_efuse(struct rtw_dev *rtwdev, u8 *log_map)
 	switch (rtw_hci_type(rtwdev)) {
 	case RTW_HCI_TYPE_PCIE:
 		rtw8822ce_efuse_parsing(efuse, map);
+		break;
+	case RTW_HCI_TYPE_USB:
+		rtw8822cu_efuse_parsing(efuse, map);
 		break;
 	default:
 		/* unsupported now */
@@ -3399,6 +3408,46 @@ static void rtw8822c_pwr_track(struct rtw_dev *rtwdev)
 	dm_info->pwr_trk_triggered = false;
 }
 
+static int rtw8822cu_set_rx_agg_switch(struct rtw_dev *rtwdev, bool enable,
+				u8 rxagg_size, u8 rxagg_timeout)
+{
+	pr_err("TODO: %s\n", __func__);
+	return 0;
+}
+
+static int rtw8822cu_fill_txdesc_checksum(struct rtw_dev *rtwdev,
+					u8 *txdesc)
+{
+	struct rtw_chip_info *chip = rtwdev->chip;
+	__le16 chksum = 0;
+	__le16 *data;
+	u16 txdesc_size;
+	u32 i;
+
+	if (!txdesc) {
+		pr_err("%s: [ERR]null pointer\n", __func__);
+		return -EINVAL;
+	}
+
+	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, 0x0000);
+
+	data = (__le16 *)(txdesc);
+
+	txdesc_size = (u16)((GET_TX_DESC_PKT_OFFSET(txdesc) +
+			(chip->tx_pkt_desc_sz >> 3)) << 1);
+
+	/* HW clculates only 32byte */
+	for (i = 0; i < txdesc_size; i++)
+		chksum ^= (*(data + 2 * i) ^ *(data + (2 * i + 1)));
+
+	/* *(data + 2 * i) & *(data + (2 * i + 1) have endain issue*/
+	/* Process eniadn issue after checksum calculation */
+
+	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, le16_to_cpu(chksum));
+
+	return 0;
+}
+
 static struct rtw_pwr_seq_cmd trans_carddis_to_cardemu_8822c[] = {
 	{0x0086,
 	 RTW_PWR_CUT_ALL_MSK,
@@ -3544,6 +3593,11 @@ static struct rtw_pwr_seq_cmd trans_cardemu_to_act_8822c[] = {
 	 RTW_PWR_INTF_ALL_MSK,
 	 RTW_PWR_ADDR_MAC,
 	 RTW_PWR_CMD_WRITE, BIT(2), BIT(2)},
+	{0x1064,
+	 RTW_PWR_CUT_ALL_MSK,
+	 RTW_PWR_INTF_ALL_MSK,
+	 RTW_PWR_ADDR_MAC,
+	 RTW_PWR_CMD_WRITE, BIT(1), BIT(1)},
 	{0xFFFF,
 	 RTW_PWR_CUT_ALL_MSK,
 	 RTW_PWR_INTF_ALL_MSK,
@@ -3732,6 +3786,7 @@ static const struct rtw_rfe_def rtw8822c_rfe_defs[] = {
 	[0] = RTW_DEF_RFE(8822c, 0, 0),
 	[1] = RTW_DEF_RFE(8822c, 0, 0),
 	[2] = RTW_DEF_RFE(8822c, 0, 0),
+	[4] = RTW_DEF_RFE(8822c, 0, 0),
 };
 
 static struct rtw_hw_reg rtw8822c_dig[] = {
@@ -3791,6 +3846,10 @@ static struct rtw_chip_ops rtw8822c_ops = {
 	.coex_set_rfe_type	= rtw8822c_coex_cfg_rfe_type,
 	.coex_set_wl_tx_power	= rtw8822c_coex_cfg_wl_tx_power,
 	.coex_set_wl_rx_gain	= rtw8822c_coex_cfg_wl_rx_gain,
+
+	/* USB relative */
+	.set_rx_agg_switch = rtw8822cu_set_rx_agg_switch,
+	.fill_txdesc_checksum = rtw8822cu_fill_txdesc_checksum,
 };
 
 /* Shared-Antenna Coex Table */
@@ -4159,6 +4218,9 @@ struct rtw_chip_info rtw8822c_hw_spec = {
 
 	.coex_info_hw_regs_num = ARRAY_SIZE(coex_info_hw_regs_8822c),
 	.coex_info_hw_regs = coex_info_hw_regs_8822c,
+
+	/* USB interface */
+	.usb_txagg_num = 3,
 };
 EXPORT_SYMBOL(rtw8822c_hw_spec);
 

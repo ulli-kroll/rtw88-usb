@@ -21,6 +21,8 @@
 	le32p_replace_bits((__le32 *)(txdesc) + 0x00, value, BIT(31))
 #define SET_TX_DESC_PKT_OFFSET(txdesc, value)                                  \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x01, value, GENMASK(28, 24))
+#define GET_TX_DESC_PKT_OFFSET(txdesc)                                  \
+	le32_get_bits(*((__le32 *)(txdesc) + 0x01), GENMASK(28, 24))
 #define SET_TX_DESC_QSEL(txdesc, value)                                        \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x01, value, GENMASK(12, 8))
 #define SET_TX_DESC_RATE_ID(txdesc, value)                                     \

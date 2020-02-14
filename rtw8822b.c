@@ -1560,13 +1560,6 @@ static void rtw8822b_bf_config_bfee(struct rtw_dev *rtwdev, struct rtw_vif *vif,
 
 /* USB relative */
 
-#define USB_BLK_DESC_NUM	0x3
-
-static int rtw8822bu_get_tx_agg_num(struct rtw_dev *rtwdev)
-{
-	return USB_BLK_DESC_NUM;
-}
-
 static int rtw8822bu_set_rx_agg_switch(struct rtw_dev *rtwdev, bool enable,
 				u8 rxagg_size, u8 rxagg_timeout)
 {
@@ -2182,7 +2175,6 @@ static struct rtw_chip_ops rtw8822b_ops = {
 	.coex_set_wl_rx_gain	= rtw8822b_coex_cfg_wl_rx_gain,
 
 	/* USB relative */
-	.get_tx_agg_num		= rtw8822bu_get_tx_agg_num,
 	.set_rx_agg_switch	= rtw8822bu_set_rx_agg_switch,
 	.fill_txdesc_checksum	= rtw8822bu_fill_txdesc_checksum,
 };
@@ -2552,6 +2544,9 @@ struct rtw_chip_info rtw8822b_hw_spec = {
 
 	.coex_info_hw_regs_num = ARRAY_SIZE(coex_info_hw_regs_8822b),
 	.coex_info_hw_regs = coex_info_hw_regs_8822b,
+
+	/* for USB interface */
+	.usb_txagg_num = 3,
 };
 EXPORT_SYMBOL(rtw8822b_hw_spec);
 

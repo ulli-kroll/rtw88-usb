@@ -450,12 +450,10 @@ static void usb_interface_configure(struct rtw_dev *rtwdev)
 	else
 		rtwusb->bulkout_size = RTW_USB_FULL_SPEED_BULK_SIZE;
 
-	pr_debug("%s : bulkout_size: %d\r\n", __func__, rtwusb->bulkout_size);
+	pr_info("%s : bulkout_size: %d\r\n", __func__, rtwusb->bulkout_size);
 
-	rtwusb->txagg_desc_num = chip->ops->get_tx_agg_num(rtwdev);
-
-	pr_debug("%s : TX Agg desc num: %d \r\n", __func__,
-		 rtwusb->txagg_desc_num);
+	rtwusb->usb_txagg_num = chip->usb_txagg_num;
+	pr_info("%s : TX Agg desc num: %d \r\n", __func__, rtwusb->usb_txagg_num);
 
 	rtw_usb_set_queue_pipe_mapping(rtwdev, rtwusb->num_in_pipes,
 				       rtwusb->num_out_pipes);
@@ -465,7 +463,7 @@ static void usb_interface_configure(struct rtw_dev *rtwdev)
 	rtwusb->txdesc_offset = rtwusb->txdesc_size + RTW_USB_PACKET_OFFSET_SZ;
 
 	// setup bulkout num
-	pr_debug("%s : bulkout_num: %d\r\n", __func__, rtwdev->hci.bulkout_num);
+	pr_info("%s : bulkout_num: %d\r\n", __func__, rtwdev->hci.bulkout_num);
 }
 
 /* RTW Thread functions */
@@ -1160,13 +1158,14 @@ static int rtw_usb_probe(struct usb_interface *intf,
 	struct rtw_usb *rtwusb;
 	int ret = 0;
 
-	pr_info("rtw_info: %s ===>\n", __func__);
+	pr_info("%s ===>\n", __func__);
 
 	ret = rtw_os_core_init(&rtwdev, id);
 	if (ret) {
 		pr_err("rtw_os_core_init fail, ret=%d\n", ret);
 		goto finish;
 	}
+
 
 	rtwdev->dev = &intf->dev;
 
@@ -1286,6 +1285,10 @@ static void rtw_usb_disconnect(struct usb_interface *intf)
 }
 
 static const struct usb_device_id rtw_usb_id_table[] = {
+	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
+					RTW_USB_PRODUCT_ID_REALTEK_8822C,
+					0xff, 0xff, 0xff),
+		.driver_info = (kernel_ulong_t)&rtw8822c_hw_spec },
 	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
 					RTW_USB_PRODUCT_ID_REALTEK_8822B,
 					0xff, 0xff, 0xff),

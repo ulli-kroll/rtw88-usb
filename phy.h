@@ -116,7 +116,7 @@ static inline const struct rtw_rfe_def *rtw_get_rfe_def(struct rtw_dev *rtwdev)
 	if (efuse->rfe_option < chip->rfe_defs_size)
 		rfe_def = &chip->rfe_defs[efuse->rfe_option];
 
-	rtw_dbg(rtwdev, RTW_DBG_PHY, "use rfe_def[%d]\n", efuse->rfe_option);
+	pr_info("use rfe_def[%d]\n", efuse->rfe_option);
 	return rfe_def;
 }
 

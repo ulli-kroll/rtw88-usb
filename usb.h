@@ -44,8 +44,9 @@
 
 /* USB Vendor/Product IDs */
 #define RTW_USB_VENDOR_ID_REALTEK 		0x0bda
-#define RTW_USB_PRODUCT_ID_REALTEK_8822B 	0xB82C
 #define RTW_USB_PRODUCT_ID_REALTEK_8812B 	0xB812
+#define RTW_USB_PRODUCT_ID_REALTEK_8822B 	0xB82C
+#define RTW_USB_PRODUCT_ID_REALTEK_8822C 	0xC82C
 
 /* defined functions */
 #define rtw_get_usb_priv(rtwdev) ((struct rtw_usb *)rtwdev->priv)
@@ -118,7 +119,7 @@ struct rtw_usb {
 	struct workqueue_struct *txwq, *rxwq;
 
 	// TX
-	u8 txagg_desc_num;
+	u8 usb_txagg_num;
 	u32 txdesc_size;
 	u32 txdesc_offset;
 	// TX - workqueue

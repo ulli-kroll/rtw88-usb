@@ -800,7 +800,6 @@ struct rtw_chip_ops {
 	void (*coex_set_wl_rx_gain)(struct rtw_dev *rtwdev, bool low_gain);
 
 	/* USB relative ops */
-	int (*get_tx_agg_num)(struct rtw_dev *rtwdev);
 	int (*set_rx_agg_switch)(struct rtw_dev *rtwdev, bool enable,
 				 u8 rx_agg_size, u8 rx_agg_timeout);
 	int (*fill_txdesc_checksum)(struct rtw_dev *rtwdev, u8 *txdesc);
@@ -1084,6 +1083,9 @@ struct rtw_chip_info {
 	const struct coex_rf_para *wl_rf_para_rx;
 	const struct coex_5g_afh_map *afh_5g;
 	const struct rtw_reg_domain *coex_info_hw_regs;
+
+	/* for USB interface */
+	u8 usb_txagg_num;
 };
 
 enum rtw_coex_bt_state_cnt {
