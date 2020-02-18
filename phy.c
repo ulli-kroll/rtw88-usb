@@ -549,6 +549,7 @@ void rtw_phy_dynamic_mechanism(struct rtw_dev *rtwdev)
 	rtw_phy_statistics(rtwdev);
 	rtw_phy_dig(rtwdev);
 	rtw_phy_cck_pd(rtwdev);
+	//Neo
 	rtw_phy_ra_info_update(rtwdev);
 	rtw_phy_dpk_track(rtwdev);
 	rtw_phy_pwr_track(rtwdev);

@@ -14,6 +14,7 @@
 #include <linux/interrupt.h>
 
 #include "util.h"
+#include "rc.h"
 
 #define RTW_MAX_MAC_ID_NUM		32
 #define RTW_MAX_SEC_CAM_NUM		32
@@ -1626,6 +1627,9 @@ struct rtw_dev {
 
 	/* loopback */
 	struct rtw_loopback loopback;
+
+	/* rate control */
+	struct rtw_rate_priv rate_priv;
 
 	/* hci related data, must be last */
 	u8 priv[0] __aligned(sizeof(void *));

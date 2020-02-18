@@ -35,6 +35,9 @@ void rtw_tx_fill_tx_desc(struct rtw_tx_pkt_info *pkt_info, struct sk_buff *skb)
 {
 	__le32 *txdesc = (__le32 *)skb->data;
 
+	//pr_info("%s: use_rate:0x%x\n", __func__, pkt_info->use_rate);
+	//pr_info("%s: rate id:0x%x\n", __func__, pkt_info->rate_id);
+	//pr_info("%s: rate:0x%x\n", __func__, pkt_info->rate);
 	SET_TX_DESC_TXPKTSIZE(txdesc,  pkt_info->tx_pkt_size);
 	SET_TX_DESC_OFFSET(txdesc, pkt_info->offset);
 	SET_TX_DESC_PKT_OFFSET(txdesc, pkt_info->pkt_offset);
@@ -224,7 +227,7 @@ static void rtw_tx_mgmt_pkt_info_update(struct rtw_dev *rtwdev,
 					struct sk_buff *skb)
 {
 	pkt_info->use_rate = true;
-	pkt_info->rate_id = 6;
+	pkt_info->rate_id = 9;
 	pkt_info->dis_rate_fallback = true;
 }
 
@@ -242,7 +245,7 @@ static void rtw_tx_data_pkt_info_update(struct rtw_dev *rtwdev,
 	u8 ampdu_density = 0;
 	bool ampdu_en = false;
 	u8 rate = DESC_RATE6M;
-	u8 rate_id = 6;
+	u8 rate_id = 9;
 	u8 bw = RTW_CHANNEL_WIDTH_20;
 	bool stbc = false;
 	bool ldpc = false;
@@ -303,16 +306,40 @@ void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 	__le16 fc = hdr->frame_control;
 	u8 sec_type = 0;
 	bool bmc;
+	struct ieee80211_rate *txrate;
+	u8 hw_value = 0;
 
 	if (control->sta) {
 		si = (struct rtw_sta_info *)control->sta->drv_priv;
 		vif = si->vif;
 	}
 
-	if (ieee80211_is_mgmt(fc) || ieee80211_is_nullfunc(fc))
-		rtw_tx_mgmt_pkt_info_update(rtwdev, pkt_info, control, skb);
-	else if (ieee80211_is_data(fc))
+	txrate = ieee80211_get_tx_rate(rtwdev->hw, info);
+	if (txrate) {
+		hw_value = txrate->hw_value;
+		//pr_info("%s: hw_value=0x%x\n", __func__, hw_value);
+	} else {
+		pr_err("%s: NO TXRATE\n", __func__);
+	}
+
+	pkt_info->use_rate = true;
+	pkt_info->rate_id = 9;
+	pkt_info->rate = hw_value;
+	pkt_info->dis_rate_fallback = true;
+
+	if (ieee80211_is_mgmt(fc)) {
+		//rtw_tx_mgmt_pkt_info_update(rtwdev, pkt_info, control, skb);
+	} else if (ieee80211_is_nullfunc(fc)) {
+		//rtw_tx_mgmt_pkt_info_update(rtwdev, pkt_info, control, skb);
+	} else if (ieee80211_is_data(fc)) {
+		//pkt_info->rate = 0x13;
+		pkt_info->use_rate = false;
+		pkt_info->dis_rate_fallback = false;
+		//pr_info("%s: pkt_info->rate=0x%x\n", __func__, pkt_info->rate);
 		rtw_tx_data_pkt_info_update(rtwdev, pkt_info, control, skb);
+	} else {
+		pr_err("%s: strange, unknown pkt\n", __func__);
+	}
 
 	if (info->control.hw_key) {
 		struct ieee80211_key_conf *key = info->control.hw_key;
@@ -359,7 +386,7 @@ void rtw_rsvd_page_pkt_info_update(struct rtw_dev *rtwdev,
 	bmc = is_broadcast_ether_addr(hdr->addr1) ||
 	      is_multicast_ether_addr(hdr->addr1);
 	pkt_info->use_rate = true;
-	pkt_info->rate_id = 6;
+	pkt_info->rate_id = 9;
 	pkt_info->dis_rate_fallback = true;
 	pkt_info->bmc = bmc;
 	pkt_info->tx_pkt_size = skb->len;

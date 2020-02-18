@@ -199,7 +199,6 @@ static inline void rtw_h2c_pkt_set_header(u8 *h2c_pkt, u8 sub_id)
 #define H2C_CMD_QUERY_BT_MP_INFO	0x67
 #define H2C_CMD_BT_WIFI_CONTROL		0x69
 
-//NeoJou
 #define H2C_CMD_H2C2HLB			0xE0
 
 #define SET_H2C_CMD_ID_CLASS(h2c_pkt, value)				       \

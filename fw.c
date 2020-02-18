@@ -564,7 +564,6 @@ void rtw_fw_set_pwr_mode(struct rtw_dev *rtwdev)
 	rtw_fw_send_h2c_command(rtwdev, h2c_pkt);
 }
 
-//NeoJou
 void rtw_fw_send_h2c2h_loopback(struct rtw_dev *rtwdev)
 {
 	u8 h2c_pkt[H2C_PKT_SIZE] = {0};

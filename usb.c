@@ -12,6 +12,7 @@
 #include "rx.h"
 #include "fw.h"
 #include "debug.h"
+#include "rc.h"
 
 /*
  * usb read/write register functions
@@ -539,9 +540,19 @@ static void rtw_indicate_tx_status(struct rtw_dev *rtwdev, struct sk_buff *skb)
 {
 	struct ieee80211_hw *hw = rtwdev->hw;
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
+	struct rtw_usb_tx_data *tx_data = rtw_usb_get_tx_data(skb);
+
+	if (info->flags & IEEE80211_TX_CTL_REQ_TX_STATUS) {
+		rtw_tx_report_enqueue(rtwdev, skb, tx_data->sn);
+		return;
+	}
+
+	if (info->flags & IEEE80211_TX_CTL_NO_ACK)
+		info->flags |= IEEE80211_TX_STAT_NOACK_TRANSMITTED;
+	else
+		info->flags |= IEEE80211_TX_STAT_ACK;
 
 	ieee80211_tx_info_clear_status(info);
-	info->flags |= IEEE80211_TX_STAT_ACK;
 	ieee80211_tx_status_irqsafe(hw, skb);
 }
 
@@ -709,6 +720,7 @@ static int rtw_usb_tx(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
 {
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	struct rtw_chip_info *chip = rtwdev->chip;
+	struct rtw_usb_tx_data *tx_data;
 	u8 *pkt_desc;
 	u8 queue = rtw_tx_queue_mapping(skb);
 	int ret;
@@ -727,6 +739,9 @@ static int rtw_usb_tx(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
 		       __func__, ret);
 		return -EINVAL;
 	}
+
+	tx_data = rtw_usb_get_tx_data(skb);
+	tx_data->sn = pkt_info->sn;
 
 	skb_queue_tail(&rtwusb->tx_queue, skb);
 	rtw_set_event(&rtwusb->tx_handler.event);
@@ -1046,13 +1061,20 @@ static int rtw_os_core_init(struct rtw_dev **prtwdev,
 
 	*prtwdev = NULL;
 
+	ret = rtw_rate_control_register();
+	if (ret) {
+		goto finish;
+	}
+
 	drv_data_size = sizeof(struct rtw_dev) + sizeof(struct rtw_usb);
 	hw = ieee80211_alloc_hw(drv_data_size, &rtw_ops);
 	if (!hw) {
 		pr_err("ieee80211_alloc_hw: No memory for device\n");
 		ret = -ENOMEM;
-		goto finish;
+		goto err_destroy_rate_control;
 	}
+
+	hw->rate_control_algorithm = RTW_RC_NAME;
 
 	rtwdev = hw->priv;
 	rtwdev->hw = hw;
@@ -1073,6 +1095,9 @@ static int rtw_os_core_init(struct rtw_dev **prtwdev,
 
 err_release_hw:
 	ieee80211_free_hw(hw);
+
+err_destroy_rate_control:
+	rtw_rate_control_unregister();
 
 finish:
 	return ret;

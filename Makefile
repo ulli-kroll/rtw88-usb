@@ -30,7 +30,8 @@ rtw88-y += main.o \
 	   ps.o \
 	   sec.o \
 	   bf.o \
-	   regd.o
+	   regd.o \
+	   rc.o
 
 #rtw88-y += hal8822b_fw.o
 rtw88-$(CONFIG_RTW88_8822BE)	+= rtw8822b.o rtw8822b_table.o

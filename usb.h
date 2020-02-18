@@ -88,6 +88,10 @@ struct rtw_work_data {
 	struct rtw_dev *rtwdev;
 };
 
+struct rtw_usb_tx_data {
+	u8 sn;
+};
+
 struct rtw_usb {
 	struct rtw_dev *rtwdev;
 	struct usb_device *udev;
@@ -136,5 +140,17 @@ struct rtw_usb {
 	struct rtw_handler rx_handler;
 	struct rtw_work_data *rx_handler_data;
 };
+
+
+static inline struct
+rtw_usb_tx_data *rtw_usb_get_tx_data(struct sk_buff *skb)
+{
+	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
+
+	BUILD_BUG_ON(sizeof(struct rtw_usb_tx_data) >
+		sizeof(info->status.status_driver_data));
+
+	return (struct rtw_usb_tx_data *)info->status.status_driver_data;
+}
 
 #endif
