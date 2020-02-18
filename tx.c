@@ -221,16 +221,6 @@ void rtw_tx_report_handle(struct rtw_dev *rtwdev, struct sk_buff *skb)
 	spin_unlock_irqrestore(&tx_report->q_lock, flags);
 }
 
-static void rtw_tx_mgmt_pkt_info_update(struct rtw_dev *rtwdev,
-					struct rtw_tx_pkt_info *pkt_info,
-					struct ieee80211_tx_control *control,
-					struct sk_buff *skb)
-{
-	pkt_info->use_rate = true;
-	pkt_info->rate_id = 9;
-	pkt_info->dis_rate_fallback = true;
-}
-
 static void rtw_tx_data_pkt_info_update(struct rtw_dev *rtwdev,
 					struct rtw_tx_pkt_info *pkt_info,
 					struct ieee80211_tx_control *control,
@@ -316,6 +306,9 @@ void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 
 	txrate = ieee80211_get_tx_rate(rtwdev->hw, info);
 	if (txrate) {
+		//pr_info("%s: txrate - flags:0x%x, bitrate:0x%x\n", 
+		//	__func__, txrate->flags, txrate->bitrate);
+		// TODO: in sband, need to implement relative ht/vht items
 		hw_value = txrate->hw_value;
 		//pr_info("%s: hw_value=0x%x\n", __func__, hw_value);
 	} else {
@@ -328,13 +321,13 @@ void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 	pkt_info->dis_rate_fallback = true;
 
 	if (ieee80211_is_mgmt(fc)) {
-		//rtw_tx_mgmt_pkt_info_update(rtwdev, pkt_info, control, skb);
+		pkt_info->rate = DESC_RATE1M;
 	} else if (ieee80211_is_nullfunc(fc)) {
-		//rtw_tx_mgmt_pkt_info_update(rtwdev, pkt_info, control, skb);
+		pkt_info->rate = DESC_RATE1M;
 	} else if (ieee80211_is_data(fc)) {
-		//pkt_info->rate = 0x13;
 		pkt_info->use_rate = false;
 		pkt_info->dis_rate_fallback = false;
+		//pkt_info->rate = DESC_RATEMCS15;
 		//pr_info("%s: pkt_info->rate=0x%x\n", __func__, pkt_info->rate);
 		rtw_tx_data_pkt_info_update(rtwdev, pkt_info, control, skb);
 	} else {

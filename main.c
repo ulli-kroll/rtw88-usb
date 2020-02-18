@@ -1483,7 +1483,6 @@ int rtw_register_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
 //	ieee80211_hw_set(hw, SUPPORTS_DYNAMIC_PS);
 	ieee80211_hw_set(hw, SUPPORT_FAST_XMIT);
 	ieee80211_hw_set(hw, SUPPORTS_AMSDU_IN_AMPDU);
-//NeoJou
 	ieee80211_hw_set(hw, HAS_RATE_CONTROL);
 	ieee80211_hw_set(hw, TX_AMSDU);
 
@@ -1526,9 +1525,9 @@ void rtw_unregister_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
 
-	ieee80211_unregister_hw(hw);
 	rtw_rate_control_unregister();
 	rtw_debugfs_deinit(rtwdev);
+	ieee80211_unregister_hw(hw);
 	rtw_unset_supported_band(hw, chip);
 }
 EXPORT_SYMBOL(rtw_unregister_hw);
