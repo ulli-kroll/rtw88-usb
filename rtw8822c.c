@@ -39,18 +39,143 @@ static int rtw8822c_read_efuse(struct rtw_dev *rtwdev, u8 *log_map)
 
 	map = (struct rtw8822c_efuse *)log_map;
 
-	efuse->rfe_option = map->rfe_option;
+	pr_info("EEPROM ID: 0x%x\n", map->rtl_id);
+	pr_info("EEPROM Version: 0x%x\n", map->eeprom_version);
+
 	efuse->rf_board_option = map->rf_board_option;
-	efuse->crystal_cap = map->xtal_k;
-	efuse->channel_plan = map->channel_plan;
-	efuse->country_code[0] = map->country_code[0];
-	efuse->country_code[1] = map->country_code[1];
+	pr_info("EEPROM rf_board_option: 0x%x\n", efuse->rf_board_option);
+	/* Regulatory selection */
+	switch (efuse->rf_board_option & 0x7) {
+	case 0:
+		pr_info("-- power by rate only\n");
+		break;
+	case 1:
+		pr_info("-- power by rate and power by limit\n");
+		break;
+	case 2:
+		pr_info("-- disable power by rate\n");
+		break;
+	case 3:
+		//pr_info("-- reserved\n");
+		break;
+	case 4:
+		pr_info("-- 5mm SAR\n");
+		break;
+	case 5:
+		pr_info("-- 8mm SAR\n");
+		break;
+	default:
+		//pr_info("-- reserved\n");
+		break;
+	}
+	if ((efuse->rf_board_option & 0x8) == 0) {
+		pr_info("-- Antenna Diversity for 2R MRC\n");
+	}
+	if (efuse->rf_board_option & 0x10) {
+		pr_info("-- disable 11ac mode\n");
+	} else {
+		pr_info("-- enable 11ac mode\n");
+	}
+	/* Module Type */
+	switch ((efuse->rf_board_option & 0xE0)>>5) {
+	case 0:
+		pr_info("-- WiFi solo module\n");
+		break;
+	case 1:
+		pr_info("-- WiFi+BT combo module\n");
+		break;
+	case 2:
+		pr_info("-- PCIe Card\n");
+		break;
+	default:
+		//pr_info("-- reserved\n");
+		break;
+	}
+
+	/* BT setting */
 	efuse->bt_setting = map->rf_bt_setting;
-	efuse->regd = map->rf_board_option & 0x7;
+	pr_info("EEPROM BT setting: 0x%x\n", efuse->bt_setting);
+	if (efuse->bt_setting & BIT(0)) {
+		pr_info("-- BT/Wifi share antenna\n");
+	} else {
+		pr_info("-- BT/Wifi isolated antenna\n");
+	}
+	switch ((efuse->bt_setting & 0xE0)>>1) {
+	case 0:
+		pr_info("-- RTL8723A internal Mailbox\n");
+		break;
+	case 1:
+		pr_info("-- RTK BT I2C Mailbox\n");
+		break;
+	case 2:
+		//pr_info("-- reserved\n");
+		break;
+	case 3:
+		pr_info("-- CSR traditional type\n");
+		break;
+	case 4:
+		pr_info("-- CSR enhance type\n");
+		break;
+	default:
+		//pr_info("-- reserved\n");
+		break;
+	}
+	if (efuse->bt_setting & 0x10) {
+		pr_info("-- antenna isolation quality: bad\n");
+	} else {
+		pr_info("-- antenna isolation quality: good\n");
+	}
+	if (efuse->bt_setting & 0x20) {
+		pr_info("-- radio on/off type: individual\n");
+	} else {
+		pr_info("-- radio on/off type: combined with wifi\n");
+	}
+
+	/* channel plan */
+	efuse->channel_plan = map->channel_plan;
+	pr_info("EEPROM channel plan: 0x%x\n", efuse->channel_plan);
+
+	/* new crystal cap */
+	efuse->crystal_cap = map->xtal_k;
+	pr_info("EEPROM crystal_cap: 0x%x\n", efuse->crystal_cap);
+
+	/* thermal meter */
 	efuse->thermal_meter[RF_PATH_A] = map->path_a_thermal;
 	efuse->thermal_meter[RF_PATH_B] = map->path_b_thermal;
 	efuse->thermal_meter_k =
 			(map->path_a_thermal + map->path_b_thermal) >> 1;
+	pr_info("EEPROM ThermalMeter: 0x%x\n", efuse->thermal_meter[RF_PATH_A]);
+
+	/* rf_antenna_option */
+	pr_info("EEPROM RF antenna option: 0x%x\n", map->rf_antenna_option);
+	switch (map->rf_antenna_option>>4) {
+	case 1:
+		pr_info("-- path S0 with 1S1T\n");
+		break;
+	case 2:
+		pr_info("-- path S1 with 1S1T\n");
+		break;
+	case 3:
+		pr_info("-- path S0/S1 with 1S2T\n");
+		break;
+	case 4:
+		pr_info("-- path S0/S1 with 1S1T diversity\n");
+		break;
+	default:
+		pr_info("-- unknown\n");
+		break;
+	}
+
+	/* customer ID */
+	pr_info("EEPROM customer ID: 0x%x\n", map->eeprom_customer_id);
+
+	/* rfe_option */
+	efuse->rfe_option = map->rfe_option;
+	pr_info("EEPROM RFE type: 0x%x\n", efuse->rfe_option);
+
+	efuse->country_code[0] = map->country_code[0];
+	efuse->country_code[1] = map->country_code[1];
+	efuse->regd = map->rf_board_option & 0x7;
 	efuse->power_track_type = (map->tx_pwr_calibrate_rate >> 4) & 0xf;
 
 	for (i = 0; i < 4; i++)
