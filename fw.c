@@ -257,13 +257,19 @@ void rtw_fw_c2h_cmd_rx_irqsafe(struct rtw_dev *rtwdev, u32 pkt_offset,
 }
 EXPORT_SYMBOL(rtw_fw_c2h_cmd_rx_irqsafe);
 
-static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
-				    u8 *h2c)
+struct rtw_h2c {
+	__le32 msg;
+	__le32 msg_ext;
+} __packed;
+
+static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev, u8 *h2c)
 {
 	u8 box;
 	u8 box_state;
 	u32 box_reg, box_ex_reg;
 	u32 h2c_wait;
+	struct rtw_h2c *h2c_box = (struct rtw_h2c *)h2c;
+
 	//static u16 pre_seq = 0;
 	//u16 seq;
 
@@ -314,8 +320,8 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 		goto out;
 	}
 
-	rtw_write32(rtwdev, box_ex_reg, le32_to_cpu(*(__le32 *)(h2c + 4)));
-	rtw_write32(rtwdev, box_reg, le32_to_cpu(*(__le32 *)h2c));
+	rtw_write32(rtwdev, box_ex_reg, le32_to_cpu(h2c_box->msg_ext));
+	rtw_write32(rtwdev, box_reg, le32_to_cpu(h2c_box->msg));
 
 	if (++rtwdev->h2c.last_box_num >= 4)
 		rtwdev->h2c.last_box_num = 0;

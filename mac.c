@@ -64,12 +64,14 @@ static int rtw_mac_pre_system_cfg(struct rtw_dev *rtwdev)
 		rtw_write32_set(rtwdev, REG_HCI_OPT_CTRL, BIT_BT_DIG_CLK_EN);
 		break;
 	case RTW_HCI_TYPE_USB:
+#if 0
 		value8 = rtw_read8(rtwdev, REG_SYS_CFG2 + 3);
 		pr_info("%s: REG_SYS_CFG2+3 = 0x%x\n", __func__, value8);
 		if (value8 == 0x20) {
 			pr_info("%s: set 0xFE5B\n", __func__);
 			rtw_write8(rtwdev,  0xFE5B, value8 | BIT(4));
 		}
+#endif
 		break;
 	default:
 		return -EINVAL;
