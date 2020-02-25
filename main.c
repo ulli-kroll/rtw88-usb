@@ -16,11 +16,6 @@
 #include "debug.h"
 #include "bf.h"
 
-#define LOAD_FW_BY_BIN_FILE
-#ifndef LOAD_FW_BY_BIN_FILE
-#include "hal8822b_fw.h"
-#endif
-
 unsigned int rtw_fw_lps_deep_mode;
 EXPORT_SYMBOL(rtw_fw_lps_deep_mode);
 bool rtw_bf_support = true;
@@ -328,15 +323,15 @@ void rtw_get_channel_params(struct cfg80211_chan_def *chandef,
 	case NL80211_CHAN_WIDTH_20_NOHT:
 	case NL80211_CHAN_WIDTH_20:
 		bandwidth = RTW_CHANNEL_WIDTH_20;
-		primary_chan_idx = 0;
+		primary_chan_idx = RTW_SC_DONT_CARE;
 		break;
 	case NL80211_CHAN_WIDTH_40:
 		bandwidth = RTW_CHANNEL_WIDTH_40;
 		if (primary_freq > center_freq) {
-			primary_chan_idx = 1;
+			primary_chan_idx = RTW_SC_20_UPPER;
 			center_chan -= 2;
 		} else {
-			primary_chan_idx = 2;
+			primary_chan_idx = RTW_SC_20_LOWER;
 			center_chan += 2;
 		}
 		break;
@@ -344,10 +339,10 @@ void rtw_get_channel_params(struct cfg80211_chan_def *chandef,
 		bandwidth = RTW_CHANNEL_WIDTH_80;
 		if (primary_freq > center_freq) {
 			if (primary_freq - center_freq == 10) {
-				primary_chan_idx = 1;
+				primary_chan_idx = RTW_SC_20_UPPER;
 				center_chan -= 2;
 			} else {
-				primary_chan_idx = 3;
+				primary_chan_idx = RTW_SC_20_UPMOST;
 				center_chan -= 6;
 			}
 			/* assign the center channel used
@@ -356,10 +351,10 @@ void rtw_get_channel_params(struct cfg80211_chan_def *chandef,
 			cch_by_bw[RTW_CHANNEL_WIDTH_40] = center_chan + 4;
 		} else {
 			if (center_freq - primary_freq == 10) {
-				primary_chan_idx = 2;
+				primary_chan_idx = RTW_SC_20_LOWER;
 				center_chan += 2;
 			} else {
-				primary_chan_idx = 4;
+				primary_chan_idx = RTW_SC_20_LOWEST;
 				center_chan += 6;
 			}
 			/* assign the center channel used
@@ -408,7 +403,8 @@ void rtw_set_channel(struct rtw_dev *rtwdev)
 	for (i = RTW_CHANNEL_WIDTH_20; i <= RTW_MAX_CHANNEL_WIDTH; i++)
 		hal->cch_by_bw[i] = ch_param.cch_by_bw[i];
 
-	chip->ops->set_channel(rtwdev, center_chan, bandwidth, primary_chan_idx);
+	chip->ops->set_channel(rtwdev, center_chan, bandwidth,
+			       primary_chan_idx);
 
 	if (hal->current_band_type == RTW_BAND_5G) {
 		rtw_coex_switchband_notify(rtwdev, COEX_SWITCH_TO_5G);
@@ -416,7 +412,9 @@ void rtw_set_channel(struct rtw_dev *rtwdev)
 		if (test_bit(RTW_FLAG_SCANNING, rtwdev->flags))
 			rtw_coex_switchband_notify(rtwdev, COEX_SWITCH_TO_24G);
 		else
-			rtw_coex_switchband_notify(rtwdev, COEX_SWITCH_TO_24G_NOFORSCAN);
+			rtw_coex_switchband_notify(rtwdev,
+						   COEX_SWITCH_TO_24G_NOFORSCAN
+						  );
 	}
 
 	rtw_phy_set_tx_power_level(rtwdev, center_chan);
@@ -717,8 +715,8 @@ void rtw_update_sta_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si)
 		if (sta->vht_cap.cap & IEEE80211_VHT_CAP_SHORT_GI_80)
 			is_support_sgi = true;
 	} else if (sta->ht_cap.ht_supported) {
-		ra_mask |= (sta->ht_cap.mcs.rx_mask[NL80211_BAND_5GHZ] << 20) |
-			   (sta->ht_cap.mcs.rx_mask[NL80211_BAND_2GHZ] << 12);
+		ra_mask |= (sta->ht_cap.mcs.rx_mask[1] << 20) |
+			   (sta->ht_cap.mcs.rx_mask[0] << 12);
 		if (sta->ht_cap.cap & IEEE80211_HT_CAP_RX_STBC)
 			stbc_en = HT_STBC_EN;
 		if (sta->ht_cap.cap & IEEE80211_HT_CAP_LDPC_CODING)
@@ -727,6 +725,9 @@ void rtw_update_sta_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si)
 		    sta->ht_cap.cap & IEEE80211_HT_CAP_SGI_40)
 			is_support_sgi = true;
 	}
+
+	if (efuse->hw_cap.nss == 1)
+		ra_mask &= RA_MASK_VHT_RATES_1SS | RA_MASK_HT_RATES_1SS;
 
 	if (hal->current_band_type == RTW_BAND_5G) {
 		ra_mask |= (u64)sta->supp_rates[NL80211_BAND_5GHZ] << 4;
@@ -759,11 +760,6 @@ void rtw_update_sta_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si)
 	} else {
 		rtw_err(rtwdev, "Unknown band type\n");
 		wireless_set = 0;
-	}
-
-	if (efuse->hw_cap.nss == 1) {
-		ra_mask &= RA_MASK_VHT_RATES_1SS;
-		ra_mask &= RA_MASK_HT_RATES_1SS;
 	}
 
 	switch (sta->bandwidth) {
@@ -804,6 +800,26 @@ void rtw_update_sta_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si)
 	rtw_fw_send_ra_info(rtwdev, si);
 }
 
+static int rtw_wait_firmware_completion(struct rtw_dev *rtwdev)
+{
+	struct rtw_chip_info *chip = rtwdev->chip;
+	struct rtw_fw_state *fw;
+
+	fw = &rtwdev->fw;
+	wait_for_completion(&fw->completion);
+	if (!fw->firmware)
+		return -EINVAL;
+
+	if (chip->wow_fw_name) {
+		fw = &rtwdev->wow_fw;
+		wait_for_completion(&fw->completion);
+		if (!fw->firmware)
+			return -EINVAL;
+	}
+
+	return 0;
+}
+
 static int rtw_power_on(struct rtw_dev *rtwdev)
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
@@ -824,11 +840,10 @@ static int rtw_power_on(struct rtw_dev *rtwdev)
 		goto err;
 	}
 
-	wait_for_completion(&fw->completion);
-	if (!fw->firmware) {
-		ret = -EINVAL;
-		rtw_err(rtwdev, "failed to load firmware\n");
-		goto err;
+	ret = rtw_wait_firmware_completion(rtwdev);
+	if (ret) {
+		rtw_err(rtwdev, "failed to wait firmware completion\n");
+		goto err_off;
 	}
 
 	ret = rtw_download_firmware(rtwdev, fw);
@@ -895,7 +910,7 @@ int rtw_core_start(struct rtw_dev *rtwdev)
 
 static void rtw_power_off(struct rtw_dev *rtwdev)
 {
-	rtwdev->hci.ops->stop(rtwdev);
+	rtw_hci_stop(rtwdev);
 	rtw_mac_power_off(rtwdev);
 }
 
@@ -906,10 +921,15 @@ void rtw_core_stop(struct rtw_dev *rtwdev)
 	clear_bit(RTW_FLAG_RUNNING, rtwdev->flags);
 	clear_bit(RTW_FLAG_FW_RUNNING, rtwdev->flags);
 
+	mutex_unlock(&rtwdev->mutex);
+
+	cancel_work_sync(&rtwdev->c2h_work);
 	cancel_delayed_work_sync(&rtwdev->watch_dog_work);
 	cancel_delayed_work_sync(&coex->bt_relink_work);
 	cancel_delayed_work_sync(&coex->bt_reenable_work);
 	cancel_delayed_work_sync(&coex->defreeze_work);
+
+	mutex_lock(&rtwdev->mutex);
 
 	rtw_power_off(rtwdev);
 }
@@ -1032,11 +1052,10 @@ static void rtw_unset_supported_band(struct ieee80211_hw *hw,
 	kfree(hw->wiphy->bands[NL80211_BAND_5GHZ]);
 }
 
-#ifdef LOAD_FW_BY_BIN_FILE
 static void rtw_load_firmware_cb(const struct firmware *firmware, void *context)
 {
-	struct rtw_dev *rtwdev = context;
-	struct rtw_fw_state *fw = &rtwdev->fw;
+	struct rtw_fw_state *fw = context;
+	struct rtw_dev *rtwdev = fw->rtwdev;
 	const struct rtw_fw_hdr *fw_hdr;
 
 	if (!firmware || !firmware->data) {
@@ -1057,49 +1076,39 @@ static void rtw_load_firmware_cb(const struct firmware *firmware, void *context)
 	rtw_info(rtwdev, "Firmware version %u.%u.%u, H2C version %u\n",
 		 fw->version, fw->sub_version, fw->sub_index, fw->h2c_version);
 }
-#endif
 
-static int rtw_load_firmware(struct rtw_dev *rtwdev, const char *fw_name)
+static int rtw_load_firmware(struct rtw_dev *rtwdev, enum rtw_fw_type type)
 {
-	struct rtw_fw_state *fw = &rtwdev->fw;
-#ifdef LOAD_FW_BY_BIN_FILE
+	const char *fw_name;
+	struct rtw_fw_state *fw;
 	int ret;
 
+	switch (type) {
+	case RTW_WOWLAN_FW:
+		fw = &rtwdev->wow_fw;
+		fw_name = rtwdev->chip->wow_fw_name;
+		break;
+
+	case RTW_NORMAL_FW:
+		fw = &rtwdev->fw;
+		fw_name = rtwdev->chip->fw_name;
+		break;
+
+	default:
+		rtw_warn(rtwdev, "unsupported firmware type\n");
+		return -ENOENT;
+	}
+
+	fw->rtwdev = rtwdev;
 	init_completion(&fw->completion);
 
 	ret = request_firmware_nowait(THIS_MODULE, true, fw_name, rtwdev->dev,
-				      GFP_KERNEL, rtwdev, rtw_load_firmware_cb);
+				      GFP_KERNEL, fw, rtw_load_firmware_cb);
 	if (ret) {
-		rtw_err(rtwdev, "async firmware request failed\n");
+		rtw_err(rtwdev, "failed to async firmware request\n");
 		return ret;
 	}
-#else
-	const struct rtw_fw_hdr *fw_hdr;
-	struct firmware *firmware;
 
-	init_completion(&fw->completion);
-
-	firmware = kzalloc(sizeof(struct firmware), GFP_KERNEL);
-	if (!firmware) {
-		pr_err("%s: kzalloc for struct firmware failed\n", __func__);
-		return -ENOMEM;
-	}
-
-	firmware->data = (const u8 *)array_mp_8822b_fw_nic;
-	firmware->size = array_length_mp_8822b_fw_nic;
-
-	fw_hdr = (const struct rtw_fw_hdr *)firmware->data;
-	fw->h2c_version = le16_to_cpu(fw_hdr->h2c_fmt_ver);
-	fw->version = le16_to_cpu(fw_hdr->version);
-	fw->sub_version = fw_hdr->subversion;
-	fw->sub_index = fw_hdr->subindex;
-
-	fw->firmware = firmware;
-	complete_all(&fw->completion);
-
-	pr_info("Firmware version %u.%u.%u, H2C version %u\n",
-		 fw->version, fw->sub_version, fw->sub_index, fw->h2c_version);
-#endif
 	return 0;
 }
 
@@ -1116,6 +1125,8 @@ static int rtw_chip_parameter_setup(struct rtw_dev *rtwdev)
 		rtwdev->hci.cpwm_addr = 0x03da;
 		break;
 	case RTW_HCI_TYPE_USB:
+		rtwdev->hci.rpwm_addr = 0xFE58;
+		rtwdev->hci.cpwm_addr = 0xFE57;
 		break;
 	default:
 		rtw_err(rtwdev, "unsupported hci type\n");
@@ -1150,6 +1161,8 @@ static int rtw_chip_parameter_setup(struct rtw_dev *rtwdev)
 	/* default use ack */
 	rtwdev->hal.rcr |= BIT_VHT_DACK;
 
+	hal->bfee_sts_cap = 3;
+
 	return ret;
 }
 
@@ -1157,7 +1170,6 @@ static int rtw_chip_efuse_enable(struct rtw_dev *rtwdev)
 {
 	struct rtw_fw_state *fw = &rtwdev->fw;
 	int ret;
-	u8 val8;
 
 	ret = rtw_hci_setup(rtwdev);
 	if (ret) {
@@ -1170,9 +1182,6 @@ static int rtw_chip_efuse_enable(struct rtw_dev *rtwdev)
 		rtw_err(rtwdev, "failed to power on mac\n");
 		goto err;
 	}
-
-	val8 = rtw_read8(rtwdev, REG_TXPKT_EMPTY);
-	val8 = rtw_read8(rtwdev, REG_TXPKT_EMPTY+1);
 
 	rtw_write8(rtwdev, REG_C2HEVT, C2H_HW_FEATURE_DUMP);
 
@@ -1295,6 +1304,7 @@ static int rtw_chip_efuse_info_setup(struct rtw_dev *rtwdev)
 	efuse->ext_lna_2g = efuse->lna_type_2g & BIT(3) ? 1 : 0;
 	efuse->ext_pa_5g = efuse->pa_type_5g & BIT(0) ? 1 : 0;
 	efuse->ext_lna_2g = efuse->lna_type_5g & BIT(3) ? 1 : 0;
+
 out_disable:
 	rtw_chip_efuse_disable(rtwdev);
 
@@ -1423,12 +1433,19 @@ int rtw_core_init(struct rtw_dev *rtwdev)
 			  BIT_HTC_LOC_CTRL | BIT_APP_PHYSTS |
 			  BIT_AB | BIT_AM | BIT_APM;
 
-	ret = rtw_load_firmware(rtwdev, rtwdev->chip->fw_name);
+	ret = rtw_load_firmware(rtwdev, RTW_NORMAL_FW);
 	if (ret) {
 		rtw_warn(rtwdev, "no firmware loaded\n");
 		return ret;
 	}
 
+	if (chip->wow_fw_name) {
+		ret = rtw_load_firmware(rtwdev, RTW_WOWLAN_FW);
+		if (ret) {
+			rtw_warn(rtwdev, "no wow firmware loaded\n");
+			return ret;
+		}
+	}
 	return 0;
 }
 EXPORT_SYMBOL(rtw_core_init);
@@ -1436,16 +1453,15 @@ EXPORT_SYMBOL(rtw_core_init);
 void rtw_core_deinit(struct rtw_dev *rtwdev)
 {
 	struct rtw_fw_state *fw = &rtwdev->fw;
+	struct rtw_fw_state *wow_fw = &rtwdev->wow_fw;
 	struct rtw_rsvd_page *rsvd_pkt, *tmp;
 	unsigned long flags;
 
-#ifdef LOAD_FW_BY_BIN_FILE
 	if (fw->firmware)
 		release_firmware(fw->firmware);
-#else
-	if (fw->firmware)
-		kfree(fw->firmware);
-#endif
+
+	if (wow_fw->firmware)
+		release_firmware(wow_fw->firmware);
 
 	tasklet_kill(&rtwdev->tx_tasklet);
 	spin_lock_irqsave(&rtwdev->tx_report.q_lock, flags);
@@ -1501,6 +1517,10 @@ int rtw_register_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
 
 	wiphy_ext_feature_set(hw->wiphy, NL80211_EXT_FEATURE_CAN_REPLACE_PTK0);
 
+#ifdef CONFIG_PM
+	hw->wiphy->wowlan = rtwdev->chip->wowlan_stub;
+	hw->wiphy->max_sched_scan_ssids = rtwdev->chip->max_sched_scan_ssids;
+#endif
 	rtw_set_supported_band(hw, rtwdev->chip);
 	SET_IEEE80211_PERM_ADDR(hw, rtwdev->efuse.addr);
 
@@ -1528,7 +1548,6 @@ void rtw_unregister_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
 
-	rtw_rate_control_unregister();
 	rtw_debugfs_deinit(rtwdev);
 	ieee80211_unregister_hw(hw);
 	rtw_unset_supported_band(hw, chip);

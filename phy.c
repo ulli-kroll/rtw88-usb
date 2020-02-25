@@ -53,16 +53,19 @@ u8 rtw_ofdm_rates[] = {
 	DESC_RATE18M, DESC_RATE24M, DESC_RATE36M,
 	DESC_RATE48M, DESC_RATE54M
 };
+
 u8 rtw_ht_1s_rates[] = {
 	DESC_RATEMCS0, DESC_RATEMCS1, DESC_RATEMCS2,
 	DESC_RATEMCS3, DESC_RATEMCS4, DESC_RATEMCS5,
 	DESC_RATEMCS6, DESC_RATEMCS7
 };
+
 u8 rtw_ht_2s_rates[] = {
 	DESC_RATEMCS8,  DESC_RATEMCS9,  DESC_RATEMCS10,
 	DESC_RATEMCS11, DESC_RATEMCS12, DESC_RATEMCS13,
 	DESC_RATEMCS14, DESC_RATEMCS15
 };
+
 u8 rtw_vht_1s_rates[] = {
 	DESC_RATEVHT1SS_MCS0, DESC_RATEVHT1SS_MCS1,
 	DESC_RATEVHT1SS_MCS2, DESC_RATEVHT1SS_MCS3,
@@ -70,6 +73,7 @@ u8 rtw_vht_1s_rates[] = {
 	DESC_RATEVHT1SS_MCS6, DESC_RATEVHT1SS_MCS7,
 	DESC_RATEVHT1SS_MCS8, DESC_RATEVHT1SS_MCS9
 };
+
 u8 rtw_vht_2s_rates[] = {
 	DESC_RATEVHT2SS_MCS0, DESC_RATEVHT2SS_MCS1,
 	DESC_RATEVHT2SS_MCS2, DESC_RATEVHT2SS_MCS3,
@@ -77,11 +81,13 @@ u8 rtw_vht_2s_rates[] = {
 	DESC_RATEVHT2SS_MCS6, DESC_RATEVHT2SS_MCS7,
 	DESC_RATEVHT2SS_MCS8, DESC_RATEVHT2SS_MCS9
 };
+
 u8 *rtw_rate_section[RTW_RATE_SECTION_MAX] = {
 	rtw_cck_rates, rtw_ofdm_rates,
 	rtw_ht_1s_rates, rtw_ht_2s_rates,
 	rtw_vht_1s_rates, rtw_vht_2s_rates
 };
+
 u8 rtw_rate_size[RTW_RATE_SECTION_MAX] = {
 	ARRAY_SIZE(rtw_cck_rates),
 	ARRAY_SIZE(rtw_ofdm_rates),
@@ -90,6 +96,7 @@ u8 rtw_rate_size[RTW_RATE_SECTION_MAX] = {
 	ARRAY_SIZE(rtw_vht_1s_rates),
 	ARRAY_SIZE(rtw_vht_2s_rates)
 };
+
 static const u8 rtw_cck_size = ARRAY_SIZE(rtw_cck_rates);
 static const u8 rtw_ofdm_size = ARRAY_SIZE(rtw_ofdm_rates);
 static const u8 rtw_ht_1s_size = ARRAY_SIZE(rtw_ht_1s_rates);
@@ -549,7 +556,6 @@ void rtw_phy_dynamic_mechanism(struct rtw_dev *rtwdev)
 	rtw_phy_statistics(rtwdev);
 	rtw_phy_dig(rtwdev);
 	rtw_phy_cck_pd(rtwdev);
-	//Neo
 	rtw_phy_ra_info_update(rtwdev);
 	rtw_phy_dpk_track(rtwdev);
 	rtw_phy_pwr_track(rtwdev);
@@ -750,19 +756,9 @@ bool rtw_phy_write_rf_reg(struct rtw_dev *rtwdev, enum rtw_rf_path rf_path,
 	direct_addr = base_addr[rf_path] + (addr << 2);
 	mask &= RFREG_MASK;
 
-	if (addr == RF_CFGCH) {
-		rtw_write32_mask(rtwdev, REG_RSV_CTRL, BITS_RFC_DIRECT, DISABLE_PI);
-		rtw_write32_mask(rtwdev, REG_WLRF1, BITS_RFC_DIRECT, DISABLE_PI);
-	}
-
 	rtw_write32_mask(rtwdev, direct_addr, mask, data);
 
 	udelay(1);
-
-	if (addr == RF_CFGCH) {
-		rtw_write32_mask(rtwdev, REG_RSV_CTRL, BITS_RFC_DIRECT, ENABLE_PI);
-		rtw_write32_mask(rtwdev, REG_WLRF1, BITS_RFC_DIRECT, ENABLE_PI);
-	}
 
 	return true;
 }
@@ -1435,7 +1431,7 @@ static void rtw_load_rfk_table(struct rtw_dev *rtwdev)
 
 	rtw_load_table(rtwdev, chip->rfk_init_tbl);
 
-	dpk_info->is_dpk_pwr_on = 1;
+	dpk_info->is_dpk_pwr_on = true;
 }
 
 void rtw_phy_load_tables(struct rtw_dev *rtwdev)

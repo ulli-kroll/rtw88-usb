@@ -483,72 +483,6 @@ out:
 	return skb_resp;
 }
 
-static bool rtw_coex_get_bt_reg(struct rtw_dev *rtwdev,
-				u8 type, u16 addr, u16 *val)
-{
-	struct rtw_coex_info_req req = {0};
-	struct sk_buff *skb;
-	u8 *payload, *p;
-
-	p = (u8 *)&addr;
-	req.op_code = BT_MP_INFO_OP_READ_REG;
-	req.para1 = type;
-	req.para2 = p[0];
-	req.para3 = p[1];
-	skb = rtw_coex_info_request(rtwdev, &req);
-	if (!skb) {
-		*val = 0xeaea;
-		return false;
-	}
-
-	payload = get_payload_from_coex_resp(skb);
-	*val = GET_COEX_RESP_BT_REG_VAL(payload);
-
-	return true;
-}
-
-static bool rtw_coex_get_bt_patch_version(struct rtw_dev *rtwdev,
-					  u32 *patch_version)
-{
-	struct rtw_coex_info_req req = {0};
-	struct sk_buff *skb;
-	u8 *payload;
-	bool ret = false;
-
-	req.op_code = BT_MP_INFO_OP_PATCH_VER;
-	skb = rtw_coex_info_request(rtwdev, &req);
-	if (!skb)
-		goto out;
-
-	payload = get_payload_from_coex_resp(skb);
-	*patch_version = GET_COEX_RESP_BT_PATCH_VER(payload);
-	ret = true;
-
-out:
-	return ret;
-}
-
-static bool rtw_coex_get_bt_supported_version(struct rtw_dev *rtwdev,
-					      u16 *supported_version)
-{
-	struct rtw_coex_info_req req = {0};
-	struct sk_buff *skb;
-	u8 *payload;
-	bool ret = false;
-
-	req.op_code = BT_MP_INFO_OP_SUPP_VER;
-	skb = rtw_coex_info_request(rtwdev, &req);
-	if (!skb)
-		goto out;
-
-	payload = get_payload_from_coex_resp(skb);
-	*supported_version = GET_COEX_RESP_BT_SUPP_VER(payload);
-	ret = true;
-
-out:
-	return ret;
-}
-
 static bool rtw_coex_get_bt_scan_type(struct rtw_dev *rtwdev, u8 *scan_type)
 {
 	struct rtw_coex_info_req req = {0};
@@ -694,7 +628,8 @@ static void rtw_coex_update_bt_link_info(struct rtw_dev *rtwdev)
 
 	coex_stat->cnt_bt[COEX_CNT_BT_INFOUPDATE]++;
 
-	rtw_dbg(rtwdev, RTW_DBG_COEX, "coex: bt status(%d)\n", coex_dm->bt_status);
+	rtw_dbg(rtwdev, RTW_DBG_COEX, "coex: bt status(%d)\n",
+		coex_dm->bt_status);
 }
 
 static void rtw_coex_update_wl_ch_info(struct rtw_dev *rtwdev, u8 type)
@@ -815,9 +750,11 @@ void rtw_coex_write_indirect_reg(struct rtw_dev *rtwdev, u16 addr,
 static void rtw_coex_coex_ctrl_owner(struct rtw_dev *rtwdev, bool wifi_control)
 {
 	if (wifi_control)
-		rtw_write32_set(rtwdev, REG_SYS_SDIO_CTRL, BIT_LTE_MUX_CTRL_PATH);
+		rtw_write32_set(rtwdev, REG_SYS_SDIO_CTRL,
+				BIT_LTE_MUX_CTRL_PATH);
 	else
-		rtw_write32_clr(rtwdev, REG_SYS_SDIO_CTRL, BIT_LTE_MUX_CTRL_PATH);
+		rtw_write32_clr(rtwdev, REG_SYS_SDIO_CTRL,
+				BIT_LTE_MUX_CTRL_PATH);
 }
 
 static void rtw_coex_set_gnt_bt(struct rtw_dev *rtwdev, u8 state)
@@ -1655,11 +1592,10 @@ static void rtw_coex_action_bt_a2dp_hid(struct rtw_dev *rtwdev)
 		else
 			table_case = 9;
 
-		if (coex_stat->wl_gl_busy) {
+		if (coex_stat->wl_gl_busy)
 			tdma_case = 13;
-		} else {
+		else
 			tdma_case = 14;
-		}
 	} else {
 		/* Non-Shared-Ant */
 		if (coex_stat->bt_ble_exist)
@@ -1970,6 +1906,9 @@ static void rtw_coex_run_coex(struct rtw_dev *rtwdev, u8 reason)
 
 	lockdep_assert_held(&rtwdev->mutex);
 
+	if (!test_bit(RTW_FLAG_RUNNING, rtwdev->flags))
+		return;
+
 	coex_dm->reason = reason;
 
 	/* update wifi_link_info_ext variable */
@@ -2154,7 +2093,8 @@ void rtw_coex_ips_notify(struct rtw_dev *rtwdev, u8 type)
 		rtw_coex_set_ant_path(rtwdev, true, COEX_SET_ANT_WOFF);
 		rtw_coex_action_coex_all_off(rtwdev);
 	} else if (type == COEX_IPS_LEAVE) {
-		rtw_coex_write_scbd(rtwdev, COEX_SCBD_ACTIVE | COEX_SCBD_ONOFF, true);
+		rtw_coex_write_scbd(rtwdev, COEX_SCBD_ACTIVE | COEX_SCBD_ONOFF,
+				    true);
 
 		/* run init hw config (exclude wifi only) */
 		__rtw_coex_init_hw_config(rtwdev, false);
@@ -2423,12 +2363,14 @@ void rtw_coex_bt_info_notify(struct rtw_dev *rtwdev, u8 *buf, u8 length)
 		if (coex_stat->bt_info_hb0 <= 127)
 			coex_stat->bt_rssi = 100;
 		else if (256 - coex_stat->bt_info_hb0 <= 100)
-			coex_stat->bt_rssi = 100 - (256 - coex_stat->bt_info_hb0);
+			coex_stat->bt_rssi = 100 -
+					    (256 - coex_stat->bt_info_hb0);
 		else
 			coex_stat->bt_rssi = 0;
 	}
 
-	coex_stat->bt_ble_exist = ((coex_stat->bt_info_hb1 & BIT(0)) == BIT(0));
+	coex_stat->bt_ble_exist = ((coex_stat->bt_info_hb1 & BIT(0))
+				    == BIT(0));
 	if (coex_stat->bt_info_hb1 & BIT(1))
 		coex_stat->cnt_bt[COEX_CNT_BT_REINIT]++;
 
@@ -2449,11 +2391,13 @@ void rtw_coex_bt_info_notify(struct rtw_dev *rtwdev, u8 *buf, u8 length)
 		coex_stat->cnt_bt[COEX_CNT_BT_IGNWLANACT]++;
 
 	coex_stat->bt_ble_voice = ((coex_stat->bt_info_hb1 & BIT(4)) == BIT(4));
-	coex_stat->bt_ble_scan_en = ((coex_stat->bt_info_hb1 & BIT(5)) == BIT(5));
+	coex_stat->bt_ble_scan_en = ((coex_stat->bt_info_hb1 & BIT(5))
+				      == BIT(5));
 	if (coex_stat->bt_info_hb1 & BIT(6))
 		coex_stat->cnt_bt[COEX_CNT_BT_ROLESWITCH]++;
 
-	coex_stat->bt_multi_link = ((coex_stat->bt_info_hb1 & BIT(7)) == BIT(7));
+	coex_stat->bt_multi_link = ((coex_stat->bt_info_hb1 & BIT(7))
+				     == BIT(7));
 	/* resend wifi info to bt, it is reset and lost the info */
 	if ((coex_stat->bt_info_hb1 & BIT(1))) {
 		if (coex_stat->wl_connected)
@@ -2566,299 +2510,3 @@ void rtw_coex_defreeze_work(struct work_struct *work)
 	rtw_coex_run_coex(rtwdev, COEX_RSN_WLSTATUS);
 	mutex_unlock(&rtwdev->mutex);
 }
-
-#define case_BTINFO(src) \
-	case COEX_BTINFO_SRC_##src: return #src
-
-static const char *rtw_coex_get_bt_info_src_string(u8 bt_info_src)
-{
-	switch (bt_info_src) {
-	case_BTINFO(WL_FW);
-	case_BTINFO(BT_RSP);
-	case_BTINFO(BT_ACT);
-	default:
-		return "Unknown";
-	}
-}
-
-#define case_RSN(src) \
-	case COEX_RSN_##src: return #src
-
-static const char *rtw_coex_get_reason_string(u8 reason)
-{
-	switch (reason) {
-	case_RSN(2GSCANSTART);
-	case_RSN(5GSCANSTART);
-	case_RSN(SCANFINISH);
-	case_RSN(2GSWITCHBAND);
-	case_RSN(5GSWITCHBAND);
-	case_RSN(2GCONSTART);
-	case_RSN(5GCONSTART);
-	case_RSN(2GCONFINISH);
-	case_RSN(5GCONFINISH);
-	case_RSN(2GMEDIA);
-	case_RSN(5GMEDIA);
-	case_RSN(MEDIADISCON);
-	case_RSN(BTINFO);
-	case_RSN(LPS);
-	case_RSN(WLSTATUS);
-	default:
-		return "Unknown";
-	}
-}
-
-#ifdef CONFIG_RTW88_DEBUGFS
-#define INFO_SIZE	80
-
-static
-int rtw_coex_addr_info(struct rtw_dev *rtwdev, const struct rtw_reg_domain *reg,
-		       char addr_info[], int n)
-{
-	const char *rf_prefix = "";
-	const char *sep = n == 0 ? "" : "/";
-	int ffs, fls;
-	int max_fls;
-
-	if (INFO_SIZE - n <= 0)
-		return 0;
-
-	switch (reg->domain) {
-	case RTW_REG_DOMAIN_MAC32:
-		max_fls = 31;
-		break;
-	case RTW_REG_DOMAIN_MAC16:
-		max_fls = 15;
-		break;
-	case RTW_REG_DOMAIN_MAC8:
-		max_fls = 7;
-		break;
-	case RTW_REG_DOMAIN_RF_A:
-	case RTW_REG_DOMAIN_RF_B:
-		rf_prefix = "RF_";
-		max_fls = 19;
-		break;
-	default:
-		return 0;
-	}
-
-	ffs = __ffs(reg->mask);
-	fls = __fls(reg->mask);
-
-	if (ffs == 0 && fls == max_fls)
-		return snprintf(addr_info + n, INFO_SIZE - n, "%s%s%x",
-				sep, rf_prefix, reg->addr);
-	else if (ffs == fls)
-		return snprintf(addr_info + n, INFO_SIZE - n, "%s%s%x[%d]",
-				sep, rf_prefix, reg->addr, ffs);
-	else
-		return snprintf(addr_info + n, INFO_SIZE - n, "%s%s%x[%d:%d]",
-				sep, rf_prefix, reg->addr, fls, ffs);
-}
-
-static
-int rtw_coex_val_info(struct rtw_dev *rtwdev, const struct rtw_reg_domain *reg,
-		      char val_info[], int n)
-{
-	const char *sep = n == 0 ? "" : "/ ";
-	u8 rf_path;
-
-	if (INFO_SIZE - n <= 0)
-		return 0;
-
-	switch (reg->domain) {
-	case RTW_REG_DOMAIN_MAC32:
-		return snprintf(val_info + n, INFO_SIZE - n, "%s0x%x", sep,
-				rtw_read32_mask(rtwdev, reg->addr, reg->mask));
-	case RTW_REG_DOMAIN_MAC16:
-		return snprintf(val_info + n, INFO_SIZE - n, "%s0x%x", sep,
-				rtw_read16_mask(rtwdev, reg->addr, reg->mask));
-	case RTW_REG_DOMAIN_MAC8:
-		return snprintf(val_info + n, INFO_SIZE - n, "%s0x%x", sep,
-				rtw_read8_mask(rtwdev, reg->addr, reg->mask));
-	case RTW_REG_DOMAIN_RF_A:
-		rf_path = RF_PATH_A;
-		break;
-	case RTW_REG_DOMAIN_RF_B:
-		rf_path = RF_PATH_B;
-		break;
-	default:
-		return 0;
-	}
-
-	/* only RF go through here */
-	return snprintf(val_info + n, INFO_SIZE - n, "%s0x%x", sep,
-			rtw_read_rf(rtwdev, rf_path, reg->addr, reg->mask));
-}
-
-static void rtw_coex_set_coexinfo_hw(struct rtw_dev *rtwdev, struct seq_file *m)
-{
-	struct rtw_chip_info *chip = rtwdev->chip;
-	const struct rtw_reg_domain *reg;
-	char addr_info[INFO_SIZE];
-	int n_addr = 0;
-	char val_info[INFO_SIZE];
-	int n_val = 0;
-	int i;
-
-	for (i = 0; i < chip->coex_info_hw_regs_num; i++) {
-		reg = &chip->coex_info_hw_regs[i];
-
-		n_addr += rtw_coex_addr_info(rtwdev, reg, addr_info, n_addr);
-		n_val += rtw_coex_val_info(rtwdev, reg, val_info, n_val);
-
-		if (reg->domain == RTW_REG_DOMAIN_NL) {
-			seq_printf(m, "%-35s = %s\n", addr_info, val_info);
-			n_addr = 0;
-			n_val = 0;
-		}
-	}
-
-	if (n_addr != 0 && n_val != 0)
-		seq_printf(m, "%-35s = %s\n", addr_info, val_info);
-}
-
-void rtw_coex_display_coex_info(struct rtw_dev *rtwdev, struct seq_file *m)
-{
-	struct rtw_chip_info *chip = rtwdev->chip;
-	struct rtw_coex *coex = &rtwdev->coex;
-	struct rtw_coex_stat *coex_stat = &coex->stat;
-	struct rtw_coex_dm *coex_dm = &coex->dm;
-	struct rtw_hal *hal = &rtwdev->hal;
-	struct rtw_efuse *efuse = &rtwdev->efuse;
-	struct rtw_fw_state *fw = &rtwdev->fw;
-	u8 reason = coex_dm->reason;
-	u8 sys_lte;
-	u16 score_board;
-	u32 wl_reg_6c0, wl_reg_6c4, wl_reg_6c8, wl_reg_778, wl_reg_6cc;
-	u32 lte_coex, bt_coex;
-	u32 bt_hi_pri, bt_lo_pri;
-	int i;
-
-	score_board = rtw_coex_read_scbd(rtwdev);
-	wl_reg_6c0 = rtw_read32(rtwdev, 0x6c0);
-	wl_reg_6c4 = rtw_read32(rtwdev, 0x6c4);
-	wl_reg_6c8 = rtw_read32(rtwdev, 0x6c8);
-	wl_reg_6cc = rtw_read32(rtwdev, 0x6cc);
-	wl_reg_778 = rtw_read32(rtwdev, 0x778);
-	bt_hi_pri = rtw_read32(rtwdev, 0x770);
-	bt_lo_pri = rtw_read32(rtwdev, 0x774);
-	rtw_write8(rtwdev, 0x76e, 0xc);
-	sys_lte = rtw_read8(rtwdev, 0x73);
-	lte_coex = rtw_coex_read_indirect_reg(rtwdev, 0x38);
-	bt_coex = rtw_coex_read_indirect_reg(rtwdev, 0x54);
-
-	if (!coex_stat->bt_disabled && !coex_stat->bt_mailbox_reply) {
-		rtw_coex_get_bt_supported_version(rtwdev, &coex_stat->supp_ver);
-		rtw_coex_get_bt_patch_version(rtwdev, &coex_stat->patch_ver);
-		rtw_coex_get_bt_reg(rtwdev, 3, 0xae, &coex_stat->bt_reg_vendor_ae);
-		rtw_coex_get_bt_reg(rtwdev, 3, 0xac, &coex_stat->bt_reg_vendor_ac);
-
-		if (coex_stat->patch_ver != 0)
-			coex_stat->bt_mailbox_reply = true;
-	}
-
-	seq_printf(m, "==========[BT Coexist info %x]========\n",
-		   chip->id);
-	seq_printf(m, "%-35s = %s/ %d\n",
-		   "Mech/ RFE", efuse->share_ant ? "Shared" : "Non-Shared",
-		   efuse->rfe_option);
-	seq_printf(m, "%-35s = %08x/ 0x%02x/ 0x%02x %s\n",
-		   "Coex Ver/ BT Dez/ BT Rpt",
-		   chip->coex_para_ver, chip->bt_desired_ver,
-		   coex_stat->supp_ver,
-		   coex_stat->bt_disabled ? "(BT disabled)" :
-		   coex_stat->supp_ver >= chip->bt_desired_ver ?
-		   "(Match)" : "(Mismatch)");
-	seq_printf(m, "%-35s = %d.%d/ 0x%x/ %c\n",
-		   "WL FW/ BT FW/ KT", fw->version, fw->sub_version,
-		   coex_stat->patch_ver, coex_stat->kt_ver + 65);
-	seq_printf(m, "%-35s = %d/ %d/ %d/ ch-(%d)\n",
-		   "AFH Map", coex_dm->wl_ch_info[0], coex_dm->wl_ch_info[1],
-		   coex_dm->wl_ch_info[2], hal->current_channel);
-	seq_printf(m, "============[BT Status]============\n");
-	seq_printf(m, "%-35s = %s/ %ddBm/ %d/ %d\n",
-		   "BT status/ rssi/ retry/ pop",
-		   coex_dm->bt_status == COEX_BTSTATUS_NCON_IDLE ? "non-conn" :
-		   coex_dm->bt_status == COEX_BTSTATUS_CON_IDLE ? "conn-idle" : "busy",
-		   coex_stat->bt_rssi - 100,
-		   coex_stat->cnt_bt[COEX_CNT_BT_RETRY],
-		   coex_stat->cnt_bt[COEX_CNT_BT_POPEVENT]);
-	seq_printf(m, "%-35s = %s%s%s%s%s (multi-link = %d)\n",
-		   "Profiles",
-		   coex_stat->bt_a2dp_exist ? (coex_stat->bt_a2dp_sink ?
-					       "A2DP sink," : "A2DP,") : "",
-		   coex_stat->bt_hfp_exist ? "HFP," : "",
-		   coex_stat->bt_hid_exist ?
-		   (coex_stat->bt_ble_exist ? "HID(RCU)," :
-		    coex_stat->bt_hid_slot >= 2 ? "HID(4/18)" :
-		    "HID(2/18),") : "",
-		   coex_stat->bt_pan_exist ? coex_stat->bt_opp_exist ?
-		   "OPP," : "PAN," : "",
-		   coex_stat->bt_ble_voice ? "Voice," : "",
-		   coex_stat->bt_multi_link);
-	seq_printf(m, "%-35s = %d/ %d/ %d/ %d/ %d/ %d/ %d\n",
-		   "Reinit/ Relink/ IgnWl/ Page/ Inq/ iqk/ iqk fail",
-		   coex_stat->cnt_bt[COEX_CNT_BT_REINIT],
-		   coex_stat->cnt_bt[COEX_CNT_BT_SETUPLINK],
-		   coex_stat->cnt_bt[COEX_CNT_BT_IGNWLANACT],
-		   coex_stat->cnt_bt[COEX_CNT_BT_PAGE],
-		   coex_stat->cnt_bt[COEX_CNT_BT_INQ],
-		   coex_stat->cnt_bt[COEX_CNT_BT_IQK],
-		   coex_stat->cnt_bt[COEX_CNT_BT_IQKFAIL]);
-	seq_printf(m, "%-35s = 0x%04x/ 0x%04x/ 0x%04x\n",
-		   "0xae/ 0xac/ score board",
-		   coex_stat->bt_reg_vendor_ae, coex_stat->bt_reg_vendor_ac,
-		   score_board);
-	seq_printf(m, "%-35s = %d/%d, %d/%d\n",
-		   "Hi-Pri tx/rx, Lo-Pri tx/rx",
-		   bt_hi_pri & 0xffff, bt_hi_pri >> 16,
-		   bt_lo_pri & 0xffff, bt_lo_pri >> 16);
-	for (i = 0; i < COEX_BTINFO_SRC_BT_IQK; i++)
-		seq_printf(m, "%-35s = %02x %02x %02x %02x %02x %02x %02x\n",
-			   rtw_coex_get_bt_info_src_string(i),
-			   coex_stat->bt_info_c2h[i][0],
-			   coex_stat->bt_info_c2h[i][1],
-			   coex_stat->bt_info_c2h[i][2],
-			   coex_stat->bt_info_c2h[i][3],
-			   coex_stat->bt_info_c2h[i][4],
-			   coex_stat->bt_info_c2h[i][5],
-			   coex_stat->bt_info_c2h[i][6]);
-	seq_printf(m, "============[Mechanism]============\n");
-	seq_printf(m, "%-35s = %02x %02x %02x %02x %02x (case-%d)\n",
-		   "TDMA", coex_dm->ps_tdma_para[0], coex_dm->ps_tdma_para[1],
-		   coex_dm->ps_tdma_para[2], coex_dm->ps_tdma_para[3],
-		   coex_dm->ps_tdma_para[4], coex_dm->cur_ps_tdma);
-	seq_printf(m, "%-35s = %d/ 0x%08x/ 0x%08x/ 0x%08x\n",
-		   "Table/ 0x6c0/ 0x6c4/ 0x6c8",
-		   coex_dm->cur_table, wl_reg_6c0, wl_reg_6c4, wl_reg_6c8);
-	seq_printf(m, "%-35s = 0x%08x/ 0x%08x/ reason (%s)\n",
-		   "0x778/ 0x6cc/ Reason",
-		   wl_reg_778, wl_reg_6cc, rtw_coex_get_reason_string(reason));
-	seq_printf(m, "%-35s = %d/ %d/ %d/ %d/ %d\n",
-		   "Null All/ Retry/ Ack/ BT Empty/ BT Late",
-		   coex_stat->wl_fw_dbg_info[1], coex_stat->wl_fw_dbg_info[2],
-		   coex_stat->wl_fw_dbg_info[3], coex_stat->wl_fw_dbg_info[4],
-		   coex_stat->wl_fw_dbg_info[5]);
-	seq_printf(m, "\r\n %-35s = %d/ %d/ %s/ %d\n",
-		   "Cnt TDMA_Togg/Lk5ms/Lk5ms_on/fw",
-		   coex_stat->wl_fw_dbg_info[6],
-		   coex_stat->wl_fw_dbg_info[7],
-		   coex_stat->wl_slot_extend ? "Yes" : "No",
-		   coex_stat->cnt_wl[COEX_CNT_WL_FW_NOTIFY]);
-	seq_printf(m, "============[HW setting]===========\n");
-	seq_printf(m, "%-35s = %s/ %s\n",
-		   "LTE Coex/ Path Owner",
-		   lte_coex & BIT(7) ? "ON" : "OFF",
-		   sys_lte & BIT(2) ? "WL" : "BT");
-	seq_printf(m, "%-35s = RF:%s_BB:%s/ RF:%s_BB:%s/ %s\n",
-		   "GNT_WL_CTRL/ GNT_BT_CTRL/ Dbg",
-		   lte_coex & BIT(12) ? "SW" : "HW",
-		   lte_coex & BIT(8) ? "SW" : "HW",
-		   lte_coex & BIT(14) ? "SW" : "HW",
-		   lte_coex & BIT(10) ? "SW" : "HW",
-		   sys_lte & BIT(3) ? "On" : "Off");
-	seq_printf(m, "%-35s = %d/%d\n", "GNT_WL/ GNT_BT",
-		   (int)(bt_coex & BIT(2)) >> 2, (int)(bt_coex & BIT(3)) >> 3);
-	rtw_coex_set_coexinfo_hw(rtwdev, m);
-}
-#endif /* CONFIG_RTW88_DEBUGFS */

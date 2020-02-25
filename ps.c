@@ -9,7 +9,6 @@
 #include "mac.h"
 #include "coex.h"
 #include "debug.h"
-#include "reg.h"
 
 static int rtw_ips_pwr_up(struct rtw_dev *rtwdev)
 {
@@ -32,6 +31,7 @@ int rtw_enter_ips(struct rtw_dev *rtwdev)
 	rtw_coex_ips_notify(rtwdev, COEX_IPS_ENTER);
 
 	rtw_core_stop(rtwdev);
+	rtw_hci_link_ps(rtwdev, true);
 
 	return 0;
 }
@@ -49,6 +49,8 @@ static void rtw_restore_port_cfg_iter(void *data, u8 *mac,
 int rtw_leave_ips(struct rtw_dev *rtwdev)
 {
 	int ret;
+
+	rtw_hci_link_ps(rtwdev, false);
 
 	ret = rtw_ips_pwr_up(rtwdev);
 	if (ret) {
@@ -89,11 +91,11 @@ void rtw_power_mode_change(struct rtw_dev *rtwdev, bool enter)
 			return;
 
 		/* check confirm power mode has left power save state */
-		for (polling_cnt = 0; polling_cnt < 3; polling_cnt++) {
+		for (polling_cnt = 0; polling_cnt < 50; polling_cnt++) {
 			polling = rtw_read8(rtwdev, rtwdev->hci.cpwm_addr);
 			if ((polling ^ confirm) & BIT_RPWM_TOGGLE)
 				return;
-			mdelay(20);
+			udelay(100);
 		}
 
 		/* in case of fw/hw missed the request, retry */
@@ -151,6 +153,7 @@ static void rtw_leave_lps_core(struct rtw_dev *rtwdev)
 	conf->rlbm = 0;
 	conf->smart_ps = 0;
 
+	rtw_hci_link_ps(rtwdev, false);
 	rtw_fw_set_pwr_mode(rtwdev);
 	rtw_fw_leave_lps_state_check(rtwdev);
 
@@ -188,6 +191,8 @@ static void rtw_enter_lps_core(struct rtw_dev *rtwdev)
 	rtw_coex_lps_notify(rtwdev, COEX_LPS_ENABLE);
 
 	rtw_fw_set_pwr_mode(rtwdev);
+	rtw_hci_link_ps(rtwdev, true);
+
 	set_bit(RTW_FLAG_LEISURE_PS, rtwdev->flags);
 }
 

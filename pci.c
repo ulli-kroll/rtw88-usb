@@ -6,6 +6,7 @@
 #include <linux/pci.h>
 #include "main.h"
 #include "pci.h"
+#include "reg.h"
 #include "tx.h"
 #include "rx.h"
 #include "fw.h"
@@ -486,13 +487,6 @@ static void rtw_pci_disable_interrupt(struct rtw_dev *rtwdev,
 	rtwpci->irq_enabled = false;
 }
 
-static int rtw_pci_setup(struct rtw_dev *rtwdev)
-{
-	rtw_pci_reset_trx_ring(rtwdev);
-
-	return 0;
-}
-
 static void rtw_pci_dma_reset(struct rtw_dev *rtwdev, struct rtw_pci *rtwpci)
 {
 	/* reset dma and rx tag */
@@ -501,11 +495,22 @@ static void rtw_pci_dma_reset(struct rtw_dev *rtwdev, struct rtw_pci *rtwpci)
 	rtwpci->rx_tag = 0;
 }
 
+static int rtw_pci_setup(struct rtw_dev *rtwdev)
+{
+	struct rtw_pci *rtwpci = (struct rtw_pci *)rtwdev->priv;
+
+	rtw_pci_reset_trx_ring(rtwdev);
+	rtw_pci_dma_reset(rtwdev, rtwpci);
+
+	return 0;
+}
+
 static void rtw_pci_dma_release(struct rtw_dev *rtwdev, struct rtw_pci *rtwpci)
 {
 	struct rtw_pci_tx_ring *tx_ring;
 	u8 queue;
 
+	rtw_pci_reset_trx_ring(rtwdev);
 	for (queue = 0; queue < RTK_MAX_TX_QUEUE_NUM; queue++) {
 		tx_ring = &rtwpci->tx_rings[queue];
 		rtw_pci_free_tx_ring_skbs(rtwdev, tx_ring);
@@ -516,8 +521,6 @@ static int rtw_pci_start(struct rtw_dev *rtwdev)
 {
 	struct rtw_pci *rtwpci = (struct rtw_pci *)rtwdev->priv;
 	unsigned long flags;
-
-	rtw_pci_dma_reset(rtwdev, rtwpci);
 
 	spin_lock_irqsave(&rtwpci->irq_lock, flags);
 	rtw_pci_enable_interrupt(rtwdev, rtwpci);
@@ -832,6 +835,11 @@ static void rtw_pci_tx_isr(struct rtw_dev *rtwdev, struct rtw_pci *rtwpci,
 
 	while (count--) {
 		skb = skb_dequeue(&ring->queue);
+		if (!skb) {
+			rtw_err(rtwdev, "failed to dequeue %d skb TX queue %d, BD=0x%08x, rp %d -> %d\n",
+				count, hw_queue, bd_idx, ring->r.rp, cur_rp);
+			break;
+		}
 		tx_data = rtw_pci_get_tx_data(skb);
 		pci_unmap_single(rtwpci->pdev, tx_data->dma, skb->len,
 				 PCI_DMA_TODEVICE);
@@ -1060,23 +1068,49 @@ static void rtw_pci_io_unmapping(struct rtw_dev *rtwdev,
 static void rtw_dbi_write8(struct rtw_dev *rtwdev, u16 addr, u8 data)
 {
 	u16 write_addr;
-	u16 remainder = addr & 0x3;
+	u16 remainder = addr & ~(BITS_DBI_WREN | BITS_DBI_ADDR_MASK);
 	u8 flag;
-	u8 cnt = 20;
+	u8 cnt;
 
-	write_addr = ((addr & 0x0ffc) | (BIT(0) << (remainder + 12)));
+	write_addr = addr & BITS_DBI_ADDR_MASK;
+	write_addr |= u16_encode_bits(BIT(remainder), BITS_DBI_WREN);
 	rtw_write8(rtwdev, REG_DBI_WDATA_V1 + remainder, data);
 	rtw_write16(rtwdev, REG_DBI_FLAG_V1, write_addr);
-	rtw_write8(rtwdev, REG_DBI_FLAG_V1 + 2, 0x01);
+	rtw_write8(rtwdev, REG_DBI_FLAG_V1 + 2, BIT_DBI_WFLAG >> 16);
 
-	flag = rtw_read8(rtwdev, REG_DBI_FLAG_V1 + 2);
-	while (flag && (cnt != 0)) {
-		udelay(10);
+	for (cnt = 0; cnt < RTW_PCI_WR_RETRY_CNT; cnt++) {
 		flag = rtw_read8(rtwdev, REG_DBI_FLAG_V1 + 2);
-		cnt--;
+		if (flag == 0)
+			return;
+
+		udelay(10);
 	}
 
-	WARN(flag, "DBI write fail\n");
+	WARN(flag, "failed to write to DBI register, addr=0x%04x\n", addr);
+}
+
+static int rtw_dbi_read8(struct rtw_dev *rtwdev, u16 addr, u8 *value)
+{
+	u16 read_addr = addr & BITS_DBI_ADDR_MASK;
+	u8 flag;
+	u8 cnt;
+
+	rtw_write16(rtwdev, REG_DBI_FLAG_V1, read_addr);
+	rtw_write8(rtwdev, REG_DBI_FLAG_V1 + 2, BIT_DBI_RFLAG >> 16);
+
+	for (cnt = 0; cnt < RTW_PCI_WR_RETRY_CNT; cnt++) {
+		flag = rtw_read8(rtwdev, REG_DBI_FLAG_V1 + 2);
+		if (flag == 0) {
+			read_addr = REG_DBI_RDATA_V1 + (addr & 3);
+			*value = rtw_read8(rtwdev, read_addr);
+			return 0;
+		}
+
+		udelay(10);
+	}
+
+	WARN(1, "failed to read DBI register, addr=0x%04x\n", addr);
+	return -EIO;
 }
 
 static void rtw_mdio_write(struct rtw_dev *rtwdev, u8 addr, u16 data, bool g1)
@@ -1087,29 +1121,141 @@ static void rtw_mdio_write(struct rtw_dev *rtwdev, u8 addr, u16 data, bool g1)
 
 	rtw_write16(rtwdev, REG_MDIO_V1, data);
 
-	page = addr < 0x20 ? 0 : 1;
-	page += g1 ? 0 : 2;
-	rtw_write8(rtwdev, REG_PCIE_MIX_CFG, addr & 0x1f);
+	page = addr < RTW_PCI_MDIO_PG_SZ ? 0 : 1;
+	page += g1 ? RTW_PCI_MDIO_PG_OFFS_G1 : RTW_PCI_MDIO_PG_OFFS_G2;
+	rtw_write8(rtwdev, REG_PCIE_MIX_CFG, addr & BITS_MDIO_ADDR_MASK);
 	rtw_write8(rtwdev, REG_PCIE_MIX_CFG + 3, page);
-
 	rtw_write32_mask(rtwdev, REG_PCIE_MIX_CFG, BIT_MDIO_WFLAG_V1, 1);
-	wflag = rtw_read32_mask(rtwdev, REG_PCIE_MIX_CFG, BIT_MDIO_WFLAG_V1);
 
-	cnt = 20;
-	while (wflag && (cnt != 0)) {
-		udelay(10);
+	for (cnt = 0; cnt < RTW_PCI_WR_RETRY_CNT; cnt++) {
 		wflag = rtw_read32_mask(rtwdev, REG_PCIE_MIX_CFG,
 					BIT_MDIO_WFLAG_V1);
-		cnt--;
+		if (wflag == 0)
+			return;
+
+		udelay(10);
 	}
 
-	WARN(wflag, "MDIO write fail\n");
+	WARN(wflag, "failed to write to MDIO register, addr=0x%02x\n", addr);
+}
+
+static void rtw_pci_clkreq_set(struct rtw_dev *rtwdev, bool enable)
+{
+	u8 value;
+	int ret;
+
+	ret = rtw_dbi_read8(rtwdev, RTK_PCIE_LINK_CFG, &value);
+	if (ret) {
+		rtw_err(rtwdev, "failed to read CLKREQ_L1, ret=%d", ret);
+		return;
+	}
+
+	if (enable)
+		value |= BIT_CLKREQ_SW_EN;
+	else
+		value &= ~BIT_CLKREQ_SW_EN;
+
+	rtw_dbi_write8(rtwdev, RTK_PCIE_LINK_CFG, value);
+}
+
+static void rtw_pci_aspm_set(struct rtw_dev *rtwdev, bool enable)
+{
+	u8 value;
+	int ret;
+
+	ret = rtw_dbi_read8(rtwdev, RTK_PCIE_LINK_CFG, &value);
+	if (ret) {
+		rtw_err(rtwdev, "failed to read ASPM, ret=%d", ret);
+		return;
+	}
+
+	if (enable)
+		value |= BIT_L1_SW_EN;
+	else
+		value &= ~BIT_L1_SW_EN;
+
+	rtw_dbi_write8(rtwdev, RTK_PCIE_LINK_CFG, value);
+}
+
+static void rtw_pci_link_ps(struct rtw_dev *rtwdev, bool enter)
+{
+	struct rtw_pci *rtwpci = (struct rtw_pci *)rtwdev->priv;
+
+	/* Like CLKREQ, ASPM is also implemented by two HW modules, and can
+	 * only be enabled when host supports it.
+	 *
+	 * And ASPM mechanism should be enabled when driver/firmware enters
+	 * power save mode, without having heavy traffic. Because we've
+	 * experienced some inter-operability issues that the link tends
+	 * to enter L1 state on the fly even when driver is having high
+	 * throughput. This is probably because the ASPM behavior slightly
+	 * varies from different SOC.
+	 */
+	if (rtwpci->link_ctrl & PCI_EXP_LNKCTL_ASPM_L1)
+		rtw_pci_aspm_set(rtwdev, enter);
+}
+
+static void rtw_pci_link_cfg(struct rtw_dev *rtwdev)
+{
+	struct rtw_chip_info *chip = rtwdev->chip;
+	struct rtw_pci *rtwpci = (struct rtw_pci *)rtwdev->priv;
+	struct pci_dev *pdev = rtwpci->pdev;
+	u16 link_ctrl;
+	int ret;
+
+	/* RTL8822CE has enabled REFCLK auto calibration, it does not need
+	 * to add clock delay to cover the REFCLK timing gap.
+	 */
+	if (chip->id == RTW_CHIP_TYPE_8822C)
+		rtw_dbi_write8(rtwdev, RTK_PCIE_CLKDLY_CTRL, 0);
+
+	/* Though there is standard PCIE configuration space to set the
+	 * link control register, but by Realtek's design, driver should
+	 * check if host supports CLKREQ/ASPM to enable the HW module.
+	 *
+	 * These functions are implemented by two HW modules associated,
+	 * one is responsible to access PCIE configuration space to
+	 * follow the host settings, and another is in charge of doing
+	 * CLKREQ/ASPM mechanisms, it is default disabled. Because sometimes
+	 * the host does not support it, and due to some reasons or wrong
+	 * settings (ex. CLKREQ# not Bi-Direction), it could lead to device
+	 * loss if HW misbehaves on the link.
+	 *
+	 * Hence it's designed that driver should first check the PCIE
+	 * configuration space is sync'ed and enabled, then driver can turn
+	 * on the other module that is actually working on the mechanism.
+	 */
+	ret = pcie_capability_read_word(pdev, PCI_EXP_LNKCTL, &link_ctrl);
+	if (ret) {
+		rtw_err(rtwdev, "failed to read PCI cap, ret=%d\n", ret);
+		return;
+	}
+
+	if (link_ctrl & PCI_EXP_LNKCTL_CLKREQ_EN)
+		rtw_pci_clkreq_set(rtwdev, true);
+
+	rtwpci->link_ctrl = link_ctrl;
+}
+
+static void rtw_pci_interface_cfg(struct rtw_dev *rtwdev)
+{
+	struct rtw_chip_info *chip = rtwdev->chip;
+
+	switch (chip->id) {
+	case RTW_CHIP_TYPE_8822C:
+		if (rtwdev->hal.cut_version >= RTW_CHIP_VER_CUT_D)
+			rtw_write32_mask(rtwdev, REG_HCI_MIX_CFG,
+					 BIT_PCIE_EMAC_PDN_AUX_TO_FAST_CLK, 1);
+		break;
+	default:
+		break;
+	}
 }
 
 static void rtw_pci_phy_cfg(struct rtw_dev *rtwdev)
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
-	struct rtw_intf_phy_para *para;
+	const struct rtw_intf_phy_para *para;
 	u16 cut;
 	u16 value;
 	u16 offset;
@@ -1144,7 +1290,26 @@ static void rtw_pci_phy_cfg(struct rtw_dev *rtwdev)
 		else
 			rtw_dbi_write8(rtwdev, offset, value);
 	}
+
+	rtw_pci_link_cfg(rtwdev);
 }
+
+#ifdef CONFIG_PM
+static int rtw_pci_suspend(struct device *dev)
+{
+	return 0;
+}
+
+static int rtw_pci_resume(struct device *dev)
+{
+	return 0;
+}
+
+static SIMPLE_DEV_PM_OPS(rtw_pm_ops, rtw_pci_suspend, rtw_pci_resume);
+#define RTW_PM_OPS (&rtw_pm_ops)
+#else
+#define RTW_PM_OPS NULL
+#endif
 
 static int rtw_pci_claim(struct rtw_dev *rtwdev, struct pci_dev *pdev)
 {
@@ -1211,6 +1376,8 @@ static struct rtw_hci_ops rtw_pci_ops = {
 	.start = rtw_pci_start,
 	.stop = rtw_pci_stop,
 	.deep_ps = rtw_pci_deep_ps,
+	.link_ps = rtw_pci_link_ps,
+	.interface_cfg = rtw_pci_interface_cfg,
 
 	.read8 = rtw_pci_read8,
 	.read16 = rtw_pci_read16,
@@ -1370,6 +1537,7 @@ static struct pci_driver rtw_pci_driver = {
 	.id_table = rtw_pci_id_table,
 	.probe = rtw_pci_probe,
 	.remove = rtw_pci_remove,
+	.driver.pm = RTW_PM_OPS,
 };
 module_pci_driver(rtw_pci_driver);
 

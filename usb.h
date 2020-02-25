@@ -1,7 +1,6 @@
 #ifndef __RTW_USB_H_
 #define __RTW_USB_H_
 
-
 #define RTW_USB_CMD_READ		0xc0
 #define RTW_USB_CMD_WRITE		0x40
 #define RTW_USB_CMD_REQ			0x05
@@ -43,10 +42,10 @@
 #define BIT_DROP_DATA_EN	BIT(9)
 
 /* USB Vendor/Product IDs */
-#define RTW_USB_VENDOR_ID_REALTEK 		0x0bda
-#define RTW_USB_PRODUCT_ID_REALTEK_8812B 	0xB812
-#define RTW_USB_PRODUCT_ID_REALTEK_8822B 	0xB82C
-#define RTW_USB_PRODUCT_ID_REALTEK_8822C 	0xC82C
+#define RTW_USB_VENDOR_ID_REALTEK		0x0bda
+#define RTW_USB_PRODUCT_ID_REALTEK_8812B	0xB812
+#define RTW_USB_PRODUCT_ID_REALTEK_8822B	0xB82C
+#define RTW_USB_PRODUCT_ID_REALTEK_8822C	0xC82C
 
 /* defined functions */
 #define rtw_get_usb_priv(rtwdev) ((struct rtw_usb *)rtwdev->priv)
@@ -128,7 +127,7 @@ struct rtw_usb {
 	u32 txdesc_offset;
 	// TX - workqueue
 	bool init_done;
-	struct mutex tx_lock;
+	struct mutex tx_lock; /* mutex for tx */
 	struct sk_buff_head tx_queue;
 	struct rtw_handler tx_handler;
 	struct rtw_work_data *tx_handler_data;
@@ -140,7 +139,6 @@ struct rtw_usb {
 	struct rtw_handler rx_handler;
 	struct rtw_work_data *rx_handler_data;
 };
-
 
 static inline struct
 rtw_usb_tx_data *rtw_usb_get_tx_data(struct sk_buff *skb)

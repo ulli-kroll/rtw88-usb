@@ -68,16 +68,17 @@ static int rtw8822c_read_efuse(struct rtw_dev *rtwdev, u8 *log_map)
 		//pr_info("-- reserved\n");
 		break;
 	}
-	if ((efuse->rf_board_option & 0x8) == 0) {
+
+	if ((efuse->rf_board_option & 0x8) == 0)
 		pr_info("-- Antenna Diversity for 2R MRC\n");
-	}
-	if (efuse->rf_board_option & 0x10) {
+
+	if (efuse->rf_board_option & 0x10)
 		pr_info("-- disable 11ac mode\n");
-	} else {
+	else
 		pr_info("-- enable 11ac mode\n");
-	}
+
 	/* Module Type */
-	switch ((efuse->rf_board_option & 0xE0)>>5) {
+	switch ((efuse->rf_board_option & 0xE0) >> 5) {
 	case 0:
 		pr_info("-- WiFi solo module\n");
 		break;
@@ -95,12 +96,12 @@ static int rtw8822c_read_efuse(struct rtw_dev *rtwdev, u8 *log_map)
 	/* BT setting */
 	efuse->bt_setting = map->rf_bt_setting;
 	pr_info("EEPROM BT setting: 0x%x\n", efuse->bt_setting);
-	if (efuse->bt_setting & BIT(0)) {
+	if (efuse->bt_setting & BIT(0))
 		pr_info("-- BT/Wifi share antenna\n");
-	} else {
+	else
 		pr_info("-- BT/Wifi isolated antenna\n");
-	}
-	switch ((efuse->bt_setting & 0xE0)>>1) {
+
+	switch ((efuse->bt_setting & 0xE0) >> 1) {
 	case 0:
 		pr_info("-- RTL8723A internal Mailbox\n");
 		break;
@@ -120,16 +121,16 @@ static int rtw8822c_read_efuse(struct rtw_dev *rtwdev, u8 *log_map)
 		//pr_info("-- reserved\n");
 		break;
 	}
-	if (efuse->bt_setting & 0x10) {
+
+	if (efuse->bt_setting & 0x10)
 		pr_info("-- antenna isolation quality: bad\n");
-	} else {
+	else
 		pr_info("-- antenna isolation quality: good\n");
-	}
-	if (efuse->bt_setting & 0x20) {
+
+	if (efuse->bt_setting & 0x20)
 		pr_info("-- radio on/off type: individual\n");
-	} else {
+	else
 		pr_info("-- radio on/off type: combined with wifi\n");
-	}
 
 	/* channel plan */
 	efuse->channel_plan = map->channel_plan;
@@ -148,7 +149,7 @@ static int rtw8822c_read_efuse(struct rtw_dev *rtwdev, u8 *log_map)
 
 	/* rf_antenna_option */
 	pr_info("EEPROM RF antenna option: 0x%x\n", map->rf_antenna_option);
-	switch (map->rf_antenna_option>>4) {
+	switch (map->rf_antenna_option >> 4) {
 	case 1:
 		pr_info("-- path S0 with 1S1T\n");
 		break;
@@ -1423,6 +1424,17 @@ static int rtw8822c_mac_init(struct rtw_dev *rtwdev)
 	return 0;
 }
 
+static void rtw8822c_rstb_3wire(struct rtw_dev *rtwdev, bool enable)
+{
+	if (enable) {
+		rtw_write32_mask(rtwdev, REG_RSTB, BIT_RSTB_3WIRE, 0x1);
+		rtw_write32_mask(rtwdev, REG_ANAPAR_A, BIT_ANAPAR_UPDATE, 0x1);
+		rtw_write32_mask(rtwdev, REG_ANAPAR_B, BIT_ANAPAR_UPDATE, 0x1);
+	} else {
+		rtw_write32_mask(rtwdev, REG_RSTB, BIT_RSTB_3WIRE, 0x0);
+	}
+}
+
 static void rtw8822c_set_channel_rf(struct rtw_dev *rtwdev, u8 channel, u8 bw)
 {
 #define RF18_BAND_MASK		(BIT(16) | BIT(9) | BIT(8))
@@ -1471,6 +1483,8 @@ static void rtw8822c_set_channel_rf(struct rtw_dev *rtwdev, u8 channel, u8 bw)
 		break;
 	}
 
+	rtw8822c_rstb_3wire(rtwdev, false);
+
 	rtw_write_rf(rtwdev, RF_PATH_A, RF_LUTWE2, 0x04, 0x01);
 	rtw_write_rf(rtwdev, RF_PATH_A, RF_LUTWA, 0x1f, 0x12);
 	rtw_write_rf(rtwdev, RF_PATH_A, RF_LUTWD0, 0xfffff, rf_rxbb);
@@ -1483,6 +1497,8 @@ static void rtw8822c_set_channel_rf(struct rtw_dev *rtwdev, u8 channel, u8 bw)
 
 	rtw_write_rf(rtwdev, RF_PATH_A, RF_CFGCH, RFREG_MASK, rf_reg18);
 	rtw_write_rf(rtwdev, RF_PATH_B, RF_CFGCH, RFREG_MASK, rf_reg18);
+
+	rtw8822c_rstb_3wire(rtwdev, true);
 }
 
 static void rtw8822c_toggle_igi(struct rtw_dev *rtwdev)
@@ -1616,7 +1632,7 @@ static void rtw8822c_set_channel_bb(struct rtw_dev *rtwdev, u8 channel, u8 bw,
 		break;
 	case RTW_CHANNEL_WIDTH_40:
 		rtw_write32_mask(rtwdev, REG_CCKSB, BIT(4),
-				 (primary_ch_idx == 1 ? 1 : 0));
+				 (primary_ch_idx == RTW_SC_20_UPPER ? 1 : 0));
 		rtw_write32_mask(rtwdev, REG_TXBWCTL, 0xf, 0x5);
 		rtw_write32_mask(rtwdev, REG_TXBWCTL, 0xc0, 0x0);
 		rtw_write32_mask(rtwdev, REG_TXBWCTL, 0xff00,
@@ -2443,7 +2459,6 @@ static u8 rtw8822c_dpk_dc_corr_check(struct rtw_dev *rtwdev, u8 path)
 		return 1;
 	else
 		return 0;
-
 }
 
 static void rtw8822c_dpk_tx_pause(struct rtw_dev *rtwdev)
@@ -3534,39 +3549,32 @@ static void rtw8822c_pwr_track(struct rtw_dev *rtwdev)
 }
 
 static int rtw8822cu_set_rx_agg_switch(struct rtw_dev *rtwdev, bool enable,
-				u8 rxagg_size, u8 rxagg_timeout)
+				       u8 rxagg_size, u8 rxagg_timeout)
 {
 	pr_err("TODO: %s\n", __func__);
 	return 0;
 }
 
-static int rtw8822cu_fill_txdesc_checksum(struct rtw_dev *rtwdev,
-					u8 *txdesc)
+static int rtw8822c_fill_txdesc_checksum(struct rtw_dev *rtwdev, u8 *txdesc)
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
 	__le16 chksum = 0;
-	__le16 *data;
+	__le16 *data = (__le16 *)(txdesc);
 	u16 txdesc_size;
 	u32 i;
 
-	if (!txdesc) {
-		pr_err("%s: [ERR]null pointer\n", __func__);
+	if (unlikely(!txdesc)) {
+		pr_err("%s: txdesc is NULL\n", __func__);
 		return -EINVAL;
 	}
 
 	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, 0x0000);
 
-	data = (__le16 *)(txdesc);
-
 	txdesc_size = (u16)((GET_TX_DESC_PKT_OFFSET(txdesc) +
 			(chip->tx_pkt_desc_sz >> 3)) << 1);
 
-	/* HW clculates only 32byte */
 	for (i = 0; i < txdesc_size; i++)
 		chksum ^= (*(data + 2 * i) ^ *(data + (2 * i + 1)));
-
-	/* *(data + 2 * i) & *(data + (2 * i + 1) have endain issue*/
-	/* Process eniadn issue after checksum calculation */
 
 	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, le16_to_cpu(chksum));
 
@@ -3661,12 +3669,12 @@ static struct rtw_pwr_seq_cmd trans_cardemu_to_act_8822c[] = {
 	 RTW_PWR_CUT_ALL_MSK,
 	 RTW_PWR_INTF_ALL_MSK,
 	 RTW_PWR_ADDR_MAC,
-	 RTW_PWR_CMD_WRITE, BIT(7), 0},
-	{0x0005,
+	 RTW_PWR_CMD_WRITE, (BIT(4) | BIT(3)), 0},
+	{0x1018,
 	 RTW_PWR_CUT_ALL_MSK,
 	 RTW_PWR_INTF_ALL_MSK,
 	 RTW_PWR_ADDR_MAC,
-	 RTW_PWR_CMD_WRITE, (BIT(4) | BIT(3)), 0},
+	 RTW_PWR_CMD_WRITE, BIT(2), BIT(2)},
 	{0x0005,
 	 RTW_PWR_CUT_ALL_MSK,
 	 RTW_PWR_INTF_ALL_MSK,
@@ -3974,7 +3982,7 @@ static struct rtw_chip_ops rtw8822c_ops = {
 
 	/* USB relative */
 	.set_rx_agg_switch = rtw8822cu_set_rx_agg_switch,
-	.fill_txdesc_checksum = rtw8822cu_fill_txdesc_checksum,
+	.fill_txdesc_checksum = rtw8822c_fill_txdesc_checksum,
 };
 
 /* Shared-Antenna Coex Table */
@@ -4244,30 +4252,17 @@ static const struct rtw_pwr_track_tbl rtw8822c_rtw_pwr_track_tbl = {
 	.pwrtrk_2g_ccka_p = rtw8822c_pwrtrk_2g_cck_a_p,
 };
 
-static const struct rtw_reg_domain coex_info_hw_regs_8822c[] = {
-	{0x1860, BIT(3), RTW_REG_DOMAIN_MAC8},
-	{0x4160, BIT(3), RTW_REG_DOMAIN_MAC8},
-	{0x1c32, BIT(6), RTW_REG_DOMAIN_MAC8},
-	{0x1c38, BIT(28), RTW_REG_DOMAIN_MAC32},
-	{0, 0, RTW_REG_DOMAIN_NL},
-	{0x430, MASKDWORD, RTW_REG_DOMAIN_MAC32},
-	{0x434, MASKDWORD, RTW_REG_DOMAIN_MAC32},
-	{0x42a, MASKLWORD, RTW_REG_DOMAIN_MAC16},
-	{0x426, MASKBYTE0, RTW_REG_DOMAIN_MAC8},
-	{0x45e, BIT(3), RTW_REG_DOMAIN_MAC8},
-	{0x454, MASKLWORD, RTW_REG_DOMAIN_MAC16},
-	{0, 0, RTW_REG_DOMAIN_NL},
-	{0x4c, BIT(24) | BIT(23), RTW_REG_DOMAIN_MAC32},
-	{0x64, BIT(0), RTW_REG_DOMAIN_MAC8},
-	{0x4c6, BIT(4), RTW_REG_DOMAIN_MAC8},
-	{0x40, BIT(5), RTW_REG_DOMAIN_MAC8},
-	{0x1, RFREG_MASK, RTW_REG_DOMAIN_RF_B},
-	{0, 0, RTW_REG_DOMAIN_NL},
-	{0x550, MASKDWORD, RTW_REG_DOMAIN_MAC32},
-	{0x522, MASKBYTE0, RTW_REG_DOMAIN_MAC8},
-	{0x953, BIT(1), RTW_REG_DOMAIN_MAC8},
-	{0xc50, MASKBYTE0, RTW_REG_DOMAIN_MAC8},
+#ifdef CONFIG_PM
+static const struct wiphy_wowlan_support rtw_wowlan_stub_8822c = {
+	.flags = WIPHY_WOWLAN_MAGIC_PKT | WIPHY_WOWLAN_GTK_REKEY_FAILURE |
+		 WIPHY_WOWLAN_DISCONNECT | WIPHY_WOWLAN_SUPPORTS_GTK_REKEY |
+		 WIPHY_WOWLAN_NET_DETECT,
+	.n_patterns = RTW_MAX_PATTERN_NUM,
+	.pattern_max_len = RTW_MAX_PATTERN_SIZE,
+	.pattern_min_len = 1,
+	.max_nd_match_sets = 4,
 };
+#endif
 
 struct rtw_chip_info rtw8822c_hw_spec = {
 	.ops = &rtw8822c_ops,
@@ -4315,6 +4310,11 @@ struct rtw_chip_info rtw8822c_hw_spec = {
 	.bfer_su_max_num = 2,
 	.bfer_mu_max_num = 1,
 
+#ifdef CONFIG_PM
+	.wow_fw_name = "rtw88/rtw8822c_wow_fw.bin",
+	.wowlan_stub = &rtw_wowlan_stub_8822c,
+	.max_sched_scan_ssids = 4,
+#endif
 	.coex_para_ver = 0x19062706,
 	.bt_desired_ver = 0x6,
 	.scbd_support = true,
@@ -4340,13 +4340,10 @@ struct rtw_chip_info rtw8822c_hw_spec = {
 	.bt_afh_span_bw40 = 0x36,
 	.afh_5g_num = ARRAY_SIZE(afh_5g_8822c),
 	.afh_5g = afh_5g_8822c,
-
-	.coex_info_hw_regs_num = ARRAY_SIZE(coex_info_hw_regs_8822c),
-	.coex_info_hw_regs = coex_info_hw_regs_8822c,
-
 	/* USB interface */
 	.usb_txagg_num = 3,
 };
 EXPORT_SYMBOL(rtw8822c_hw_spec);
 
 MODULE_FIRMWARE("rtw88/rtw8822c_fw.bin");
+MODULE_FIRMWARE("rtw88/rtw8822c_wow_fw.bin");

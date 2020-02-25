@@ -232,7 +232,7 @@ static int rtw8822b_mac_init(struct rtw_dev *rtwdev)
 
 	/* txq control */
 	value8 = rtw_read8(rtwdev, REG_FWHW_TXQ_CTRL + 1);
-	value8 |= BIT(4)|BIT(5);
+	value8 |= BIT(4) | BIT(5);
 	rtw_write8(rtwdev, REG_FWHW_TXQ_CTRL + 1, value8);
 
 	/* protocol configuration */
@@ -660,7 +660,7 @@ static void rtw8822b_set_channel_bb(struct rtw_dev *rtwdev, u8 channel, u8 bw,
 		rtw_write32_mask(rtwdev, REG_ADC160, BIT(30), 0x1);
 		break;
 	case RTW_CHANNEL_WIDTH_40:
-		if (primary_ch_idx == 1)
+		if (primary_ch_idx == RTW_SC_20_UPPER)
 			rtw_write32_set(rtwdev, REG_RXSB, BIT(4));
 		else
 			rtw_write32_clr(rtwdev, REG_RXSB, BIT(4));
@@ -1561,40 +1561,32 @@ static void rtw8822b_bf_config_bfee(struct rtw_dev *rtwdev, struct rtw_vif *vif,
 /* USB relative */
 
 static int rtw8822bu_set_rx_agg_switch(struct rtw_dev *rtwdev, bool enable,
-				u8 rxagg_size, u8 rxagg_timeout)
+				       u8 rxagg_size, u8 rxagg_timeout)
 {
 	pr_err("TODO: %s\n", __func__);
 	return 0;
 }
 
-static int rtw8822bu_fill_txdesc_checksum(struct rtw_dev *rtwdev,
-					u8 *txdesc)
+static int rtw8822b_fill_txdesc_checksum(struct rtw_dev *rtwdev, u8 *txdesc)
 {
 	__le16 chksum = 0;
-	__le16 *data;
+	__le16 *data = (__le16 *)(txdesc);
 	u32 i;
 
-	if (!txdesc) {
-		pr_err("%s: [ERR]null pointer\n", __func__);
+	if (unlikely(!txdesc)) {
+		pr_err("%s: txdesc is NULL\n", __func__);
 		return -EINVAL;
 	}
 
 	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, 0x0000);
 
-	data = (__le16 *)(txdesc);
-
-	/* HW clculates only 32byte */
 	for (i = 0; i < 8; i++)
 		chksum ^= (*(data + 2 * i) ^ *(data + (2 * i + 1)));
-
-	/* *(data + 2 * i) & *(data + (2 * i + 1) have endain issue*/
-	/* Process eniadn issue after checksum calculation */
 
 	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, le16_to_cpu(chksum));
 
 	return 0;
 }
-
 
 static struct rtw_pwr_seq_cmd trans_carddis_to_cardemu_8822b[] = {
 	{0x0086,
@@ -2176,7 +2168,7 @@ static struct rtw_chip_ops rtw8822b_ops = {
 
 	/* USB relative */
 	.set_rx_agg_switch	= rtw8822bu_set_rx_agg_switch,
-	.fill_txdesc_checksum	= rtw8822bu_fill_txdesc_checksum,
+	.fill_txdesc_checksum	= rtw8822b_fill_txdesc_checksum,
 };
 
 /* Shared-Antenna Coex Table */
@@ -2445,33 +2437,6 @@ static const struct rtw_pwr_track_tbl rtw8822b_rtw_pwr_track_tbl = {
 	.pwrtrk_2g_ccka_p = rtw8822b_pwrtrk_2g_cck_a_p,
 };
 
-static const struct rtw_reg_domain coex_info_hw_regs_8822b[] = {
-	{0xcb0, MASKDWORD, RTW_REG_DOMAIN_MAC32},
-	{0xcb4, MASKDWORD, RTW_REG_DOMAIN_MAC32},
-	{0xcba, MASKBYTE0, RTW_REG_DOMAIN_MAC8},
-	{0xcbd, MASKBYTE0, RTW_REG_DOMAIN_MAC8},
-	{0xc58, MASKBYTE0, RTW_REG_DOMAIN_MAC8},
-	{0xcbd, BIT(0), RTW_REG_DOMAIN_MAC8},
-	{0, 0, RTW_REG_DOMAIN_NL},
-	{0x430, MASKDWORD, RTW_REG_DOMAIN_MAC32},
-	{0x434, MASKDWORD, RTW_REG_DOMAIN_MAC32},
-	{0x42a, MASKLWORD, RTW_REG_DOMAIN_MAC16},
-	{0x426, MASKBYTE0, RTW_REG_DOMAIN_MAC8},
-	{0x45e, BIT(3), RTW_REG_DOMAIN_MAC8},
-	{0x454, MASKLWORD, RTW_REG_DOMAIN_MAC16},
-	{0, 0, RTW_REG_DOMAIN_NL},
-	{0x4c, BIT(24) | BIT(23), RTW_REG_DOMAIN_MAC32},
-	{0x64, BIT(0), RTW_REG_DOMAIN_MAC8},
-	{0x4c6, BIT(4), RTW_REG_DOMAIN_MAC8},
-	{0x40, BIT(5), RTW_REG_DOMAIN_MAC8},
-	{0x1, RFREG_MASK, RTW_REG_DOMAIN_RF_B},
-	{0, 0, RTW_REG_DOMAIN_NL},
-	{0x550, MASKDWORD, RTW_REG_DOMAIN_MAC32},
-	{0x522, MASKBYTE0, RTW_REG_DOMAIN_MAC8},
-	{0x953, BIT(1), RTW_REG_DOMAIN_MAC8},
-	{0xc50,  MASKBYTE0, RTW_REG_DOMAIN_MAC8},
-};
-
 struct rtw_chip_info rtw8822b_hw_spec = {
 	.ops = &rtw8822b_ops,
 	.id = RTW_CHIP_TYPE_8822B,
@@ -2541,10 +2506,6 @@ struct rtw_chip_info rtw8822b_hw_spec = {
 	.bt_afh_span_bw40 = 0x36,
 	.afh_5g_num = ARRAY_SIZE(afh_5g_8822b),
 	.afh_5g = afh_5g_8822b,
-
-	.coex_info_hw_regs_num = ARRAY_SIZE(coex_info_hw_regs_8822b),
-	.coex_info_hw_regs = coex_info_hw_regs_8822b,
-
 	/* for USB interface */
 	.usb_txagg_num = 3,
 };

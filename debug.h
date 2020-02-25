@@ -18,21 +18,18 @@ enum rtw_debug_mask {
 	RTW_DBG_DEBUGFS		= 0x00000200,
 	RTW_DBG_PS		= 0x00000400,
 	RTW_DBG_BF		= 0x00000800,
+	RTW_DBG_WOW		= 0x00001000,
 	RTW_DBG_USB		= 0x00001000,
 
 	RTW_DBG_ALL		= 0xffffffff
 };
 
 #ifdef CONFIG_RTW88_DEBUGFS
-
 void rtw_debugfs_init(struct rtw_dev *rtwdev);
 void rtw_debugfs_deinit(struct rtw_dev *rtwdev);
-
 #else
-
 static inline void rtw_debugfs_init(struct rtw_dev *rtwdev) {}
 static inline void rtw_debugfs_deinit(struct rtw_dev *rtwdev) {}
-
 #endif /* CONFIG_RTW88_DEBUGFS */
 
 #ifdef CONFIG_RTW88_DEBUG

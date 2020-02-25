@@ -16,10 +16,12 @@ void rtw_set_channel_mac(struct rtw_dev *rtwdev, u8 channel, u8 bw,
 	u8 value8;
 
 	txsc20 = primary_ch_idx;
-	if (txsc20 == 1 || txsc20 == 3)
-		txsc40 = 9;
-	else
-		txsc40 = 10;
+	if (bw == RTW_CHANNEL_WIDTH_80) {
+		if (txsc20 == RTW_SC_20_UPPER || txsc20 == RTW_SC_20_UPMOST)
+			txsc40 = RTW_SC_40_UPPER;
+		else
+			txsc40 = RTW_SC_40_LOWER;
+	}
 	rtw_write8(rtwdev, REG_DATA_SC,
 		   BIT_TXSC_20M(txsc20) | BIT_TXSC_40M(txsc40));
 
@@ -64,14 +66,6 @@ static int rtw_mac_pre_system_cfg(struct rtw_dev *rtwdev)
 		rtw_write32_set(rtwdev, REG_HCI_OPT_CTRL, BIT_BT_DIG_CLK_EN);
 		break;
 	case RTW_HCI_TYPE_USB:
-#if 0
-		value8 = rtw_read8(rtwdev, REG_SYS_CFG2 + 3);
-		pr_info("%s: REG_SYS_CFG2+3 = 0x%x\n", __func__, value8);
-		if (value8 == 0x20) {
-			pr_info("%s: set 0xFE5B\n", __func__);
-			rtw_write8(rtwdev,  0xFE5B, value8 | BIT(4));
-		}
-#endif
 		break;
 	default:
 		return -EINVAL;
@@ -954,7 +948,8 @@ static int priority_queue_cfg(struct rtw_dev *rtwdev)
 	rtw_write32_set(rtwdev, REG_RQPN_CTRL_2, BIT_LD_RQPN);
 
 	rtw_write16(rtwdev, REG_FIFOPAGE_CTRL_2, fifo->rsvd_boundary);
-	rtw_write8_set(rtwdev, REG_FWHW_TXQ_CTRL + 2, BIT_EN_WR_FREE_TAIL >> 16);
+	rtw_write8_set(rtwdev, REG_FWHW_TXQ_CTRL + 2,
+		       BIT_EN_WR_FREE_TAIL >> 16);
 
 	rtw_write16(rtwdev, REG_BCNQ_BDNY_V1, fifo->rsvd_boundary);
 	rtw_write16(rtwdev, REG_FIFOPAGE_CTRL_2 + 2, fifo->rsvd_boundary);
@@ -965,11 +960,10 @@ static int priority_queue_cfg(struct rtw_dev *rtwdev)
 	if (!check_hw_ready(rtwdev, REG_AUTO_LLT_V1, BIT_AUTO_INIT_LLT_V1, 0))
 		return -EBUSY;
 
-	if (likely(trx_mode == RTW_TRX_MODE_NORMAL)) {
+	if (likely(trx_mode == RTW_TRX_MODE_NORMAL))
 		rtw_write8(rtwdev, REG_CR + 3, 0);
-	} else if (trx_mode == RTW_TRX_MODE_LOOPBACK) {
+	else if (trx_mode == RTW_TRX_MODE_LOOPBACK)
 		rtw_write8(rtwdev, REG_CR + 3, 0xB);
-	}
 
 	return 0;
 }
@@ -1081,6 +1075,8 @@ int rtw_mac_init(struct rtw_dev *rtwdev)
 	ret = rtw_drv_info_cfg(rtwdev);
 	if (ret)
 		return ret;
+
+	rtw_hci_interface_cfg(rtwdev);
 
 	return 0;
 }

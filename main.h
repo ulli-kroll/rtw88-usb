@@ -14,11 +14,14 @@
 #include <linux/interrupt.h>
 
 #include "util.h"
-#include "rc.h"
 
 #define RTW_MAX_MAC_ID_NUM		32
 #define RTW_MAX_SEC_CAM_NUM		32
 #define MAX_PG_CAM_BACKUP_NUM		8
+
+#define RTW_MAX_PATTERN_NUM		12
+#define RTW_MAX_PATTERN_MASK_SIZE	16
+#define RTW_MAX_PATTERN_SIZE		128
 
 #define RTW_WATCH_DOG_DELAY_TIME	round_jiffies_relative(HZ * 2)
 
@@ -101,6 +104,16 @@ enum rtw_bandwidth {
 	RTW_CHANNEL_WIDTH_80_80	= 4,
 	RTW_CHANNEL_WIDTH_5	= 5,
 	RTW_CHANNEL_WIDTH_10	= 6,
+};
+
+enum rtw_sc_offset {
+	RTW_SC_DONT_CARE	= 0,
+	RTW_SC_20_UPPER		= 1,
+	RTW_SC_20_LOWER		= 2,
+	RTW_SC_20_UPMOST	= 3,
+	RTW_SC_20_LOWEST	= 4,
+	RTW_SC_40_UPPER		= 9,
+	RTW_SC_40_LOWER		= 10,
 };
 
 enum rtw_net_type {
@@ -199,6 +212,11 @@ enum rtw_rx_queue_type {
 	RTW_RX_QUEUE_C2H = 0x1,
 	/* keep it last */
 	RTK_MAX_RX_QUEUE_NUM
+};
+
+enum rtw_fw_type {
+	RTW_NORMAL_FW = 0x0,
+	RTW_WOWLAN_FW = 0x1,
 };
 
 enum rtw_rate_index {
@@ -345,6 +363,7 @@ enum rtw_flags {
 	RTW_FLAG_LEISURE_PS_DEEP,
 	RTW_FLAG_DIG_DISABLE,
 	RTW_FLAG_BUSY_TRAFFIC,
+	RTW_FLAG_WOWLAN,
 
 	NUM_OF_RTW_FLAGS,
 };
@@ -373,6 +392,15 @@ enum rtw_snr {
 	RTW_SNR_2SS_D,
 	/* keep it last */
 	RTW_SNR_NUM
+};
+
+enum rtw_wow_flags {
+	RTW_WOW_FLAG_EN_MAGIC_PKT,
+	RTW_WOW_FLAG_EN_REKEY_PKT,
+	RTW_WOW_FLAG_EN_DISCONNECT,
+
+	/* keep it last */
+	RTW_WOW_FLAG_MAX,
 };
 
 /* the power index is represented by differences, which cck-1s & ht40-1s are
@@ -492,18 +520,6 @@ struct rtw_channel_params {
 struct rtw_hw_reg {
 	u32 addr;
 	u32 mask;
-};
-
-struct rtw_reg_domain {
-	u32 addr;
-	u32 mask;
-#define RTW_REG_DOMAIN_MAC32	0
-#define RTW_REG_DOMAIN_MAC16	1
-#define RTW_REG_DOMAIN_MAC8	2
-#define RTW_REG_DOMAIN_RF_A	3
-#define RTW_REG_DOMAIN_RF_B	4
-#define RTW_REG_DOMAIN_NL	0xFF
-	u8 domain;
 };
 
 struct rtw_backup_info {
@@ -628,6 +644,7 @@ struct rtw_lps_conf {
 	u8 smart_ps;
 	u8 port_id;
 	bool sec_cam_backup;
+	bool pattern_cam_backup;
 };
 
 enum rtw_hw_key_type {
@@ -736,7 +753,6 @@ struct rtw_bf_info {
 };
 
 struct rtw_vif {
-	struct ieee80211_vif *vif;
 	enum rtw_net_type net_type;
 	u16 aid;
 	u8 mac_addr[ETH_ALEN];
@@ -747,7 +763,6 @@ struct rtw_vif {
 	const struct rtw_vif_port *conf;
 
 	struct rtw_traffic_stats stats;
-	bool in_lps;
 
 	struct rtw_bfee bfee;
 };
@@ -800,10 +815,11 @@ struct rtw_chip_ops {
 	void (*coex_set_wl_tx_power)(struct rtw_dev *rtwdev, u8 wl_pwr);
 	void (*coex_set_wl_rx_gain)(struct rtw_dev *rtwdev, bool low_gain);
 
+	int (*fill_txdesc_checksum)(struct rtw_dev *rtwdev, u8 *txdesc);
+
 	/* USB relative ops */
 	int (*set_rx_agg_switch)(struct rtw_dev *rtwdev, bool enable,
 				 u8 rx_agg_size, u8 rx_agg_timeout);
-	int (*fill_txdesc_checksum)(struct rtw_dev *rtwdev, u8 *txdesc);
 };
 
 #define RTW_PWR_POLLING_CNT	20000
@@ -927,11 +943,38 @@ struct rtw_intf_phy_para {
 	u16 platform;
 };
 
+struct rtw_wow_pattern {
+	u16 crc;
+	u8 type;
+	u8 valid;
+	u8 mask[RTW_MAX_PATTERN_MASK_SIZE];
+};
+
+struct rtw_pno_request {
+	bool inited;
+	u32 match_set_cnt;
+	struct cfg80211_match_set *match_sets;
+	u8 channel_cnt;
+	struct ieee80211_channel *channels;
+	struct cfg80211_sched_scan_plan scan_plan;
+};
+
+struct rtw_wow_param {
+	struct ieee80211_vif *wow_vif;
+	DECLARE_BITMAP(flags, RTW_WOW_FLAG_MAX);
+	u8 txpause;
+	u8 pattern_cnt;
+	struct rtw_wow_pattern patterns[RTW_MAX_PATTERN_NUM];
+
+	bool ips_enabled;
+	struct rtw_pno_request pno_req;
+};
+
 struct rtw_intf_phy_para_table {
-	struct rtw_intf_phy_para *usb2_para;
-	struct rtw_intf_phy_para *usb3_para;
-	struct rtw_intf_phy_para *gen1_para;
-	struct rtw_intf_phy_para *gen2_para;
+	const struct rtw_intf_phy_para *usb2_para;
+	const struct rtw_intf_phy_para *usb3_para;
+	const struct rtw_intf_phy_para *gen1_para;
+	const struct rtw_intf_phy_para *gen2_para;
 	u8 n_usb2_para;
 	u8 n_usb3_para;
 	u8 n_gen1_para;
@@ -1056,6 +1099,10 @@ struct rtw_chip_info {
 	u8 bfer_su_max_num;
 	u8 bfer_mu_max_num;
 
+	const char *wow_fw_name;
+	const struct wiphy_wowlan_support *wowlan_stub;
+	const u8 max_sched_scan_ssids;
+
 	/* coex paras */
 	u32 coex_para_ver;
 	u8 bt_desired_ver;
@@ -1073,7 +1120,6 @@ struct rtw_chip_info {
 	u8 bt_afh_span_bw40;
 	u8 afh_5g_num;
 	u8 wl_rf_para_num;
-	u8 coex_info_hw_regs_num;
 	const u8 *bt_rssi_step;
 	const u8 *wl_rssi_step;
 	const struct coex_table_para *table_nsant;
@@ -1083,8 +1129,6 @@ struct rtw_chip_info {
 	const struct coex_rf_para *wl_rf_para_tx;
 	const struct coex_rf_para *wl_rf_para_rx;
 	const struct coex_5g_afh_map *afh_5g;
-	const struct rtw_reg_domain *coex_info_hw_regs;
-
 	/* for USB interface */
 	u8 usb_txagg_num;
 };
@@ -1211,10 +1255,8 @@ struct rtw_coex_stat {
 	bool wl_cck_lock_pre;
 	bool wl_cck_lock_ever;
 
-	u16 supp_ver;
-	u32 patch_ver;
-	u16 bt_reg_vendor_ae;
-	u16 bt_reg_vendor_ac;
+	u32 bt_supported_version;
+	u32 bt_supported_feature;
 	s8 bt_rssi;
 	u8 kt_ver;
 	u8 gnt_workaround_state;
@@ -1489,6 +1531,7 @@ struct rtw_fifo_conf {
 
 struct rtw_fw_state {
 	const struct firmware *firmware;
+	struct rtw_dev *rtwdev;
 	struct completion completion;
 	u16 version;
 	u8 sub_version;
@@ -1624,12 +1667,11 @@ struct rtw_dev {
 	DECLARE_BITMAP(flags, NUM_OF_RTW_FLAGS);
 
 	u8 mp_mode;
+	struct rtw_fw_state wow_fw;
+	struct rtw_wow_param wow;
 
 	/* loopback */
 	struct rtw_loopback loopback;
-
-	/* rate control */
-	struct rtw_rate_priv rate_priv;
 
 	/* hci related data, must be last */
 	u8 priv[0] __aligned(sizeof(void *));
@@ -1654,6 +1696,18 @@ static inline struct ieee80211_vif *rtwvif_to_vif(struct rtw_vif *rtwvif)
 	void *p = rtwvif;
 
 	return container_of(p, struct ieee80211_vif, drv_priv);
+}
+
+static inline bool rtw_ssid_equal(struct cfg80211_ssid *a,
+				  struct cfg80211_ssid *b)
+{
+	if (!a || !b || a->ssid_len != b->ssid_len)
+		return false;
+
+	if (memcmp(a->ssid, b->ssid, a->ssid_len))
+		return false;
+
+	return true;
 }
 
 void rtw_get_channel_params(struct cfg80211_chan_def *chandef,

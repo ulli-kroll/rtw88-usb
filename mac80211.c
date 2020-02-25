@@ -12,6 +12,7 @@
 #include "reg.h"
 #include "bf.h"
 #include "debug.h"
+#include "wow.h"
 
 static void rtw_ops_tx(struct ieee80211_hw *hw,
 		       struct ieee80211_tx_control *control,
@@ -77,15 +78,12 @@ static int rtw_ops_config(struct ieee80211_hw *hw, u32 changed)
 #if 0
 	rtw_leave_lps_deep(rtwdev);
 
-	if (changed & IEEE80211_CONF_CHANGE_IDLE) {
-		if (hw->conf.flags & IEEE80211_CONF_IDLE) {
-			rtw_enter_ips(rtwdev);
-		} else {
-			ret = rtw_leave_ips(rtwdev);
-			if (ret) {
-				rtw_err(rtwdev, "failed to leave idle state\n");
-				goto out;
-			}
+	if ((changed & IEEE80211_CONF_CHANGE_IDLE) &&
+	    !(hw->conf.flags & IEEE80211_CONF_IDLE)) {
+		ret = rtw_leave_ips(rtwdev);
+		if (ret) {
+			rtw_err(rtwdev, "failed to leave idle state\n");
+			goto out;
 		}
 	}
 
@@ -102,6 +100,11 @@ static int rtw_ops_config(struct ieee80211_hw *hw, u32 changed)
 	if (changed & IEEE80211_CONF_CHANGE_CHANNEL)
 		rtw_set_channel(rtwdev);
 
+#if 0
+	if ((changed & IEEE80211_CONF_CHANGE_IDLE) &&
+	    (hw->conf.flags & IEEE80211_CONF_IDLE))
+		rtw_enter_ips(rtwdev);
+#endif
 //out:
 	mutex_unlock(&rtwdev->mutex);
 	return ret;
@@ -156,12 +159,10 @@ static int rtw_ops_add_interface(struct ieee80211_hw *hw,
 	u8 bcn_ctrl = 0;
 
 	rtwvif->port = port;
-	rtwvif->vif = vif;
 	rtwvif->stats.tx_unicast = 0;
 	rtwvif->stats.rx_unicast = 0;
 	rtwvif->stats.tx_cnt = 0;
 	rtwvif->stats.rx_cnt = 0;
-	rtwvif->in_lps = false;
 	memset(&rtwvif->bfee, 0, sizeof(struct rtw_bfee));
 	rtwvif->conf = &rtw_vif_port[port];
 	rtw_txq_init(rtwdev, vif->txq);
@@ -519,6 +520,9 @@ static int rtw_ops_set_key(struct ieee80211_hw *hw, enum set_key_cmd cmd,
 	case WLAN_CIPHER_SUITE_BIP_CMAC_256:
 	case WLAN_CIPHER_SUITE_BIP_GMAC_128:
 	case WLAN_CIPHER_SUITE_BIP_GMAC_256:
+	case WLAN_CIPHER_SUITE_CCMP_256:
+	case WLAN_CIPHER_SUITE_GCMP:
+	case WLAN_CIPHER_SUITE_GCMP_256:
 		/* suppress error messages */
 		return -EOPNOTSUPP;
 	default:
@@ -576,8 +580,7 @@ static int rtw_ops_ampdu_action(struct ieee80211_hw *hw,
 
 	switch (params->action) {
 	case IEEE80211_AMPDU_TX_START:
-		ieee80211_start_tx_ba_cb_irqsafe(vif, sta->addr, tid);
-		break;
+		return IEEE80211_AMPDU_TX_START_IMMEDIATE;
 	case IEEE80211_AMPDU_TX_STOP_CONT:
 	case IEEE80211_AMPDU_TX_STOP_FLUSH:
 	case IEEE80211_AMPDU_TX_STOP_FLUSH_CONT:
@@ -596,6 +599,20 @@ static int rtw_ops_ampdu_action(struct ieee80211_hw *hw,
 	}
 
 	return 0;
+}
+
+static bool rtw_ops_can_aggregate_in_amsdu(struct ieee80211_hw *hw,
+					   struct sk_buff *head,
+					   struct sk_buff *skb)
+{
+	struct rtw_dev *rtwdev = hw->priv;
+	struct rtw_hal *hal = &rtwdev->hal;
+
+	/* we don't want to enable TX AMSDU on 2.4G */
+	if (hal->current_band_type == RTW_BAND_2G)
+		return false;
+
+	return true;
 }
 
 static void rtw_ops_sw_scan_start(struct ieee80211_hw *hw,
@@ -740,6 +757,44 @@ static int rtw_ops_set_bitrate_mask(struct ieee80211_hw *hw,
 	return 0;
 }
 
+#ifdef CONFIG_PM
+static int rtw_ops_suspend(struct ieee80211_hw *hw,
+			   struct cfg80211_wowlan *wowlan)
+{
+	struct rtw_dev *rtwdev = hw->priv;
+	int ret;
+
+	mutex_lock(&rtwdev->mutex);
+	ret = rtw_wow_suspend(rtwdev, wowlan);
+	if (ret)
+		rtw_err(rtwdev, "failed to suspend for wow %d\n", ret);
+	mutex_unlock(&rtwdev->mutex);
+
+	return ret ? 1 : 0;
+}
+
+static int rtw_ops_resume(struct ieee80211_hw *hw)
+{
+	struct rtw_dev *rtwdev = hw->priv;
+	int ret;
+
+	mutex_lock(&rtwdev->mutex);
+	ret = rtw_wow_resume(rtwdev);
+	if (ret)
+		rtw_err(rtwdev, "failed to resume for wow %d\n", ret);
+	mutex_unlock(&rtwdev->mutex);
+
+	return ret ? 1 : 0;
+}
+
+static void rtw_ops_set_wakeup(struct ieee80211_hw *hw, bool enabled)
+{
+	struct rtw_dev *rtwdev = hw->priv;
+
+	device_set_wakeup_enable(rtwdev->dev, enabled);
+}
+#endif
+
 const struct ieee80211_ops rtw_ops = {
 	.tx			= rtw_ops_tx,
 	.wake_tx_queue		= rtw_ops_wake_tx_queue,
@@ -755,6 +810,7 @@ const struct ieee80211_ops rtw_ops = {
 	.sta_remove		= rtw_ops_sta_remove,
 	.set_key		= rtw_ops_set_key,
 	.ampdu_action		= rtw_ops_ampdu_action,
+	.can_aggregate_in_amsdu	= rtw_ops_can_aggregate_in_amsdu,
 	.sw_scan_start		= rtw_ops_sw_scan_start,
 	.sw_scan_complete	= rtw_ops_sw_scan_complete,
 	.mgd_prepare_tx		= rtw_ops_mgd_prepare_tx,
@@ -762,5 +818,10 @@ const struct ieee80211_ops rtw_ops = {
 	.sta_statistics		= rtw_ops_sta_statistics,
 	.flush			= rtw_ops_flush,
 	.set_bitrate_mask	= rtw_ops_set_bitrate_mask,
+#ifdef CONFIG_PM
+	.suspend		= rtw_ops_suspend,
+	.resume			= rtw_ops_resume,
+	.set_wakeup		= rtw_ops_set_wakeup,
+#endif
 };
 EXPORT_SYMBOL(rtw_ops);

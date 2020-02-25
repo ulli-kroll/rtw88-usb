@@ -14,7 +14,6 @@
 #include "phy.h"
 #include "mac.h"
 
-
 struct rtw_debugfs_priv {
 	struct rtw_dev *rtwdev;
 
@@ -34,12 +33,12 @@ static int rtw_debugfs_do_tx_perf(struct seq_file *s, void *data)
 
 	start_time = ktime_get_ns();
 
-	for (i=0; i<1000; i++)
+	for (i = 0; i < 1000; i++)
 		rtw_fw_send_h2c2h_loopback(rtwdev);
 
 	delta = ktime_get_ns() - start_time;
 	seq_printf(s, "H2C loopback 1000, total time: %llu, average: %llu ns\n",
-		delta, delta/1000);
+		   delta, delta / 1000);
 
 	return 0;
 }
@@ -74,11 +73,6 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	int ret = 0;
 	int i;
 
-	/* rf_supportability :
-	   rtw_phydm_ability_backup()
-	   rtw_phydm_func_disable_all()
-	 */
-
 	sema_init(&loopback->sema, 0);
 	loopback->total = cnt;
 	loopback->pktsize = pktsize;
@@ -93,21 +87,21 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	size = pktsize + chip->tx_pkt_desc_sz + 24;
 	skb = dev_alloc_skb(size);
 	if (!skb) {
-		rtw_err(rtwdev, "skb alloc failed\n");
+		rtw_err(rtwdev, "skb allocation: out of memory\n");
 		ret = -ENOMEM;
 		goto trxmode_deinit;
 	}
 
 	loopback->rx_buf = kmalloc(pktsize, GFP_KERNEL);
 	if (!loopback->rx_buf) {
-		rtw_err(rtwdev, "rx_buf alloc failed\n");
+		rtw_err(rtwdev, "rx_buf allocation: out of memory\n");
 		ret = -ENOMEM;
 		goto skb_deinit;
 	}
 
 	loopback->tx_buf = kmalloc(pktsize, GFP_KERNEL);
 	if (!loopback->tx_buf) {
-		rtw_err(rtwdev, "tx_buf alloc failed\n");
+		rtw_err(rtwdev, "tx_buf allocation: out of memory\n");
 		ret = -ENOMEM;
 		goto rxbuf_deinit;
 	}
@@ -153,17 +147,16 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 
 	down(&loopback->sema);
 
-	spend = ktime_to_ns(ktime_sub(ktime_get(), t1))/(cnt *1000);
+	spend = ktime_to_ns(ktime_sub(ktime_get(), t1)) / (cnt * 1000);
 	seq_printf(s, "pktsize:%d, spend: %lldus, throughput=%lldMbps\n",
-		   pktsize, spend, pktsize * 8 / spend );
+		   pktsize, spend, pktsize * 8 / spend);
 
 	msleep(100);
 
-	if (memcmp(loopback->tx_buf, loopback->rx_buf, pktsize) == 0) {
+	if (memcmp(loopback->tx_buf, loopback->rx_buf, pktsize) == 0)
 		seq_printf(s, "loopback success, pktsize=%d\n", pktsize);
-	} else {
+	else
 		seq_printf(s, "loopback failed, pktsize=%d\n", pktsize);
-	}
 
 	loopback->start = false;
 
@@ -189,9 +182,11 @@ exit:
 	return ret;
 }
 
-static int rtw_debugfs_usb_loopback_func_open(struct inode *inode, struct file *filp)
+static int rtw_debugfs_usb_loopback_func_open(struct inode *inode,
+					      struct file *filp)
 {
-	return single_open(filp, rtw_debugfs_usb_loopback_func, inode->i_private);
+	return single_open(filp, rtw_debugfs_usb_loopback_func,
+			   inode->i_private);
 }
 
 static const struct file_operations file_ops_usb_loopback_func = {
@@ -211,22 +206,20 @@ void rtw_debugfs_init(struct rtw_dev *rtwdev)
 	rtwdev->debugfs = debugfs_topdir;
 
 	priv_data.rtwdev = rtwdev;
-	if (!debugfs_create_file("do_tx_perf", S_IFREG| S_IRUGO, 
+	if (!debugfs_create_file("do_tx_perf", S_IFREG | S_IRUGO,
 				 debugfs_topdir, &priv_data,
-				 &file_ops_do_tx_perf))		
+				 &file_ops_do_tx_perf))
 		pr_err("Unable to initialize debugfs-do_tx_perf\n");
 
-	if (!debugfs_create_file("usb_loopback_func", S_IFREG| S_IRUGO, 
+	if (!debugfs_create_file("usb_loopback_func", S_IFREG | S_IRUGO,
 				 debugfs_topdir, &priv_data,
 				 &file_ops_usb_loopback_func))
 		pr_err("Unable to initialize debugfs-do_tx_perf\n");
-
 }
 
 void rtw_debugfs_deinit(struct rtw_dev *rtwdev)
 {
-	if (rtwdev->debugfs)
-		debugfs_remove_recursive(rtwdev->debugfs);
+	debugfs_remove_recursive(rtwdev->debugfs);
 }
 
 #ifdef CONFIG_RTW88_DEBUG
@@ -243,7 +236,7 @@ void __rtw_dbg(struct rtw_dev *rtwdev, enum rtw_debug_mask mask,
 	vaf.va = &args;
 
 	if (rtw_debug_mask & mask)
-		dev_printk(KERN_DEBUG, rtwdev->dev, "%pV", &vaf);
+		dev_dbg(rtwdev->dev, "%pV", &vaf);
 
 	va_end(args);
 }

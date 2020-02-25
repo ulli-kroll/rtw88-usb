@@ -235,7 +235,7 @@ static void rtw_tx_data_pkt_info_update(struct rtw_dev *rtwdev,
 	u8 ampdu_density = 0;
 	bool ampdu_en = false;
 	u8 rate = DESC_RATE6M;
-	u8 rate_id = 9;
+	u8 rate_id = 6;
 	u8 bw = RTW_CHANNEL_WIDTH_20;
 	bool stbc = false;
 	bool ldpc = false;
@@ -306,7 +306,7 @@ void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 
 	txrate = ieee80211_get_tx_rate(rtwdev->hw, info);
 	if (txrate) {
-		//pr_info("%s: txrate - flags:0x%x, bitrate:0x%x\n", 
+		//pr_info("%s: txrate - flags:0x%x, bitrate:0x%x\n",
 		//	__func__, txrate->flags, txrate->bitrate);
 		// TODO: in sband, need to implement relative ht/vht items
 		hw_value = txrate->hw_value;
@@ -316,7 +316,7 @@ void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 	}
 
 	pkt_info->use_rate = true;
-	pkt_info->rate_id = 9;
+	pkt_info->rate_id = 6;
 	pkt_info->rate = hw_value;
 	pkt_info->dis_rate_fallback = true;
 
@@ -327,7 +327,7 @@ void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 	} else if (ieee80211_is_data(fc)) {
 		pkt_info->use_rate = false;
 		pkt_info->dis_rate_fallback = false;
-		//pkt_info->rate = DESC_RATEMCS15;
+		//pkt_info->rate = DESC_RATE54M;
 		//pr_info("%s: pkt_info->rate=0x%x\n", __func__, pkt_info->rate);
 		rtw_tx_data_pkt_info_update(rtwdev, pkt_info, control, skb);
 	} else {
@@ -379,7 +379,7 @@ void rtw_rsvd_page_pkt_info_update(struct rtw_dev *rtwdev,
 	bmc = is_broadcast_ether_addr(hdr->addr1) ||
 	      is_multicast_ether_addr(hdr->addr1);
 	pkt_info->use_rate = true;
-	pkt_info->rate_id = 9;
+	pkt_info->rate_id = 6;
 	pkt_info->dis_rate_fallback = true;
 	pkt_info->bmc = bmc;
 	pkt_info->tx_pkt_size = skb->len;
