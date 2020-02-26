@@ -3,12 +3,9 @@ KERNELDIR ?= /lib/modules/$(shell uname -r)/build
 PWD       := $(shell pwd)
 
 CONFIG_RTW88_CORE=m
-CONFIG_RTW88_PCI=m
 CONFIG_RTW88_USB=m
-CONFIG_RTW88_8822BE=y
-CONFIG_RTW88_8822CE=y
-ccflags-y += -DCONFIG_RTW88_8822BE=y
-ccflags-y += -DCONFIG_RTW88_8822CE=y
+CONFIG_RTW88_8822B=y
+CONFIG_RTW88_8822C=y
 ccflags-y += -DDEBUG
 ccflags-y += -DCONFIG_RTW88_DEBUG=y
 ccflags-y += -DCONFIG_RTW88_DEBUGFS=y
@@ -33,13 +30,10 @@ rtw88-y += main.o \
 	   wow.o \
 	   regd.o
 
-#rtw88-y += hal8822b_fw.o
-rtw88-$(CONFIG_RTW88_8822BE)	+= rtw8822b.o rtw8822b_table.o
-rtw88-$(CONFIG_RTW88_8822CE)	+= rtw8822c.o rtw8822c_table.o
+rtw88-$(CONFIG_RTW88_8822B)	+= rtw8822b.o rtw8822b_table.o
+rtw88-$(CONFIG_RTW88_8822C)	+= rtw8822c.o rtw8822c_table.o
 
-obj-$(CONFIG_RTW88_PCI)		+= rtwpci.o
 obj-$(CONFIG_RTW88_USB)		+= rtwusb.o
-rtwpci-objs			:= pci.o
 rtwusb-objs			:= usb.o
 
 ########### section above is for upstream kernel ###########
@@ -56,6 +50,7 @@ cscope:
 
 clean:
 	find ./ -name "*.o" -exec rm {} \;
+	find ./ -name "*.a" -exec rm {} \;
 	find ./ -name "*.ko" -exec rm {} \;
 	find ./ -name "*.cmd" -exec rm {} \;
 	find ./ -name "*.mod" -exec rm {} \;
