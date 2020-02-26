@@ -714,8 +714,9 @@ static int rtw_usb_write_data_h2c(struct rtw_dev *rtwdev, u8 *buf, u32 size)
 	return rtw_usb_write_data(rtwdev, buf, size, TX_DESC_QSEL_H2C);
 }
 
-static int rtw_usb_tx(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
-		      struct sk_buff *skb)
+static int rtw_usb_tx_write(struct rtw_dev *rtwdev,
+			    struct rtw_tx_pkt_info *pkt_info,
+			    struct sk_buff *skb)
 {
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	struct rtw_chip_info *chip = rtwdev->chip;
@@ -743,9 +744,15 @@ static int rtw_usb_tx(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
 	tx_data->sn = pkt_info->sn;
 
 	skb_queue_tail(&rtwusb->tx_queue, skb);
-	rtw_set_event(&rtwusb->tx_handler.event);
 
 	return 0;
+}
+
+static void rtw_usb_tx_kick_off(struct rtw_dev *rtwdev)
+{
+	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+
+	rtw_set_event(&rtwusb->tx_handler.event);
 }
 
 // RX functions
@@ -1040,7 +1047,8 @@ static void rtw_usb_interface_cfg(struct rtw_dev *rtwdev)
 }
 
 static struct rtw_hci_ops rtw_usb_ops = {
-	.tx = rtw_usb_tx,
+	.tx_write = rtw_usb_tx_write,
+	.tx_kick_off = rtw_usb_tx_kick_off,
 	.setup = rtw_usb_setup,
 	.start = rtw_usb_start,
 	.stop = rtw_usb_stop,

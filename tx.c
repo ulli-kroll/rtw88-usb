@@ -6,6 +6,7 @@
 #include "tx.h"
 #include "fw.h"
 #include "ps.h"
+#include "debug.h"
 
 static
 void rtw_tx_stats(struct rtw_dev *rtwdev, struct ieee80211_vif *vif,
@@ -223,10 +224,9 @@ void rtw_tx_report_handle(struct rtw_dev *rtwdev, struct sk_buff *skb)
 
 static void rtw_tx_data_pkt_info_update(struct rtw_dev *rtwdev,
 					struct rtw_tx_pkt_info *pkt_info,
-					struct ieee80211_tx_control *control,
+					struct ieee80211_sta *sta,
 					struct sk_buff *skb)
 {
-	struct ieee80211_sta *sta = control->sta;
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
 	struct rtw_sta_info *si;
@@ -285,7 +285,7 @@ out:
 
 void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 			    struct rtw_tx_pkt_info *pkt_info,
-			    struct ieee80211_tx_control *control,
+			    struct ieee80211_sta *sta,
 			    struct sk_buff *skb)
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
@@ -299,8 +299,8 @@ void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 	struct ieee80211_rate *txrate;
 	u8 hw_value = 0;
 
-	if (control->sta) {
-		si = (struct rtw_sta_info *)control->sta->drv_priv;
+	if (sta) {
+		si = (struct rtw_sta_info *)sta->drv_priv;
 		vif = si->vif;
 	}
 
@@ -328,8 +328,9 @@ void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 		pkt_info->use_rate = false;
 		pkt_info->dis_rate_fallback = false;
 		//pkt_info->rate = DESC_RATE54M;
-		//pr_info("%s: pkt_info->rate=0x%x\n", __func__, pkt_info->rate);
-		rtw_tx_data_pkt_info_update(rtwdev, pkt_info, control, skb);
+		//pr_info("%s: pkt_info->rate=0x%x\n", __func__,
+		//	  pkt_info->rate);
+		rtw_tx_data_pkt_info_update(rtwdev, pkt_info, sta, skb);
 	} else {
 		pr_err("%s: strange, unknown pkt\n", __func__);
 	}
@@ -393,10 +394,16 @@ void rtw_tx(struct rtw_dev *rtwdev,
 	    struct sk_buff *skb)
 {
 	struct rtw_tx_pkt_info pkt_info = {0};
+	int ret;
 
-	rtw_tx_pkt_info_update(rtwdev, &pkt_info, control, skb);
-	if (rtw_hci_tx(rtwdev, &pkt_info, skb))
+	rtw_tx_pkt_info_update(rtwdev, &pkt_info, control->sta, skb);
+	ret = rtw_hci_tx_write(rtwdev, &pkt_info, skb);
+	if (ret) {
+		rtw_err(rtwdev, "failed to write TX skb to HCI\n");
 		goto out;
+	}
+
+	rtw_hci_tx_kick_off(rtwdev);
 
 	return;
 

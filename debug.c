@@ -138,11 +138,13 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 			goto txbuf_deinit;
 		}
 
-		ret = rtw_hci_tx(rtwdev, &pkt_info, skb1);
+		ret = rtw_hci_tx_write(rtwdev, &pkt_info, skb1);
 		if (ret) {
 			rtw_err(rtwdev, "rtw_hci_tx() failed\n");
 			goto txbuf_deinit;
 		}
+
+		rtw_hci_tx_kick_off(rtwdev);
 	}
 
 	down(&loopback->sema);
