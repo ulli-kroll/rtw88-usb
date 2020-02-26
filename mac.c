@@ -1024,19 +1024,19 @@ static int rtw_init_trx_cfg(struct rtw_dev *rtwdev)
 
 	ret = txdma_queue_mapping(rtwdev);
 	if (ret) {
-		pr_info("txdma_queue_mapping failed, ret=%d\n", ret);
+		pr_err("txdma_queue_mapping failed, ret=%d\n", ret);
 		return ret;
 	}
 
 	ret = priority_queue_cfg(rtwdev);
 	if (ret) {
-		pr_info("priority_queue_cfg failed, ret=%d\n", ret);
+		pr_err("priority_queue_cfg failed, ret=%d\n", ret);
 		return ret;
 	}
 
 	ret = init_h2c(rtwdev);
 	if (ret) {
-		pr_info("init_h2c failed, ret=%d\n", ret);
+		pr_err("init_h2c failed, ret=%d\n", ret);
 		return ret;
 	}
 
@@ -1080,3 +1080,4 @@ int rtw_mac_init(struct rtw_dev *rtwdev)
 
 	return 0;
 }
+
