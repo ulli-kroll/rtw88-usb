@@ -1591,6 +1591,7 @@ struct rtw_hal {
 struct rtw_loopback {
 	struct semaphore	sema;
 	bool			start;
+	bool			usb_agg_test;
 	u32			pktsize;
 	u8			*tx_buf;
 	u8			*rx_buf;

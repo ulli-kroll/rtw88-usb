@@ -12,6 +12,153 @@
 #include "fw.h"
 #include "debug.h"
 
+struct txdesc_hdr {
+	u16 txpktsize;
+	u8 offset;
+	u8 bmc:1;
+	u8 htc:1;
+	u8 ls:1;
+	u8 amsdu_pad_en:1;
+	u8 bcnpkt_tsf_ctrl:1;
+	u8 noacm:1;
+	u8 gf:1;
+	u8 disqsellseq:1;
+
+	u8 macid:7;
+	u8 rsvd1:1;
+	u8 qsel:5;
+	u8 rdg_nav_ext:1;
+	u8 lsig_txop_en:1;
+	u8 tx_pkt_after_pifs:1;
+	u8 rate_id:5;
+	u8 en_desc_id:1;
+	u8 sectype:2;
+	u8 pkt_offset:5;
+	u8 moredata:1;
+	u8 rsvd2:2;
+
+	u16 p_aid:9;
+	u16 tri_frame:1;
+	u16 cca_rts:2;
+	u16 agg_en:1;
+	u16 rdg_en:1;
+	u16 null0:1;
+	u16 null1:1;
+	u8 bk:1;
+	u8 morefrag:1;
+	u8 raw:1;
+	u8 spe_rpt_en:1;
+	u8 ampdu_density:3;
+	u8 bt_null:1;
+	u8 g_id:6;
+	u8 ftm_en:1;
+	u8 hw_aes_iv:1;
+
+	u8 wheader_len:5;
+	u8 rsvd3:1;
+	u8 hw_ssn_sel:2;
+	u8 userate:1;
+	u8 disrtsfb:1;
+	u8 disdatafb:1;
+	u8 cts2self:1;
+	u8 rts:1;
+	u8 hw_rts_en:1;
+	u8 chk_en:1;
+	u8 navusehdr:1;
+	u8 use_max_time_en:1;
+	u8 max_agg_num:5;
+	u8 ndpa:2;
+	u8 ampdu_max_time;
+
+	u8 datarate:7;
+	u8 try_rate:1;
+	u16 data_rty_lowest_rate:5;
+	u16 rtw_rty_lowest_rate:4;
+	u16 rty_lmt_en:1;
+	u16 rts_data_rty_lmt:6;
+	u8 rtsrate:5;
+	u8 pcts_en:1;
+	u8 pcts_mask_idx:2;
+
+	u8 data_sc:4;
+	u8 data_short:1;
+	u8 data_bw:2;
+	u8 data_ldpc:1;
+	u16 data_stbc:2;
+	u16 vcs_stbc:2;
+	u16 rts_short:1;
+	u16 signaling_ta_pkt_sc:4;
+	u16 signaling_ta_pkt_en:1;
+	u16 multiple_port:3;
+	u16 port_id:3;
+	u8 rsvd4:4;
+	u8 txpwr_ofset:3;
+	u8 polluted:1;
+
+	u16 sw_define:12;
+	u16 mbssid:4;
+	u8 antsel_a:2;
+	u8 antsel_b:2;
+	u8 antsel_c:2;
+	u8 ant_mapa:2;
+	u8 ant_mapb:2;
+	u8 ant_mapc:2;
+	u8 ant_mapd:2;
+	u8 antsel_d:2;
+
+	u16 txdesc_checksum;
+	u8 rsvd5:4;
+	u8 ntx_map:4;
+	u8 dma_txagg_num;
+
+	u8 rts_rc:6;
+	u8 bar_rc:2;
+	u8 data_rc:6;
+	u8 en_hwexseq:1;
+	u8 en_hwseq:1;
+	u8 nextheadpage_l;
+	u8 tailpage_l;
+
+	u16 padding_len:11;
+	u8 txbf_path:1;
+	u16 sw_seq:12;
+	u8 nextheadpage_h:4;
+	u8 tailpage_h:4;
+
+	u8 snd_pkt_sel:2;
+	u8 rsvd6:2;
+	u8 mu_rc:4;
+	u8 mu_datarate;
+	u16 rsvd7;
+} __packed;
+
+static u16 show_txdesc(u8 *ptxdesc, bool is_agg)
+{
+	struct txdesc_hdr *tdh = (struct txdesc_hdr *)ptxdesc;
+
+	if (!is_agg && !tdh->dma_txagg_num) {
+		return 0;
+	}
+
+	if (!tdh->txpktsize) {
+		pr_err("%s: txpktsize == 0,parse failed\n", __func__);
+		return 0;
+	}
+
+	pr_info("**************\n");
+	pr_info("* txpktsize:%d\n", tdh->txpktsize);
+	pr_info("* pkt_offset:%d\n", tdh->pkt_offset);
+	pr_info("* dma_txagg_num:%d\n", tdh->dma_txagg_num);
+	pr_info("* padding_len:%d\n", tdh->padding_len);
+	pr_info("* sw_seq:%d\n", tdh->sw_seq);
+	pr_info("**************\n");
+
+	print_hex_dump(KERN_INFO, "txdesc: ", DUMP_PREFIX_OFFSET, 16, 1,
+		       ptxdesc, 48, 1);
+
+	return ALIGN(tdh->txpktsize, 4) + 48 + tdh->pkt_offset * 8;
+}
+
 /*
  * usb read/write register functions
  */
@@ -521,14 +668,10 @@ static void rtw_usb_tx_handler(struct work_struct *work)
 	struct rtw_dev *rtwdev = my_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	u32 timeout = 0;
-	//u32 queue_len;
 
 	do {
 		rtw_wait_event(&rtwusb->tx_handler.event, timeout);
 		rtw_reset_event(&rtwusb->tx_handler.event);
-
-		//queue_len = skb_queue_len(&rtwusb->tx_queue);
-		//pr_info("%s: skb queue len=%d\n", __func__, queue_len);
 
 		if (rtwusb->init_done)
 			rtw_tx_func(rtwusb);
@@ -573,7 +716,10 @@ static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 	if (ret < 0)
 		pr_err("usb_bulk_msg error, ret=%d\n", ret);
 
-	if (unlikely(loopback->start)) {
+	if (unlikely(loopback->usb_agg_test)) {
+		print_hex_dump(KERN_INFO, "TX: ", DUMP_PREFIX_OFFSET, 16, 1,
+			       skb->data, skb->len, 1);
+	} else if (unlikely(loopback->start)) {
 		loopback->cur++;
 		if (loopback->cur >= loopback->total)
 			up(&loopback->sema);
@@ -588,6 +734,68 @@ void rtw_tx_func(struct rtw_usb *rtwusb)
 	struct sk_buff *skb;
 	u8 queue;
 	int status;
+
+	if (loopback->usb_agg_test) {
+		struct sk_buff *skb, *skb1, *skb2;
+		int queue_len;
+		int len;
+		u16 offset;
+
+		queue_len = skb_queue_len(&rtwusb->tx_queue);
+		pr_info("%s: queue len = %d\n", __func__, queue_len);
+
+		if (queue_len < 2) {
+			pr_err("Not the test case, queue_len = %d\n", queue_len);
+			return;
+		}
+
+		skb1 = skb_dequeue(&rtwusb->tx_queue);
+		if (!skb1) {
+			pr_err("skb1 dequeue failed\n");
+			return;
+		}
+
+		skb2 = skb_dequeue(&rtwusb->tx_queue);
+		if (!skb2) {
+			pr_err("skb2 dequeue failed\n");
+			return;
+		}
+
+		queue = rtw_tx_queue_mapping(skb1);
+
+		len = skb1->len + skb2->len;
+		skb = dev_alloc_skb(len);
+		if (!skb)
+			goto free_skb;
+		skb_put(skb, len);
+
+		SET_TX_DESC_DMA_TXAGG_NUM(skb1->data, 2);
+		SET_TX_DESC_PKT_OFFSET(skb1->data, 1);
+		SET_TX_DESC_PKT_OFFSET(skb2->data, 0);
+
+		memcpy(skb->data, skb1->data, skb1->len);
+		memcpy(skb->data + skb1->len, skb2->data, 48);
+		memset(skb->data + skb1->len + 48, 0xbb, 8);
+		memcpy(skb->data + skb1->len + 48 + 8, skb2->data + 48 + 8,
+		       skb2->len - 48 - 8);
+
+		offset = show_txdesc(skb->data, 1);
+		pr_info("%s: offset=%d\n", __func__, offset);
+		show_txdesc(skb->data + offset, 1);
+
+		status = rtw_usb_write_port(rtwdev, queue, skb->len, skb);
+		if (status) {
+			pr_err("%s, rtw_usb_write_xmit failed, ret=%d\n",
+			       __func__, status);
+		}
+
+free_skb:
+		dev_kfree_skb(skb);
+		dev_kfree_skb(skb1);
+		dev_kfree_skb(skb2);
+
+		return;
+	}
 
 	while (1) {
 		mutex_lock(&rtwusb->tx_lock);
@@ -812,7 +1020,12 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 
 			skb_put(skb, pkt_stat.pkt_len);
 			skb_reserve(skb, pkt_offset);
-			if (loopback->start) {
+
+			if (unlikely(loopback->usb_agg_test)) {
+				print_hex_dump(KERN_INFO, "rx data: ",
+					       DUMP_PREFIX_OFFSET, 16, 1,
+					       skb->data, skb->len, 1);
+			} else if (unlikely(loopback->start)) {
 				if (loopback->rx_buf && skb->len > 24)
 					memcpy(loopback->rx_buf, skb->data + 24,
 					       min(skb->len - 24,

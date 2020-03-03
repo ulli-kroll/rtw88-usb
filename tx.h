@@ -57,6 +57,8 @@
 	le32p_replace_bits((__le32 *)(txdesc) + 0x07, value, GENMASK(15, 0))
 #define GET_TX_DESC_PKT_OFFSET(txdesc)                                  \
 	le32_get_bits(*((__le32 *)(txdesc) + 0x01), GENMASK(28, 24))
+#define SET_TX_DESC_DMA_TXAGG_NUM(txdesc, value)                             \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x07, value, GENMASK(31, 24))
 
 enum rtw_tx_desc_queue_select {
 	TX_DESC_QSEL_TID0	= 0,

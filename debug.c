@@ -199,6 +199,116 @@ static const struct file_operations file_ops_usb_loopback_func = {
 	.release = single_release,
 };
 
+/* USB aggregation packet test */
+
+static int rtw_debugfs_usb_agg_test(struct seq_file *s, void *data)
+{
+	struct rtw_debugfs_priv *priv = s->private;
+	struct rtw_dev *rtwdev = priv->rtwdev;
+	struct sk_buff *skb, *skb1;
+	struct rtw_chip_info *chip = rtwdev->chip;
+	struct rtw_tx_pkt_info pkt_info = {0};
+	struct rtw_loopback *loopback = &rtwdev->loopback;
+	int size;
+	u32 pktsize = 512 - 48 - 24 - 8;
+	int ret = 0;
+
+	rtwdev->trx_mode = RTW_TRX_MODE_LOOPBACK;
+	ret = rtw_mac_init(rtwdev);
+	if (ret) {
+		rtw_err(rtwdev, "failed to configure mac\n");
+		goto exit;
+	}
+
+	size = pktsize + chip->tx_pkt_desc_sz + 24 + 8;
+	skb = dev_alloc_skb(size);
+	if (!skb) {
+		rtw_err(rtwdev, "skb allocation: out of memory\n");
+		ret = -ENOMEM;
+		goto trxmode_deinit;
+	}
+
+	skb_put(skb, pktsize + 24 + 8);
+	memset(skb->data, 0x00, 8);
+	memset(skb->data + 8, 0x00, 24);
+	skb->data[8] = 0x40;
+	memset(skb->data + 8 + 4, 0xFF, ETH_ALEN);
+	memcpy(skb->data + 8 + 4 + ETH_ALEN, rtwdev->efuse.addr, ETH_ALEN);
+	memset(skb->data + 8 + 4 + 2 * ETH_ALEN, 0Xff, ETH_ALEN);
+
+	//get_random_bytes(skb->data + 24, pktsize);
+	memset(skb->data + 8 + 24, 0xBB, pktsize);
+
+	/* set pkt_info */
+	pkt_info.sec_type = 0;
+	pkt_info.tx_pkt_size = skb->len - 8;
+	pkt_info.offset = chip->tx_pkt_desc_sz + 8;
+	pkt_info.qsel = 0;
+	pkt_info.ls = true;
+
+	loopback->usb_agg_test = true;
+
+	skb1 = skb_copy(skb, GFP_ATOMIC);
+	if (!skb1) {
+		rtw_err(rtwdev, "skb_copy failed\n");
+		ret = -ENOMEM;
+		goto skb_deinit;
+	}
+	memset(skb1->data + 8 + 24, 0xAA, pktsize);
+
+	ret = rtw_hci_tx_write(rtwdev, &pkt_info, skb1);
+	if (ret) {
+		rtw_err(rtwdev, "rtw_hci_tx() skb1 failed\n");
+		goto skb1_deinit;
+	}
+
+	ret = rtw_hci_tx_write(rtwdev, &pkt_info, skb);
+	if (ret) {
+		rtw_err(rtwdev, "rtw_hci_tx() skb failed\n");
+		goto skb_deinit;
+	}
+
+	rtw_hci_tx_kick_off(rtwdev);
+
+	msleep(1000);
+
+	loopback->usb_agg_test = false;
+
+	goto trxmode_deinit;
+
+skb1_deinit:
+	dev_kfree_skb(skb1);
+
+skb_deinit:
+	// TODO: should purge tx queue for skb1
+	dev_kfree_skb(skb);
+
+trxmode_deinit:
+	rtwdev->trx_mode = RTW_TRX_MODE_NORMAL;
+	ret = rtw_mac_init(rtwdev);
+	if (ret) {
+		rtw_err(rtwdev, "failed to configure mac\n");
+		return ret;
+	}
+
+exit:
+	return ret;
+}
+static int rtw_debugfs_usb_agg_test_open(struct inode *inode,
+					      struct file *filp)
+{
+	return single_open(filp, rtw_debugfs_usb_agg_test,
+			   inode->i_private);
+}
+
+static const struct file_operations file_ops_usb_agg_test = {
+	.owner = THIS_MODULE,
+	.open = rtw_debugfs_usb_agg_test_open,
+	.read = seq_read,
+	.llseek = seq_lseek,
+	.release = single_release,
+};
+
 static struct rtw_debugfs_priv priv_data;
 void rtw_debugfs_init(struct rtw_dev *rtwdev)
 {
@@ -216,7 +326,12 @@ void rtw_debugfs_init(struct rtw_dev *rtwdev)
 	if (!debugfs_create_file("usb_loopback_func", S_IFREG | S_IRUGO,
 				 debugfs_topdir, &priv_data,
 				 &file_ops_usb_loopback_func))
-		pr_err("Unable to initialize debugfs-do_tx_perf\n");
+		pr_err("Unable to initialize debugfs-usb_loopback_func\n");
+
+	if (!debugfs_create_file("usb_agg_test", S_IFREG | S_IRUGO,
+				 debugfs_topdir, &priv_data,
+				 &file_ops_usb_agg_test))
+		pr_err("Unable to initialize debugfs-usb_agg_test\n");
 }
 
 void rtw_debugfs_deinit(struct rtw_dev *rtwdev)
