@@ -804,7 +804,9 @@ struct rtw_chip_ops {
 			      struct ieee80211_bss_conf *conf);
 	void (*cfg_csi_rate)(struct rtw_dev *rtwdev, u8 rssi, u8 cur_rate,
 			     u8 fixrate_en, u8 *new_rate);
-	void (*fill_txdesc_checksum)(struct rtw_dev *rtwdev, u8 *txdesc);
+	void (*fill_txdesc_checksum)(struct rtw_dev *rtwdev,
+				     struct rtw_tx_pkt_info *pkt_info,
+				     u8 *txdesc);
 
 	/* for coex */
 	void (*coex_set_init)(struct rtw_dev *rtwdev);
@@ -1590,6 +1592,7 @@ struct rtw_hal {
 struct rtw_loopback {
 	struct semaphore	sema;
 	bool			start;
+	bool			usb_agg_test;
 	u32			pktsize;
 	u8			*tx_buf;
 	u8			*rx_buf;

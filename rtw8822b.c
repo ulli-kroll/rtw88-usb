@@ -1567,9 +1567,11 @@ static int rtw8822bu_set_rx_agg_switch(struct rtw_dev *rtwdev, bool enable,
 	return 0;
 }
 
-static void rtw8822b_fill_txdesc_checksum(struct rtw_dev *rtwdev, u8 *txdesc)
+static void rtw8822b_fill_txdesc_checksum(struct rtw_dev *rtwdev,
+					  struct rtw_tx_pkt_info *pkt_info,
+					  u8 *txdesc)
 {
-	fill_txdesc_checksum_common(rtwdev, txdesc, 8);
+	fill_txdesc_checksum_common(txdesc, 8);
 }
 
 static struct rtw_pwr_seq_cmd trans_carddis_to_cardemu_8822b[] = {

@@ -55,8 +55,8 @@
 	le32p_replace_bits((__le32 *)(txdesc) + 0x06, value, GENMASK(11, 0))
 #define SET_TX_DESC_TXDESC_CHECKSUM(txdesc, value)                             \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x07, value, GENMASK(15, 0))
-#define GET_TX_DESC_PKT_OFFSET(txdesc)                                  \
-	le32_get_bits(*((__le32 *)(txdesc) + 0x01), GENMASK(28, 24))
+#define SET_TX_DESC_DMA_TXAGG_NUM(txdesc, value)                             \
+	le32p_replace_bits((__le32 *)(txdesc) + 0x07, value, GENMASK(31, 24))
 
 enum rtw_tx_desc_queue_select {
 	TX_DESC_QSEL_TID0	= 0,
@@ -99,7 +99,7 @@ void rtw_rsvd_page_pkt_info_update(struct rtw_dev *rtwdev,
 				   struct sk_buff *skb);
 
 static inline
-void fill_txdesc_checksum_common(struct rtw_dev *rtwdev, u8 *txdesc, u16 len)
+void fill_txdesc_checksum_common(u8 *txdesc, u16 len)
 {
 	__le16 chksum = 0;
 	__le16 *data = (__le16 *)(txdesc);
