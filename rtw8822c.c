@@ -3555,11 +3555,10 @@ static int rtw8822cu_set_rx_agg_switch(struct rtw_dev *rtwdev, bool enable,
 	return 0;
 }
 
-static void rtw8822c_fill_txdesc_checksum(struct rtw_dev *rtwdev,
-					  struct rtw_tx_pkt_info *pkt_info,
+static void rtw8822c_fill_txdesc_checksum(struct rtw_tx_pkt_info *pkt_info,
 					  u8 *txdesc)
 {
-	struct rtw_chip_info *chip = rtwdev->chip;
+	struct rtw_chip_info *chip = &rtw8822c_hw_spec;
 	u16 len;
 
 	len = pkt_info->pkt_offset + (chip->tx_pkt_desc_sz >> 3);
