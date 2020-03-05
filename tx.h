@@ -98,20 +98,19 @@ void rtw_rsvd_page_pkt_info_update(struct rtw_dev *rtwdev,
 				   struct rtw_tx_pkt_info *pkt_info,
 				   struct sk_buff *skb);
 
-#define fill_txdesc_checksum_common(rtwdev, txdesc, len) (		\
-{									\
-	typeof(txdesc) _txdesc = (txdesc);				\
-	__le16 chksum = 0;						\
-	__le16 *data = (__le16 *)(_txdesc);				\
-	u32 i;								\
-									\
-	SET_TX_DESC_TXDESC_CHECKSUM(_txdesc, 0x0000);			\
-									\
-	for (i = 0; i < len; i++)					\
-		chksum ^= *(data + 2 * i) ^ *(data + (2 * i + 1));	\
-									\
-	SET_TX_DESC_TXDESC_CHECKSUM(_txdesc, le16_to_cpu(chksum));	\
-}									\
-)
+static inline
+void fill_txdesc_checksum_common(struct rtw_dev *rtwdev, u8 *txdesc, u16 len)
+{
+	__le16 chksum = 0;
+	__le16 *data = (__le16 *)(txdesc);
+	u32 i;
+
+	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, 0x0000);
+
+	for (i = 0; i < len; i++)
+		chksum ^= *(data + 2 * i) ^ *(data + (2 * i + 1));
+
+	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, le16_to_cpu(chksum));
+}
 
 #endif
