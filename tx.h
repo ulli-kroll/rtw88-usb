@@ -99,16 +99,15 @@ void rtw_rsvd_page_pkt_info_update(struct rtw_dev *rtwdev,
 				   struct sk_buff *skb);
 
 static inline
-void fill_txdesc_checksum_common(u8 *txdesc, u16 len)
+void fill_txdesc_checksum_common(u8 *txdesc, size_t words)
 {
 	__le16 chksum = 0;
 	__le16 *data = (__le16 *)(txdesc);
-	u32 i;
 
 	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, 0x0000);
 
-	for (i = 0; i < len; i++)
-		chksum ^= *(data + 2 * i) ^ *(data + (2 * i + 1));
+	while (words--)
+		chksum ^= *data++;
 
 	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, le16_to_cpu(chksum));
 }

@@ -881,7 +881,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 
 	rtw_tx_fill_tx_desc(&pkt_info, skb);
 
-	chip->ops->fill_txdesc_checksum(&pkt_info, skb->data);
+	chip->ops->fill_txdesc_checksum(rtwdev, &pkt_info, skb->data);
 
 	addr = rtw_qsel_to_queue(qsel);
 
@@ -934,7 +934,7 @@ static int rtw_usb_tx_write(struct rtw_dev *rtwdev,
 	pkt_info->qsel = rtw_queue_to_qsel(skb, queue);
 	rtw_tx_fill_tx_desc(pkt_info, skb);
 
-	chip->ops->fill_txdesc_checksum(pkt_info, skb->data);
+	chip->ops->fill_txdesc_checksum(rtwdev, pkt_info, skb->data);
 
 	tx_data = rtw_usb_get_tx_data(skb);
 	tx_data->sn = pkt_info->sn;

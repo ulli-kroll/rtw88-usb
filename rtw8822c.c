@@ -3555,16 +3555,16 @@ static int rtw8822cu_set_rx_agg_switch(struct rtw_dev *rtwdev, bool enable,
 	return 0;
 }
 
-static void rtw8822c_fill_txdesc_checksum(struct rtw_tx_pkt_info *pkt_info,
+static void rtw8822c_fill_txdesc_checksum(struct rtw_dev *rtwdev,
+					  struct rtw_tx_pkt_info *pkt_info,
 					  u8 *txdesc)
 {
-	struct rtw_chip_info *chip = &rtw8822c_hw_spec;
-	u16 len;
+	struct rtw_chip_info *chip = rtwdev->chip;
+	size_t words;
 
-	len = pkt_info->pkt_offset + (chip->tx_pkt_desc_sz >> 3);
-	len <<= 1;
+	words = (pkt_info->pkt_offset * 8 + chip->tx_pkt_desc_sz) / 2;
 
-	fill_txdesc_checksum_common(txdesc, len);
+	fill_txdesc_checksum_common(txdesc, words);
 }
 
 static struct rtw_pwr_seq_cmd trans_carddis_to_cardemu_8822c[] = {
