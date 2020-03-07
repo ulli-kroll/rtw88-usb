@@ -833,7 +833,6 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 	u32 desclen, len, headsize;
 	u8 ret = 0;
 	u8 addr;
-	int status;
 
 	if (!rtwusb) {
 		pr_err("%s: rtwusb is NULL\n", __func__);
@@ -882,12 +881,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 
 	rtw_tx_fill_tx_desc(&pkt_info, skb);
 
-	status = chip->ops->fill_txdesc_checksum(rtwdev, skb->data);
-	if (status != 0) {
-		pr_err("%s : halmac txdesc checksum failed, status = %d\n",
-		       __func__, status);
-		goto exit;
-	}
+	chip->ops->fill_txdesc_checksum(rtwdev, &pkt_info, skb->data);
 
 	addr = rtw_qsel_to_queue(qsel);
 
@@ -931,7 +925,6 @@ static int rtw_usb_tx_write(struct rtw_dev *rtwdev,
 	struct rtw_usb_tx_data *tx_data;
 	u8 *pkt_desc;
 	u8 queue = rtw_tx_queue_mapping(skb);
-	int ret;
 
 	if (!pkt_info)
 		return -EINVAL;
@@ -941,12 +934,7 @@ static int rtw_usb_tx_write(struct rtw_dev *rtwdev,
 	pkt_info->qsel = rtw_queue_to_qsel(skb, queue);
 	rtw_tx_fill_tx_desc(pkt_info, skb);
 
-	ret = chip->ops->fill_txdesc_checksum(rtwdev, skb->data);
-	if (ret) {
-		pr_err("%s : halmac txdesc checksum failed, status = %d\n",
-		       __func__, ret);
-		return -EINVAL;
-	}
+	chip->ops->fill_txdesc_checksum(rtwdev, pkt_info, skb->data);
 
 	tx_data = rtw_usb_get_tx_data(skb);
 	tx_data->sn = pkt_info->sn;
@@ -1375,9 +1363,8 @@ static int rtw_usb_init_tx(struct rtw_dev *rtwdev)
 
 	rtwusb->tx_handler_data = kmalloc(sizeof(*rtwusb->tx_handler_data),
 					  GFP_KERNEL);
-	if (!rtwusb->tx_handler_data) {
+	if (!rtwusb->tx_handler_data)
 		goto err_destroy_wq;
-	}
 
 	rtwusb->tx_handler_data->rtwdev = rtwdev;
 

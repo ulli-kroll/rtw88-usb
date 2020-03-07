@@ -804,6 +804,9 @@ struct rtw_chip_ops {
 			      struct ieee80211_bss_conf *conf);
 	void (*cfg_csi_rate)(struct rtw_dev *rtwdev, u8 rssi, u8 cur_rate,
 			     u8 fixrate_en, u8 *new_rate);
+	void (*fill_txdesc_checksum)(struct rtw_dev *rtwdev,
+				     struct rtw_tx_pkt_info *pkt_info,
+				     u8 *txdesc);
 
 	/* for coex */
 	void (*coex_set_init)(struct rtw_dev *rtwdev);
@@ -814,8 +817,6 @@ struct rtw_chip_ops {
 	void (*coex_set_rfe_type)(struct rtw_dev *rtwdev);
 	void (*coex_set_wl_tx_power)(struct rtw_dev *rtwdev, u8 wl_pwr);
 	void (*coex_set_wl_rx_gain)(struct rtw_dev *rtwdev, bool low_gain);
-
-	int (*fill_txdesc_checksum)(struct rtw_dev *rtwdev, u8 *txdesc);
 
 	/* USB relative ops */
 	int (*set_rx_agg_switch)(struct rtw_dev *rtwdev, bool enable,

@@ -55,8 +55,6 @@
 	le32p_replace_bits((__le32 *)(txdesc) + 0x06, value, GENMASK(11, 0))
 #define SET_TX_DESC_TXDESC_CHECKSUM(txdesc, value)                             \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x07, value, GENMASK(15, 0))
-#define GET_TX_DESC_PKT_OFFSET(txdesc)                                  \
-	le32_get_bits(*((__le32 *)(txdesc) + 0x01), GENMASK(28, 24))
 #define SET_TX_DESC_DMA_TXAGG_NUM(txdesc, value)                             \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x07, value, GENMASK(31, 24))
 
@@ -99,5 +97,19 @@ void rtw_tx_report_handle(struct rtw_dev *rtwdev, struct sk_buff *skb);
 void rtw_rsvd_page_pkt_info_update(struct rtw_dev *rtwdev,
 				   struct rtw_tx_pkt_info *pkt_info,
 				   struct sk_buff *skb);
+
+static inline
+void fill_txdesc_checksum_common(u8 *txdesc, size_t words)
+{
+	__le16 chksum = 0;
+	__le16 *data = (__le16 *)(txdesc);
+
+	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, 0x0000);
+
+	while (words--)
+		chksum ^= *data++;
+
+	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, le16_to_cpu(chksum));
+}
 
 #endif

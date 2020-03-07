@@ -87,21 +87,18 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	size = pktsize + chip->tx_pkt_desc_sz + 24;
 	skb = dev_alloc_skb(size);
 	if (!skb) {
-		rtw_err(rtwdev, "skb allocation: out of memory\n");
 		ret = -ENOMEM;
 		goto trxmode_deinit;
 	}
 
 	loopback->rx_buf = kmalloc(pktsize, GFP_KERNEL);
 	if (!loopback->rx_buf) {
-		rtw_err(rtwdev, "rx_buf allocation: out of memory\n");
 		ret = -ENOMEM;
 		goto skb_deinit;
 	}
 
 	loopback->tx_buf = kmalloc(pktsize, GFP_KERNEL);
 	if (!loopback->tx_buf) {
-		rtw_err(rtwdev, "tx_buf allocation: out of memory\n");
 		ret = -ENOMEM;
 		goto rxbuf_deinit;
 	}
