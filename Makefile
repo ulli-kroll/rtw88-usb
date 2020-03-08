@@ -9,6 +9,14 @@ CONFIG_RTW88_8822C=y
 ccflags-y += -DDEBUG
 ccflags-y += -DCONFIG_RTW88_DEBUG=y
 ccflags-y += -DCONFIG_RTW88_DEBUGFS=y
+ifeq ($(CONFIG_RTW88_8822B), y)
+ccflags-y += -DCONFIG_RTW88_8822B
+endif
+ifeq ($(CONFIG_RTW88_8822C), y)
+ccflags-y += -DCONFIG_RTW88_8822C
+endif
+
+
 
 ########### section below is for upstream kernel ###########
 
