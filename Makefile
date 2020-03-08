@@ -9,6 +9,14 @@ CONFIG_RTW88_8822C=y
 ccflags-y += -DDEBUG
 ccflags-y += -DCONFIG_RTW88_DEBUG=y
 ccflags-y += -DCONFIG_RTW88_DEBUGFS=y
+ifeq ($(CONFIG_RTW88_8822B), y)
+ccflags-y += -DCONFIG_RTW88_8822B
+endif
+ifeq ($(CONFIG_RTW88_8822C), y)
+ccflags-y += -DCONFIG_RTW88_8822C
+endif
+
+
 
 ########### section below is for upstream kernel ###########
 
@@ -38,8 +46,11 @@ rtwusb-objs			:= usb.o
 
 ########### section above is for upstream kernel ###########
 
+SUBARCH := $(shell uname -m | sed -e s/i.86/i386/)
+ARCH ?= $(SUBARCH)
+
 all:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) C=2
+	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KERNELDIR) M=$(PWD) C=2
 
 cscope:
 	find ./ -name "*.[ch]" > cscope.files
@@ -49,12 +60,4 @@ cscope:
 .PHONY: clean
 
 clean:
-	find ./ -name "*.o" -exec rm {} \;
-	find ./ -name "*.a" -exec rm {} \;
-	find ./ -name "*.ko" -exec rm {} \;
-	find ./ -name "*.cmd" -exec rm {} \;
-	find ./ -name "*.mod" -exec rm {} \;
-	find ./ -name "*.mod.c" -exec rm {} \;
-	find ./ -name "*.order" -exec rm {} \;
-	find ./ -name "*.symvers" -exec rm {} \;
-	find ./ -name ".tmp_versions" -exec rm {} \;
+	rm -f *.o .*.d *.a *.ko .*.cmd *.mod* *.order *.symvers *.tmp_versions
