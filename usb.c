@@ -1526,19 +1526,23 @@ static void rtw_usb_disconnect(struct usb_interface *intf)
 }
 
 static const struct usb_device_id rtw_usb_id_table[] = {
-	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
-					RTW_USB_PRODUCT_ID_REALTEK_8822C,
-					0xff, 0xff, 0xff),
-		.driver_info = (kernel_ulong_t)&rtw8822c_hw_spec },
-	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
-					RTW_USB_PRODUCT_ID_REALTEK_8822B,
-					0xff, 0xff, 0xff),
-		.driver_info = (kernel_ulong_t)&rtw8822b_hw_spec },
-	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
-					RTW_USB_PRODUCT_ID_REALTEK_8812B,
-					0xff, 0xff, 0xff),
-		.driver_info = (kernel_ulong_t)&rtw8822b_hw_spec },
-	{}
+#ifdef CONFIG_RTW88_8822B
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       RTW_USB_PRODUCT_ID_REALTEK_8812B,
+				       0xff, 0xff, 0xff,
+				       rtw8822b_hw_spec) },
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       RTW_USB_PRODUCT_ID_REALTEK_8812B,
+				       0xff, 0xff, 0xff,
+				       rtw8822b_hw_spec) },
+#endif
+#ifdef CONFIG_RTW88_8822C
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       RTW_USB_PRODUCT_ID_REALTEK_8822C,
+				       0xff, 0xff, 0xff,
+				       rtw8822c_hw_spec) },
+#endif
+	{},
 };
 
 static struct usb_driver rtw_usb_driver = {
