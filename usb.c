@@ -1531,6 +1531,7 @@ static const struct usb_device_id rtw_usb_id_table[] = {
 #endif
 	{},
 };
+MODULE_DEVICE_TABLE(usb, rtw_usb_id_table);
 
 static struct usb_driver rtw_usb_driver = {
 	.name = "rtwifi_usb",
