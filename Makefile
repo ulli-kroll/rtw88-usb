@@ -52,12 +52,4 @@ cscope:
 .PHONY: clean
 
 clean:
-	find ./ -name "*.o" -exec rm {} \;
-	find ./ -name "*.a" -exec rm {} \;
-	find ./ -name "*.ko" -exec rm {} \;
-	find ./ -name "*.cmd" -exec rm {} \;
-	find ./ -name "*.mod" -exec rm {} \;
-	find ./ -name "*.mod.c" -exec rm {} \;
-	find ./ -name "*.order" -exec rm {} \;
-	find ./ -name "*.symvers" -exec rm {} \;
-	find ./ -name ".tmp_versions" -exec rm {} \;
+	rm -f *.o .*.d *.a *.ko .*.cmd *.mod* *.order *.symvers *.tmp_versions
