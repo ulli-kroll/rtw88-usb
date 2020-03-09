@@ -1290,6 +1290,7 @@ static int rtw_os_core_init(struct rtw_dev **prtwdev,
 	struct rtw_dev *rtwdev;
 	struct rtw_usb *rtwusb;
 	int ret;
+	char *chip_name = NULL;
 
 	*prtwdev = NULL;
 
@@ -1305,7 +1306,16 @@ static int rtw_os_core_init(struct rtw_dev **prtwdev,
 	rtwdev->hw = hw;
 	rtwdev->chip = (struct rtw_chip_info *)id->driver_info;
 
-	pr_info("%s: rtw_core_init\n", __func__);
+#ifdef CONFIG_RTW88_8822B
+	if (rtwdev->chip == &rtw8822b_hw_spec)
+		chip_name = "RTW8822B";
+#endif
+#ifdef CONFIG_RTW88_8822C
+	if (rtwdev->chip == &rtw8822c_hw_spec)
+		chip_name = "RTW8822C";
+#endif
+
+	pr_info("%s: rtw_core_init Chip %s\n", __func__, chip_name);;
 	ret = rtw_core_init(rtwdev);
 	if (ret) {
 		pr_err("%s : rtw_core_init: ret=%d\n", __func__, ret);
