@@ -16,6 +16,8 @@
 #include "util.h"
 #include "bf.h"
 
+/* #define RTW_8822CU_WOW_WLAN */
+
 static void rtw8822c_config_trx_mode(struct rtw_dev *rtwdev, u8 tx_path,
 				     u8 rx_path, bool is_tx2_path);
 
@@ -4271,6 +4273,7 @@ static const struct rtw_pwr_track_tbl rtw8822c_rtw_pwr_track_tbl = {
 };
 
 #ifdef CONFIG_PM
+#ifdef RTW_8822CU_WOW_WLAN
 static const struct wiphy_wowlan_support rtw_wowlan_stub_8822c = {
 	.flags = WIPHY_WOWLAN_MAGIC_PKT | WIPHY_WOWLAN_GTK_REKEY_FAILURE |
 		 WIPHY_WOWLAN_DISCONNECT | WIPHY_WOWLAN_SUPPORTS_GTK_REKEY |
@@ -4280,6 +4283,7 @@ static const struct wiphy_wowlan_support rtw_wowlan_stub_8822c = {
 	.pattern_min_len = 1,
 	.max_nd_match_sets = 4,
 };
+#endif
 #endif
 
 struct rtw_chip_info rtw8822c_hw_spec = {
@@ -4329,10 +4333,12 @@ struct rtw_chip_info rtw8822c_hw_spec = {
 	.bfer_su_max_num = 2,
 	.bfer_mu_max_num = 1,
 
+#ifdef RTW_8822CU_WOW_WLAN
 #ifdef CONFIG_PM
 	.wow_fw_name = "rtw88/rtw8822c_wow_fw.bin",
 	.wowlan_stub = &rtw_wowlan_stub_8822c,
 	.max_sched_scan_ssids = 4,
+#endif
 #endif
 	.coex_para_ver = 0x19062706,
 	.bt_desired_ver = 0x6,
@@ -4365,4 +4371,6 @@ struct rtw_chip_info rtw8822c_hw_spec = {
 EXPORT_SYMBOL(rtw8822c_hw_spec);
 
 MODULE_FIRMWARE("rtw88/rtw8822c_fw.bin");
+#ifdef RTW_8822CU_WOW_WLAN
 MODULE_FIRMWARE("rtw88/rtw8822c_wow_fw.bin");
+#endif
