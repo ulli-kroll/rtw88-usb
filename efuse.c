@@ -152,6 +152,8 @@ int rtw_parse_efuse_map(struct rtw_dev *rtwdev)
 		goto out_free;
 	}
 
+	rtw_info(rtwdev, "RFE Option %d\n", efuse->rfe_option);
+
 out_free:
 	kfree(log_map);
 	kfree(phy_map);
