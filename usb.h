@@ -43,9 +43,20 @@
 
 /* USB Vendor/Product IDs */
 #define RTW_USB_VENDOR_ID_REALTEK		0x0bda
+#define RTW_USB_VENDOR_ID_EDIMAX		0x7392
 #define RTW_USB_PRODUCT_ID_REALTEK_8812B	0xB812
 #define RTW_USB_PRODUCT_ID_REALTEK_8822B	0xB82C
 #define RTW_USB_PRODUCT_ID_REALTEK_8822C	0xC82C
+
+/* helper for USB Ids */
+
+#define RTK_USB_DEVICE(vend, dev, hw_config)	\
+	USB_DEVICE(vend, dev),			\
+	.driver_info = (kernel_ulong_t) & (hw_config),
+
+#define RTK_USB_DEVICE_AND_INTERFACE(vend, dev, cl, sc, pr, hw_config)	\
+	USB_DEVICE_AND_INTERFACE_INFO(vend, dev, cl, sc, pr),		\
+	.driver_info = (kernel_ulong_t) & (hw_config),
 
 /* defined functions */
 #define rtw_get_usb_priv(rtwdev) ((struct rtw_usb *)rtwdev->priv)
