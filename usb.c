@@ -1513,20 +1513,61 @@ static void rtw_usb_disconnect(struct usb_interface *intf)
 }
 
 static const struct usb_device_id rtw_usb_id_table[] = {
-	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
-					RTW_USB_PRODUCT_ID_REALTEK_8822C,
-					0xff, 0xff, 0xff),
-		.driver_info = (kernel_ulong_t)&rtw8822c_hw_spec },
-	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
-					RTW_USB_PRODUCT_ID_REALTEK_8822B,
-					0xff, 0xff, 0xff),
-		.driver_info = (kernel_ulong_t)&rtw8822b_hw_spec },
-	{ USB_DEVICE_AND_INTERFACE_INFO(RTW_USB_VENDOR_ID_REALTEK,
-					RTW_USB_PRODUCT_ID_REALTEK_8812B,
-					0xff, 0xff, 0xff),
-		.driver_info = (kernel_ulong_t)&rtw8822b_hw_spec },
-	{}
+#ifdef CONFIG_RTW88_8822B
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       RTW_USB_PRODUCT_ID_REALTEK_8812B,
+				       0xff, 0xff, 0xff,
+				       rtw8822b_hw_spec) },
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       RTW_USB_PRODUCT_ID_REALTEK_8822B,
+				       0xff, 0xff, 0xff,
+				       rtw8822b_hw_spec) },
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_EDIMAX,
+				       0xB822,
+				       0xff, 0xff, 0xff,
+				       rtw8822b_hw_spec) }, 	/* Edimax */
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_EDIMAX,
+				       0xC822,
+				       0xff, 0xff, 0xff,
+				       rtw8822b_hw_spec) },	/* Edimax */
+	{ RTK_USB_DEVICE(0x0b05, 0x184c, rtw8822b_hw_spec) },	/* ASUS AC53 Nano */
+	{ RTK_USB_DEVICE(0x0b05, 0x1841, rtw8822b_hw_spec) },	/* ASUS AC55 B1 */
+	{ RTK_USB_DEVICE(0x2001, 0x331c, rtw8822b_hw_spec) },	/* D-Link DWA-182 rev D1 */
+	{ RTK_USB_DEVICE(0x13b1, 0x0043, rtw8822b_hw_spec) },	/* Linksys WUSB6400M */
+#endif
+#ifdef CONFIG_RTW88_8822C
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       RTW_USB_PRODUCT_ID_REALTEK_8822C,
+				       0xff, 0xff, 0xff,
+				       rtw8822c_hw_spec) },
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       0xb82b,
+				       0xff, 0xff, 0xff,
+				       rtw8822c_hw_spec) }, /* 8821CU */
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       0xb820,
+				       0xff, 0xff, 0xff,
+				       rtw8822c_hw_spec) }, /* 8821CU */
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       0xC821,
+				       0xff, 0xff, 0xff,
+				       rtw8822c_hw_spec) }, /* 8821CU */
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       0xC820,
+				       0xff, 0xff, 0xff,
+				       rtw8822c_hw_spec) }, /* 8821CU */
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       0xC82A,
+				       0xff, 0xff, 0xff,
+				       rtw8822c_hw_spec) }, /* 8821CU */
+	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
+				       0xC82B,
+				       0xff, 0xff, 0xff,
+				       rtw8822c_hw_spec) }, /* 8821CU */
+#endif
+	{},
 };
+MODULE_DEVICE_TABLE(usb, rtw_usb_id_table);
 
 static struct usb_driver rtw_usb_driver = {
 	.name = "rtwifi_usb",
