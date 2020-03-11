@@ -716,10 +716,7 @@ static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 	if (ret < 0)
 		pr_err("usb_bulk_msg error, ret=%d\n", ret);
 
-	if (unlikely(loopback->usb_agg_test)) {
-		print_hex_dump(KERN_INFO, "TX: ", DUMP_PREFIX_OFFSET, 16, 1,
-			       skb->data, skb->len, 1);
-	} else if (unlikely(loopback->start)) {
+	if (unlikely(loopback->start)) {
 		loopback->cur++;
 		if (loopback->cur >= loopback->total)
 			up(&loopback->sema);
@@ -734,68 +731,6 @@ void rtw_tx_func(struct rtw_usb *rtwusb)
 	struct sk_buff *skb;
 	u8 queue;
 	int status;
-
-	if (loopback->usb_agg_test) {
-		struct sk_buff *skb, *skb1, *skb2;
-		int queue_len;
-		int len;
-		u16 offset;
-
-		queue_len = skb_queue_len(&rtwusb->tx_queue);
-		pr_info("%s: queue len = %d\n", __func__, queue_len);
-
-		if (queue_len < 2) {
-			pr_err("Not the test case, queue_len = %d\n", queue_len);
-			return;
-		}
-
-		skb1 = skb_dequeue(&rtwusb->tx_queue);
-		if (!skb1) {
-			pr_err("skb1 dequeue failed\n");
-			return;
-		}
-
-		skb2 = skb_dequeue(&rtwusb->tx_queue);
-		if (!skb2) {
-			pr_err("skb2 dequeue failed\n");
-			return;
-		}
-
-		queue = rtw_tx_queue_mapping(skb1);
-
-		len = skb1->len + skb2->len;
-		skb = dev_alloc_skb(len);
-		if (!skb)
-			goto free_skb;
-		skb_put(skb, len);
-
-		SET_TX_DESC_DMA_TXAGG_NUM(skb1->data, 2);
-		SET_TX_DESC_PKT_OFFSET(skb1->data, 1);
-		SET_TX_DESC_PKT_OFFSET(skb2->data, 0);
-
-		memcpy(skb->data, skb1->data, skb1->len);
-		memcpy(skb->data + skb1->len, skb2->data, 48);
-		memset(skb->data + skb1->len + 48, 0xbb, 8);
-		memcpy(skb->data + skb1->len + 48 + 8, skb2->data + 48 + 8,
-		       skb2->len - 48 - 8);
-
-		offset = show_txdesc(skb->data, 1);
-		pr_info("%s: offset=%d\n", __func__, offset);
-		show_txdesc(skb->data + offset, 1);
-
-		status = rtw_usb_write_port(rtwdev, queue, skb->len, skb);
-		if (status) {
-			pr_err("%s, rtw_usb_write_xmit failed, ret=%d\n",
-			       __func__, status);
-		}
-
-free_skb:
-		dev_kfree_skb(skb);
-		dev_kfree_skb(skb1);
-		dev_kfree_skb(skb2);
-
-		return;
-	}
 
 	while (1) {
 		mutex_lock(&rtwusb->tx_lock);
@@ -1009,11 +944,7 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 			skb_put(skb, pkt_stat.pkt_len);
 			skb_reserve(skb, pkt_offset);
 
-			if (unlikely(loopback->usb_agg_test)) {
-				print_hex_dump(KERN_INFO, "rx data: ",
-					       DUMP_PREFIX_OFFSET, 16, 1,
-					       skb->data, skb->len, 1);
-			} else if (unlikely(loopback->start)) {
+			if (unlikely(loopback->start)) {
 				if (loopback->rx_buf && skb->len > 24)
 					memcpy(loopback->rx_buf, skb->data + 24,
 					       min(skb->len - 24,
