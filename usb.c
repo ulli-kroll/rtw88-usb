@@ -1461,10 +1461,13 @@ static const struct usb_device_id rtw_usb_id_table[] = {
 				       0xC822,
 				       0xff, 0xff, 0xff,
 				       rtw8822b_hw_spec) },	/* Edimax */
+	{ RTK_USB_DEVICE(0x13b1, 0x0043, rtw8822b_hw_spec) },	/* Alpha - Alpha */
 	{ RTK_USB_DEVICE(0x0b05, 0x184c, rtw8822b_hw_spec) },	/* ASUS AC53 Nano */
 	{ RTK_USB_DEVICE(0x0b05, 0x1841, rtw8822b_hw_spec) },	/* ASUS AC55 B1 */
 	{ RTK_USB_DEVICE(0x2001, 0x331c, rtw8822b_hw_spec) },	/* D-Link DWA-182 rev D1 */
 	{ RTK_USB_DEVICE(0x13b1, 0x0043, rtw8822b_hw_spec) },	/* Linksys WUSB6400M */
+	{ RTK_USB_DEVICE(0x2357, 0x0115, rtw8822b_hw_spec) },	/* TP-Link Archer T4U V3 */
+	{ RTK_USB_DEVICE(0x2357, 0x012d, rtw8822b_hw_spec) },	/* TP-Link Archer T3U V1 */
 #endif
 #ifdef CONFIG_RTW88_8822C
 	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
