@@ -121,6 +121,7 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 	pkt_info.ls = true;
 
 	loopback->cur = 0;
+	loopback->read_cnt = 0;
 	loopback->start = true;
 
 	t1 = ktime_get();
@@ -146,6 +147,7 @@ static int rtw_debugfs_usb_loopback_func(struct seq_file *s, void *data)
 
 	down(&loopback->sema);
 
+	cnt += loopback->read_cnt;
 	spend = ktime_to_ns(ktime_sub(ktime_get(), t1)) / (cnt * 1000);
 	seq_printf(s, "pktsize:%d, spend: %lldus, throughput=%lldMbps\n",
 		   pktsize, spend, pktsize * 8 / spend);

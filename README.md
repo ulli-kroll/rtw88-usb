@@ -10,7 +10,7 @@ fw/rtw8822b_fw.bin can be put under /lib/firmware/rtw88/rtw8822b_fw.bin
 load driver:
     sudo insmod rtw88.ko
     sudo insmod rtwusb.ko
-    
+
 Scan:
     sudo iw wlanX scan
 
@@ -19,4 +19,8 @@ Connect to the AP without security:
 
 dynamic IP:
     can see IP address obtained by DHCP by using ifconfig
+
+loopback test:
+    cat /sys/kernel/debug/rtw88/usb_loopback_func
+    pktsize: 2000, spend: 54 us, throughput=296Mbps
 

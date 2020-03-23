@@ -958,6 +958,7 @@ static void rtw_usb_read_port_complete(struct urb *urb)
 	struct rtw_dev *rtwdev = (struct rtw_dev *)rxcb->data;
 	struct sk_buff *skb = rxcb->rx_skb;
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
+	struct rtw_loopback *loopback = &rtwdev->loopback;
 
 	if (urb->status == 0) {
 		if (urb->actual_length >= RTW_USB_MAX_RECVBUF_SZ ||
@@ -967,6 +968,8 @@ static void rtw_usb_read_port_complete(struct urb *urb)
 			if (skb)
 				dev_kfree_skb(skb);
 		} else {
+			if (unlikely(loopback->start))
+				loopback->read_cnt++;
 			skb_queue_tail(&rtwusb->rx_queue, skb);
 			rtw_set_event(&rtwusb->rx_handler.event);
 		}

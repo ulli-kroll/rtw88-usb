@@ -1597,6 +1597,7 @@ struct rtw_loopback {
 	u8			*rx_buf;
 	int			total;
 	int			cur;
+	int			read_cnt;
 };
 
 struct rtw_dev {
