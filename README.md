@@ -7,6 +7,16 @@ to add support for USB wifi IC - 88x2bu / 88x2cu
 
 fw/rtw8822b_fw.bin can be put under /lib/firmware/rtw88/rtw8822b_fw.bin
 
+load driver:
+    sudo insmod rtw88.ko
+    sudo insmod rtwusb.ko
+    
+Scan:
+    sudo iw wlanX scan
 
+Connect to the AP without security:
+    sudo iw wlanX connect <AP name>
 
+dynamic IP:
+    can see IP address obtained by DHCP by using ifconfig
 
