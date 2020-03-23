@@ -140,6 +140,7 @@ struct rtw_usb {
 	bool init_done;
 	struct mutex tx_lock; /* mutex for tx */
 	struct sk_buff_head tx_queue[RTK_MAX_TX_QUEUE_NUM];
+	struct sk_buff_head tx_ack_queue;
 	struct rtw_handler tx_handler;
 	struct rtw_work_data *tx_handler_data;
 
