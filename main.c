@@ -872,9 +872,6 @@ static int rtw_power_on(struct rtw_dev *rtwdev)
 	rtw_fw_send_phydm_info(rtwdev);
 
 	wifi_only = !rtwdev->efuse.btcoex;
-	// Neo: force to true first
-	pr_info("%s: before wifi_only:0x%x\n", __func__, wifi_only);
-	wifi_only = true;
 	rtw_coex_power_on_setting(rtwdev);
 	rtw_coex_init_hw_config(rtwdev, wifi_only);
 
