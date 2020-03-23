@@ -736,16 +736,19 @@ static inline void rtw_tx_queue_purge(struct rtw_usb *rtwusb)
 	skb_queue_purge(&rtwusb->tx_ack_queue);
 }
 
-static struct sk_buff *rtw_tx_dequeue(struct rtw_usb *rtwusb)
+static struct sk_buff *rtw_usb_tx_dequeue(struct rtw_usb *rtwusb)
 {
 	struct sk_buff *skb = NULL;
-	int index = RTK_MAX_TX_QUEUE_NUM - 1;
+	static int index = RTK_MAX_TX_QUEUE_NUM - 1;
 
 	for (; index >= 0; index--) {
 		skb = skb_dequeue(&rtwusb->tx_queue[index]);
 		if (skb)
 			break;
 	}
+
+	if (index < 0)
+		index = RTK_MAX_TX_QUEUE_NUM - 1;
 
 	return skb;
 }
@@ -795,7 +798,7 @@ void rtw_tx_func(struct rtw_usb *rtwusb)
 	while (1) {
 		mutex_lock(&rtwusb->tx_lock);
 
-		skb = rtw_tx_dequeue(rtwusb);
+		skb = rtw_usb_tx_dequeue(rtwusb);
 		if (!skb) {
 			mutex_unlock(&rtwusb->tx_lock);
 			break;
