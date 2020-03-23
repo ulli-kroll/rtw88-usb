@@ -12,6 +12,8 @@
 #include "fw.h"
 #include "debug.h"
 
+#define USB_MSG_TIMEOUT	3000 /* (ms) */
+
 struct txdesc_hdr {
 	u16 txpktsize;
 	u8 offset;
@@ -701,9 +703,8 @@ static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 
 	pipe = rtw_usb_get_pipe(rtwusb, addr);
 
-	// 0 : MAX_SCHEDULE_TIMEOUT
 	ret = usb_bulk_msg(usbd, pipe, (void *)skb->data, (int)cnt,
-			   &transfer, 0);
+			   &transfer, USB_MSG_TIMEOUT);
 	if (ret < 0)
 		pr_err("usb_bulk_msg error, ret=%d\n", ret);
 
