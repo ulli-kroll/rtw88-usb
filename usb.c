@@ -773,19 +773,79 @@ static inline void rtw_do_tx_ack_queue(struct rtw_usb *rtwusb)
 	}
 }
 
+static inline void rtw_usb_fill_tx_checksum(struct  rtw_usb *rtwusb,
+					    struct sk_buff *skb, int agg_num)
+{
+	struct rtw_dev *rtwdev = rtwusb->rtwdev;
+	struct rtw_chip_info *chip = rtwdev->chip;
+	struct rtw_tx_pkt_info pkt_info;
+	struct txdesc_hdr *tdh;
+
+	tdh = (struct txdesc_hdr *)(skb->data);
+	tdh->dma_txagg_num = agg_num;
+	pkt_info.pkt_offset = tdh->pkt_offset;
+	chip->ops->fill_txdesc_checksum(rtwdev, &pkt_info, skb->data);
+}
+
 static inline void rtw_usb_tx_agg(struct rtw_usb *rtwusb, struct sk_buff *skb,
 				  u8 queue)
 {
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
-	int status;
+	struct sk_buff_head *list;
+	struct sk_buff *skb_m = NULL, *skb1;
+	u8 *data_ptr;
+	int status, len, agg_num = 0;
+	unsigned long flags;
 
+	list = &rtwusb->tx_queue[queue];
+	if (skb_queue_empty(list))
+		goto err_skb_m;
+
+	if (queue != RTW_TX_QUEUE_VO)
+		goto err_skb_m;
+
+	skb_m = dev_alloc_skb(RTW_USB_MAX_XMITBUF_SZ);
+	if (!skb_m)
+		goto err_skb_m;
+
+	data_ptr = skb_m->data;
+	skb1 = skb;
+	while (skb1) {
+		memcpy(data_ptr, skb1->data, skb1->len);
+		len = ALIGN(skb1->len, 8);
+		skb_put(skb_m, len);
+		data_ptr += len;
+		agg_num++;
+
+		rtw_tx_ack_enqueue(rtwusb, skb1);
+
+		spin_lock_irqsave(&list->lock, flags);
+		skb1 = skb_peek(list);
+		if (skb1 && skb1->len < RTW_USB_MAX_XMITBUF_SZ - skb_m->len)
+			__skb_unlink(skb1, list);
+		else
+			skb1 = NULL;
+		spin_unlock_irqrestore(&list->lock, flags);
+	};
+
+	if (agg_num > 1)
+		rtw_usb_fill_tx_checksum(rtwusb, skb_m, agg_num);
+
+	goto write_port;
+
+err_skb_m:
+	skb_m = skb;
 	rtw_tx_ack_enqueue(rtwusb, skb);
 
-	status = rtw_usb_write_port(rtwdev, queue, skb->len, skb);
+write_port:
+	status = rtw_usb_write_port(rtwdev, queue, skb_m->len, skb_m);
 	if (status) {
 		pr_err("%s, rtw_usb_write_xmit failed, ret=%d\n",
 		       __func__, status);
 	}
+
+	if (skb_m != skb)
+		dev_kfree_skb(skb_m);
 
 	rtw_do_tx_ack_queue(rtwusb);
 }
