@@ -413,13 +413,13 @@ static u8 rtw_tx_queue_mapping(struct sk_buff *skb)
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
 	__le16 fc = hdr->frame_control;
 	u8 q_mapping = skb_get_queue_mapping(skb);
-	u8 queue;
+	u8 queue = RTW_TX_QUEUE_BCN;
 
-	if (unlikely(ieee80211_is_beacon(fc)))
-		queue = RTW_TX_QUEUE_BCN;
-	else if (unlikely(ieee80211_is_mgmt(fc) || ieee80211_is_ctl(fc)))
+	//if (unlikely(ieee80211_is_beacon(fc)))
+	//	queue = RTW_TX_QUEUE_BCN;
+	if (unlikely(ieee80211_is_mgmt(fc) || ieee80211_is_ctl(fc)))
 		queue = RTW_TX_QUEUE_MGMT;
-	else
+	else if (q_mapping <= IEEE80211_AC_BK)
 		queue = rtw_usb_ac_to_hwq[q_mapping];
 
 	return queue;
