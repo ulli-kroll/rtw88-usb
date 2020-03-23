@@ -746,13 +746,29 @@ static struct sk_buff *rtw_tx_dequeue(struct rtw_usb *rtwusb)
 	return skb;
 }
 
-void rtw_tx_func(struct rtw_usb *rtwusb)
+static inline void rtw_usb_tx_agg(struct rtw_usb *rtwusb, struct sk_buff *skb,
+				  u8 queue)
 {
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
 	struct rtw_loopback *loopback = &rtwdev->loopback;
+	int status;
+
+	status = rtw_usb_write_port(rtwdev, queue, skb->len, skb);
+	if (status) {
+		pr_err("%s, rtw_usb_write_xmit failed, ret=%d\n",
+		       __func__, status);
+	}
+
+	if (unlikely(loopback->start))
+		dev_kfree_skb(skb);
+	else
+		rtw_indicate_tx_status(rtwdev, skb);
+}
+
+void rtw_tx_func(struct rtw_usb *rtwusb)
+{
 	struct sk_buff *skb;
 	u8 queue;
-	int status;
 
 	while (1) {
 		mutex_lock(&rtwusb->tx_lock);
@@ -762,19 +778,9 @@ void rtw_tx_func(struct rtw_usb *rtwusb)
 			mutex_unlock(&rtwusb->tx_lock);
 			break;
 		}
-
 		queue = rtw_tx_queue_mapping(skb);
 
-		status = rtw_usb_write_port(rtwdev, queue, skb->len, skb);
-		if (status) {
-			pr_err("%s, rtw_usb_write_xmit failed, ret=%d\n",
-			       __func__, status);
-		}
-
-		if (likely(!loopback->start))
-			rtw_indicate_tx_status(rtwdev, skb);
-		else
-			dev_kfree_skb(skb);
+		rtw_usb_tx_agg(rtwusb, skb, queue);
 
 		mutex_unlock(&rtwusb->tx_lock);
 	}
