@@ -129,6 +129,7 @@ static struct ieee80211_supported_band rtw_band_5ghz = {
 	.vht_cap = {0},
 };
 
+#if 0
 struct rtw_watch_dog_iter_data {
 	struct rtw_dev *rtwdev;
 	struct rtw_vif *rtwvif;
@@ -299,6 +300,7 @@ static void rtw_txq_ba_work(struct work_struct *work)
 
 	rtw_iterate_stas_atomic(rtwdev, rtw_txq_ba_iter, &data);
 }
+#endif
 
 void rtw_get_channel_params(struct cfg80211_chan_def *chandef,
 			    struct rtw_channel_params *chan_params)
@@ -1070,8 +1072,8 @@ static void rtw_load_firmware_cb(const struct firmware *firmware, void *context)
 	fw->firmware = firmware;
 	complete_all(&fw->completion);
 
-	rtw_info(rtwdev, "Firmware version %u.%u.%u, H2C version %u\n",
-		 fw->version, fw->sub_version, fw->sub_index, fw->h2c_version);
+	pr_info("Firmware version %u.%u.%u, H2C version %u\n",
+		fw->version, fw->sub_version, fw->sub_index, fw->h2c_version);
 }
 
 static int rtw_load_firmware(struct rtw_dev *rtwdev, enum rtw_fw_type type)
@@ -1360,6 +1362,7 @@ err_out:
 }
 EXPORT_SYMBOL(rtw_chip_info_setup);
 
+#if 0
 static void rtw_stats_init(struct rtw_dev *rtwdev)
 {
 	struct rtw_traffic_stats *stats = &rtwdev->stats;
@@ -1374,13 +1377,15 @@ static void rtw_stats_init(struct rtw_dev *rtwdev)
 	for (i = 0; i < RTW_SNR_NUM; i++)
 		ewma_snr_init(&dm_info->ewma_snr[i]);
 }
+#endif
 
 int rtw_core_init(struct rtw_dev *rtwdev)
 {
-	struct rtw_chip_info *chip = rtwdev->chip;
-	struct rtw_coex *coex = &rtwdev->coex;
+	//struct rtw_chip_info *chip = rtwdev->chip;
+	//struct rtw_coex *coex = &rtwdev->coex;
 	int ret;
 
+#if 0
 	INIT_LIST_HEAD(&rtwdev->rsvd_page_list);
 	INIT_LIST_HEAD(&rtwdev->txqs);
 
@@ -1393,6 +1398,7 @@ int rtw_core_init(struct rtw_dev *rtwdev)
 	INIT_DELAYED_WORK(&coex->bt_relink_work, rtw_coex_bt_relink_work);
 	INIT_DELAYED_WORK(&coex->bt_reenable_work, rtw_coex_bt_reenable_work);
 	INIT_DELAYED_WORK(&coex->defreeze_work, rtw_coex_defreeze_work);
+
 	INIT_WORK(&rtwdev->c2h_work, rtw_c2h_work);
 	INIT_WORK(&rtwdev->ba_work, rtw_txq_ba_work);
 	skb_queue_head_init(&rtwdev->c2h_queue);
@@ -1429,13 +1435,14 @@ int rtw_core_init(struct rtw_dev *rtwdev)
 	rtwdev->hal.rcr = BIT_APP_FCS | BIT_APP_MIC | BIT_APP_ICV |
 			  BIT_HTC_LOC_CTRL | BIT_APP_PHYSTS |
 			  BIT_AB | BIT_AM | BIT_APM;
-
+#endif
 	ret = rtw_load_firmware(rtwdev, RTW_NORMAL_FW);
 	if (ret) {
 		rtw_warn(rtwdev, "no firmware loaded\n");
 		return ret;
 	}
 
+#if 0
 	if (chip->wow_fw_name) {
 		ret = rtw_load_firmware(rtwdev, RTW_WOWLAN_FW);
 		if (ret) {
@@ -1443,6 +1450,7 @@ int rtw_core_init(struct rtw_dev *rtwdev)
 			return ret;
 		}
 	}
+#endif
 	return 0;
 }
 EXPORT_SYMBOL(rtw_core_init);

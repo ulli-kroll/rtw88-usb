@@ -1378,14 +1378,15 @@ static int rtw_usb_probe(struct usb_interface *intf,
 	int ret = 0;
 
 	pr_info("%s ===>\n", __func__);
-	ret = -EINVAL;
-	goto finish;
 
 	ret = rtw_os_core_init(&rtwdev, id);
 	if (ret) {
 		pr_err("rtw_os_core_init fail, ret=%d\n", ret);
 		goto finish;
 	}
+
+	ret = -EINVAL;
+	goto finish;
 
 	rtwdev->dev = &intf->dev;
 
