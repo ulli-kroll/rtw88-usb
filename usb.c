@@ -341,7 +341,7 @@ static int rtw_usb_parse(struct rtw_dev *rtwdev,
 		    usb_endpoint_xfer_bulk(endpoint)) {
 			dev_dbg(dev, "%s: out endpoint num %i\n",
 				__func__, num);
-			if (j >= 4) {
+			if (j >= RTW_USB_MAX_EP_OUT_NUM ) {
 				dev_warn(dev,
 					 "%s: Too many OUT pipes\n", __func__);
 				ret = -EINVAL;
@@ -356,29 +356,29 @@ static int rtw_usb_parse(struct rtw_dev *rtwdev,
 
 	switch (usbd->speed) {
 	case USB_SPEED_LOW:
-		pr_debug("USB_SPEED_LOW\r\n");
+		pr_debug("USB_SPEED_LOW\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_1_1;
 		break;
 	case USB_SPEED_FULL:
-		pr_debug("USB_SPEED_FULL\r\n");
+		pr_debug("USB_SPEED_FULL\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_1_1;
 		break;
 	case USB_SPEED_HIGH:
-		pr_debug("USB_SPEED_HIGH\r\n");
+		pr_debug("USB_SPEED_HIGH\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_2;
 		break;
 	case USB_SPEED_SUPER:
-		pr_debug("USB_SPEED_SUPER\r\n");
+		pr_debug("USB_SPEED_SUPER\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_3;
 		break;
 	default:
-		pr_debug("USB speed unknown \r\n");
+		pr_debug("USB speed unknown\n");
 		break;
 	}
 
 exit:
 	rtwusb->nr_out_eps = j;
-	pr_debug("out eps num: %d \r\n", rtwusb->nr_out_eps);
+	pr_debug("out eps num: %d\n", rtwusb->nr_out_eps);
 	return ret;
 }
 
@@ -531,6 +531,19 @@ static void rtw_usb_three_outpipe_mapping(struct rtw_usb *rtwusb)
 	rtwusb->queue_to_pipe[RTW_TX_QUEUE_H2C]  = rtwusb->out_ep[0];/* TXCMD */
 }
 
+static void rtw_usb_seven_outpipe_mapping(struct rtw_usb *rtwusb)
+{
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_VO] = rtwusb->out_ep[3];/* VO */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_VI] = rtwusb->out_ep[4];/* VI */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BE] = rtwusb->out_ep[5];/* BE */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BK] = rtwusb->out_ep[6];/* BK */
+
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_BCN]	 = rtwusb->out_ep[2];/* BCN */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_MGMT] = rtwusb->out_ep[1];/* MGT */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_HI0]  = rtwusb->out_ep[0];/* HIGH */
+	rtwusb->queue_to_pipe[RTW_TX_QUEUE_H2C]  = rtwusb->out_ep[2];/* TXCMD */
+}
+
 static u8 rtw_usb_set_queue_pipe_mapping(struct rtw_dev *rtwdev, u8 in_pipes,
 					 u8 out_pipes)
 {
@@ -540,6 +553,12 @@ static u8 rtw_usb_set_queue_pipe_mapping(struct rtw_dev *rtwdev, u8 in_pipes,
 	rtwdev->hci.bulkout_num = 0;
 
 	switch (out_pipes) {
+	case 7:
+		rtwusb->out_ep_queue_sel = RTW_USB_TX_SEL_HQ |
+					   RTW_USB_TX_SEL_LQ |
+					   RTW_USB_TX_SEL_NQ;
+		rtwdev->hci.bulkout_num = 7;
+		break;
 	case 4:
 		rtwusb->out_ep_queue_sel = RTW_USB_TX_SEL_HQ |
 					   RTW_USB_TX_SEL_LQ |
@@ -569,15 +588,18 @@ static u8 rtw_usb_set_queue_pipe_mapping(struct rtw_dev *rtwdev, u8 in_pipes,
 		 __func__, rtwusb->out_ep_queue_sel, rtwdev->hci.bulkout_num);
 
 	switch (out_pipes) {
-	case 2:
-		rtw_usb_two_outpipe_mapping(rtwusb);
+	case 7:
+		rtw_usb_seven_outpipe_mapping(rtwusb);
 		break;
 	case 3:
 	case 4:
 		rtw_usb_three_outpipe_mapping(rtwusb);
 		break;
+	case 2:
+		rtw_usb_two_outpipe_mapping(rtwusb);
 	case 1:
 		rtw_usb_one_outpipe_mapping(rtwusb);
+		break;
 		break;
 	default:
 		pr_debug("%s ERROR - out_pipes(%d) out of expect\n",
@@ -600,10 +622,10 @@ static void usb_interface_configure(struct rtw_dev *rtwdev)
 	else
 		rtwusb->bulkout_size = RTW_USB_FULL_SPEED_BULK_SIZE;
 
-	pr_info("%s : bulkout_size: %d\r\n", __func__, rtwusb->bulkout_size);
+	pr_info("%s : bulkout_size: %d\n", __func__, rtwusb->bulkout_size);
 
 	rtwusb->usb_txagg_num = chip->usb_txagg_num;
-	pr_info("%s : TX Agg desc num: %d \r\n", __func__,
+	pr_info("%s : TX Agg desc num: %d\n", __func__,
 		rtwusb->usb_txagg_num);
 
 	rtw_usb_set_queue_pipe_mapping(rtwdev, rtwusb->num_in_pipes,
@@ -614,7 +636,7 @@ static void usb_interface_configure(struct rtw_dev *rtwdev)
 	rtwusb->txdesc_offset = rtwusb->txdesc_size + RTW_USB_PACKET_OFFSET_SZ;
 
 	// setup bulkout num
-	pr_info("%s : bulkout_num: %d\r\n", __func__, rtwdev->hci.bulkout_num);
+	pr_info("%s : bulkout_num: %d\n", __func__, rtwdev->hci.bulkout_num);
 }
 
 /* RTW Thread functions */
@@ -1423,6 +1445,9 @@ static int rtw_usb_probe(struct usb_interface *intf,
 		rtw_err(rtwdev, "failed to setup chip information\n");
 		goto err_destroy_usb;
 	}
+
+	ret = -EINVAL;
+	goto finish;
 
 	ret = rtw_register_hw(rtwdev, rtwdev->hw);
 	if (ret) {

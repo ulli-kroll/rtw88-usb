@@ -1113,9 +1113,9 @@ static int rtw_load_firmware(struct rtw_dev *rtwdev, enum rtw_fw_type type)
 
 static int rtw_chip_parameter_setup(struct rtw_dev *rtwdev)
 {
-	struct rtw_chip_info *chip = rtwdev->chip;
+	//struct rtw_chip_info *chip = rtwdev->chip;
 	struct rtw_hal *hal = &rtwdev->hal;
-	struct rtw_efuse *efuse = &rtwdev->efuse;
+	//struct rtw_efuse *efuse = &rtwdev->efuse;
 	int ret = 0;
 
 	switch (rtw_hci_type(rtwdev)) {
@@ -1134,19 +1134,26 @@ static int rtw_chip_parameter_setup(struct rtw_dev *rtwdev)
 
 	hal->chip_version = rtw_read32(rtwdev, REG_SYS_CFG1);
 	hal->cut_version = BIT_GET_CHIP_VER(hal->chip_version);
+	pr_info("Cut version: 0x%x\n", hal->cut_version);
+
 	hal->mp_chip = (hal->chip_version & BIT_RTL_ID) ? 0 : 1;
+	pr_info("%s\n", (hal->mp_chip)? "MP" : "Test");
+
 	if (hal->chip_version & BIT_RF_TYPE_ID) {
+		pr_info("2T2R\n");
 		hal->rf_type = RF_2T2R;
 		hal->rf_path_num = 2;
 		hal->antenna_tx = BB_PATH_AB;
 		hal->antenna_rx = BB_PATH_AB;
 	} else {
+		pr_info("1T1R\n");
 		hal->rf_type = RF_1T1R;
 		hal->rf_path_num = 1;
 		hal->antenna_tx = BB_PATH_A;
 		hal->antenna_rx = BB_PATH_A;
 	}
 
+#if 0
 	efuse->physical_size = chip->phy_efuse_size;
 	efuse->logical_size = chip->log_efuse_size;
 	efuse->protect_size = chip->ptct_efuse_size;
@@ -1155,7 +1162,7 @@ static int rtw_chip_parameter_setup(struct rtw_dev *rtwdev)
 	rtwdev->hal.rcr |= BIT_VHT_DACK;
 
 	hal->bfee_sts_cap = 3;
-
+#endif
 	return ret;
 }
 
@@ -1337,6 +1344,8 @@ int rtw_chip_info_setup(struct rtw_dev *rtwdev)
 		goto err_out;
 	}
 
+	return 0;
+
 	ret = rtw_chip_efuse_info_setup(rtwdev);
 	if (ret) {
 		rtw_err(rtwdev, "failed to setup chip efuse info\n");
@@ -1355,7 +1364,6 @@ err_out:
 	return ret;
 }
 EXPORT_SYMBOL(rtw_chip_info_setup);
-
 
 #if 0
 static void rtw_stats_init(struct rtw_dev *rtwdev)
@@ -1431,6 +1439,8 @@ int rtw_core_init(struct rtw_dev *rtwdev)
 			  BIT_HTC_LOC_CTRL | BIT_APP_PHYSTS |
 			  BIT_AB | BIT_AM | BIT_APM;
 
+
+
 #endif
 	ret = rtw_load_firmware(rtwdev, RTW_NORMAL_FW);
 	if (ret) {
@@ -1454,13 +1464,13 @@ EXPORT_SYMBOL(rtw_core_init);
 void rtw_core_deinit(struct rtw_dev *rtwdev)
 {
 	struct rtw_fw_state *fw = &rtwdev->fw;
-	struct rtw_fw_state *wow_fw = &rtwdev->wow_fw;
-	struct rtw_rsvd_page *rsvd_pkt, *tmp;
-	unsigned long flags;
+	//struct rtw_fw_state *wow_fw = &rtwdev->wow_fw;
+	//struct rtw_rsvd_page *rsvd_pkt, *tmp;
+	//unsigned long flags;
 
 	if (fw->firmware)
 		release_firmware(fw->firmware);
-
+#if 0
 	if (wow_fw->firmware)
 		release_firmware(wow_fw->firmware);
 
@@ -1477,6 +1487,7 @@ void rtw_core_deinit(struct rtw_dev *rtwdev)
 	mutex_destroy(&rtwdev->mutex);
 	mutex_destroy(&rtwdev->coex.mutex);
 	mutex_destroy(&rtwdev->hal.tx_power_mutex);
+#endif
 }
 EXPORT_SYMBOL(rtw_core_deinit);
 
