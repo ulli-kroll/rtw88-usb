@@ -1677,7 +1677,7 @@ struct rtw_dev {
 	struct rtw_loopback loopback;
 
 	/* hci related data, must be last */
-	u8 priv[0] __aligned(sizeof(void *));
+	u8 priv[] __aligned(sizeof(void *));
 };
 
 #include "hci.h"
