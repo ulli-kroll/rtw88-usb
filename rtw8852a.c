@@ -4272,6 +4272,8 @@ struct rtw_chip_info rtw8852a_hw_spec = {
 	.ops = &rtw8852a_ops,
 	.id = RTW_CHIP_TYPE_8852A,
 	.fw_name = "rtw88/rtw8852a_fw.bin",
+	/* USB interface */
+	.usb_txagg_num = 3,
 #if 0
 	.tx_pkt_desc_sz = 48,
 	.tx_buf_desc_sz = 16,
@@ -4341,8 +4343,6 @@ struct rtw_chip_info rtw8852a_hw_spec = {
 	.bt_afh_span_bw40 = 0x36,
 	.afh_5g_num = ARRAY_SIZE(afh_5g_8822c),
 	.afh_5g = afh_5g_8822c,
-	/* USB interface */
-	.usb_txagg_num = 3,
 #endif
 };
 EXPORT_SYMBOL(rtw8852a_hw_spec);

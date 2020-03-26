@@ -71,5 +71,10 @@ bInterval=0
 usb 2-1: rtw_usb_parse: out endpoint num 12
 USB_SPEED_HIGH
 out eps num: 7
+rtw_usb_probe: usb_interface_configure
+usb_interface_configure : bulkout_size: 512
+usb_interface_configure : TX Agg desc num: 3
+RTW: rtw_usb_set_queue_pipe_mapping OutEPQueueSel(0x07) OutEPNum(7)
+usb_interface_configure : bulkout_num: 7
 rtwifi_usb: probe of 2-1:1.2 failed with error -22
 Firmware version 2.4.0, H2C version 2040
