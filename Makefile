@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+EXTRA_CFLAGS += $(USER_EXTRA_CFLAGS) -fno-pie
+
 KERNELDIR ?= /lib/modules/$(shell uname -r)/build
 PWD       := $(shell pwd)
 
@@ -44,7 +46,7 @@ rtw88-y += main.o \
 
 rtw88-$(CONFIG_RTW88_8822B)	+= rtw8822b.o rtw8822b_table.o
 rtw88-$(CONFIG_RTW88_8822C)	+= rtw8822c.o rtw8822c_table.o
-rtw88-$(CONFIG_RTW88_8852A)	+= rtw8852a.o 
+rtw88-$(CONFIG_RTW88_8852A)	+= rtw8852a.o
 
 obj-$(CONFIG_RTW88_USB)		+= rtwusb.o
 rtwusb-objs			:= usb.o

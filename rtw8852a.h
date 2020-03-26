@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause */
-/* Copyright(c) 2018-2019  Realtek Corporation
+/* Copyright(c) 2018-2020  Realtek Corporation
  */
 
 #ifndef __RTW8852A_H__
@@ -7,7 +7,6 @@
 
 #include <asm/byteorder.h>
 
-#if 0
 struct rtw8822cu_efuse {
 	u8 res0[0x30];			/* 0x120 */
 	u8 vid[2];			/* 0x150 */
@@ -312,4 +311,3 @@ const struct rtw_table name ## _tbl = {			\
 #define BIT_TX_CFIR		GENMASK(31, 30)
 #endif
 
-#endif

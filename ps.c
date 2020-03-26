@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
-/* Copyright(c) 2018-2019  Realtek Corporation
+/* Copyright(c) 2018-2020  Realtek Corporation
  */
 
 #include "main.h"
@@ -95,7 +95,7 @@ void rtw_power_mode_change(struct rtw_dev *rtwdev, bool enter)
 			polling = rtw_read8(rtwdev, rtwdev->hci.cpwm_addr);
 			if ((polling ^ confirm) & BIT_RPWM_TOGGLE)
 				return;
-			udelay(100);
+			usleep_range(100, 200);
 		}
 
 		/* in case of fw/hw missed the request, retry */

@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
-/* Copyright(c) 2018-2019  Realtek Corporation
+/* SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+ * Copyright(c) 2018-2020  Realtek Corporation
  */
 
 #include "main.h"
@@ -133,7 +133,7 @@ static int rtw_pwr_cmd_polling(struct rtw_dev *rtwdev,
 				return -EBUSY;
 			}
 		} else {
-			udelay(50);
+			usleep_range(50, 100);
 		}
 	} while (1);
 }

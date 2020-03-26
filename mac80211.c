@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
-/* Copyright(c) 2018-2020  Realtek Corporation
+/* SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+ * Copyright(c) 2018-2020  Realtek Corporation
  */
 
 #include "main.h"
@@ -100,11 +100,10 @@ static int rtw_ops_config(struct ieee80211_hw *hw, u32 changed)
 	if (changed & IEEE80211_CONF_CHANGE_CHANNEL)
 		rtw_set_channel(rtwdev);
 
-#if 0
 	if ((changed & IEEE80211_CONF_CHANGE_IDLE) &&
 	    (hw->conf.flags & IEEE80211_CONF_IDLE))
 		rtw_enter_ips(rtwdev);
-#endif
+
 //out:
 	mutex_unlock(&rtwdev->mutex);
 	return ret;

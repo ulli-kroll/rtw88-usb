@@ -134,6 +134,7 @@ struct txdesc_hdr {
 	u16 rsvd7;
 } __packed;
 
+/*
 static u16 show_txdesc(u8 *ptxdesc, bool is_agg)
 {
 	struct txdesc_hdr *tdh = (struct txdesc_hdr *)ptxdesc;
@@ -160,6 +161,7 @@ static u16 show_txdesc(u8 *ptxdesc, bool is_agg)
 
 	return ALIGN(tdh->txpktsize, 4) + 48 + tdh->pkt_offset * 8;
 }
+*/
 
 /*
  * usb read/write register functions
