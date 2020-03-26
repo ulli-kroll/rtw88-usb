@@ -26,6 +26,7 @@
 #define RTW_USB_HW_QUEUE_ENTRY		8
 
 #define RTW_USB_PACKET_OFFSET_SZ	8
+#define RTW_USB_MAX_XMITBUF_SZ		(1592 * 3)
 #define RTW_USB_MAX_RECVBUF_SZ		32768
 
 #define RTW_USB_RECVBUFF_ALIGN_SZ	8
@@ -139,7 +140,8 @@ struct rtw_usb {
 	// TX - workqueue
 	bool init_done;
 	struct mutex tx_lock; /* mutex for tx */
-	struct sk_buff_head tx_queue;
+	struct sk_buff_head tx_queue[RTK_MAX_TX_QUEUE_NUM];
+	struct sk_buff_head tx_ack_queue;
 	struct rtw_handler tx_handler;
 	struct rtw_work_data *tx_handler_data;
 
