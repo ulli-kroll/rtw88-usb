@@ -1432,9 +1432,6 @@ static int rtw_usb_probe(struct usb_interface *intf,
 	pr_info("%s: usb_interface_configure\n", __func__);
 	usb_interface_configure(rtwdev);
 
-	ret = -EINVAL;
-	goto finish;
-
 	rtwusb->init_done = true;
 	SET_IEEE80211_DEV(rtwdev->hw, &intf->dev);
 
@@ -1443,6 +1440,9 @@ static int rtw_usb_probe(struct usb_interface *intf,
 		rtw_err(rtwdev, "failed to setup chip information\n");
 		goto err_destroy_usb;
 	}
+
+	ret = -EINVAL;
+	goto finish;
 
 	ret = rtw_register_hw(rtwdev, rtwdev->hw);
 	if (ret) {
