@@ -6,6 +6,7 @@ CONFIG_RTW88_CORE=m
 CONFIG_RTW88_USB=m
 CONFIG_RTW88_8822B=y
 CONFIG_RTW88_8822C=y
+CONFIG_RTW88_8852A=y
 ccflags-y += -DDEBUG
 ccflags-y += -DCONFIG_RTW88_DEBUG=y
 ccflags-y += -DCONFIG_RTW88_DEBUGFS=y
@@ -14,6 +15,9 @@ ccflags-y += -DCONFIG_RTW88_8822B
 endif
 ifeq ($(CONFIG_RTW88_8822C), y)
 ccflags-y += -DCONFIG_RTW88_8822C
+endif
+ifeq ($(CONFIG_RTW88_8852A), y)
+ccflags-y += -DCONFIG_RTW88_8852A
 endif
 
 
@@ -40,6 +44,7 @@ rtw88-y += main.o \
 
 rtw88-$(CONFIG_RTW88_8822B)	+= rtw8822b.o rtw8822b_table.o
 rtw88-$(CONFIG_RTW88_8822C)	+= rtw8822c.o rtw8822c_table.o
+rtw88-$(CONFIG_RTW88_8852A)	+= rtw8852a.o 
 
 obj-$(CONFIG_RTW88_USB)		+= rtwusb.o
 rtwusb-objs			:= usb.o
