@@ -1,0 +1,11 @@
+[ 7715.555319] usb 2-1: new high-speed USB device number 10 using xhci_hcd
+[ 7715.575908] usb 2-1: New USB device found, idVendor=0bda, idProduct=885a, bcdDevice= 0.00
+[ 7715.575913] usb 2-1: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+[ 7715.575916] usb 2-1: Product: 802.11ax WLAN Adapter
+[ 7715.575919] usb 2-1: Manufacturer: Realtek
+[ 7715.581846] rtw_usb_probe ===>
+[ 7715.581860] rtwifi_usb: probe of 2-1:1.2 failed with error -22
+[ 7715.582400] Bluetooth: hci1: RTL: examining hci_ver=0b hci_rev=000a lmp_ver=0b lmp_subver=8852
+[ 7715.582406] Bluetooth: hci1: RTL: unknown IC info, lmp subver 8852, hci rev 000a, hci ver 000b
+[ 7715.582409] Bluetooth: hci1: RTL: assuming no firmware upload needed
+[ 7772.071288] usb 2-1: USB disconnect, device number 10
