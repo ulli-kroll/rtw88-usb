@@ -1464,7 +1464,7 @@ void rtw_core_deinit(struct rtw_dev *rtwdev)
 
 	if (fw->firmware)
 		release_firmware(fw->firmware);
-
+#if 0
 	if (wow_fw->firmware)
 		release_firmware(wow_fw->firmware);
 
@@ -1481,6 +1481,7 @@ void rtw_core_deinit(struct rtw_dev *rtwdev)
 	mutex_destroy(&rtwdev->mutex);
 	mutex_destroy(&rtwdev->coex.mutex);
 	mutex_destroy(&rtwdev->hal.tx_power_mutex);
+#endif
 }
 EXPORT_SYMBOL(rtw_core_deinit);
 

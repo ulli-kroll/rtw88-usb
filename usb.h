@@ -23,6 +23,8 @@
 #define RTW_USB_BULK_IN_ADDR		0x80
 #define RTW_USB_INT_IN_ADDR		0x81
 
+#define RTW_USB_MAX_EP_OUT_NUM		8
+
 #define RTW_USB_HW_QUEUE_ENTRY		8
 
 #define RTW_USB_PACKET_OFFSET_SZ	8
@@ -119,7 +121,7 @@ struct rtw_usb {
 	unsigned int pipe_interrupt;
 	unsigned int pipe_in;
 	unsigned int pipe_out[20];
-	u8 out_ep[4];
+	u8 out_ep[RTW_USB_MAX_EP_OUT_NUM];
 	u8 out_ep_queue_sel;
 	//u8 out_ep_num;
 	int nr_out_eps;

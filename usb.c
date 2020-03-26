@@ -339,7 +339,7 @@ static int rtw_usb_parse(struct rtw_dev *rtwdev,
 		    usb_endpoint_xfer_bulk(endpoint)) {
 			dev_dbg(dev, "%s: out endpoint num %i\n",
 				__func__, num);
-			if (j >= 4) {
+			if (j >= RTW_USB_MAX_EP_OUT_NUM ) {
 				dev_warn(dev,
 					 "%s: Too many OUT pipes\n", __func__);
 				ret = -EINVAL;
@@ -354,29 +354,29 @@ static int rtw_usb_parse(struct rtw_dev *rtwdev,
 
 	switch (usbd->speed) {
 	case USB_SPEED_LOW:
-		pr_debug("USB_SPEED_LOW\r\n");
+		pr_debug("USB_SPEED_LOW\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_1_1;
 		break;
 	case USB_SPEED_FULL:
-		pr_debug("USB_SPEED_FULL\r\n");
+		pr_debug("USB_SPEED_FULL\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_1_1;
 		break;
 	case USB_SPEED_HIGH:
-		pr_debug("USB_SPEED_HIGH\r\n");
+		pr_debug("USB_SPEED_HIGH\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_2;
 		break;
 	case USB_SPEED_SUPER:
-		pr_debug("USB_SPEED_SUPER\r\n");
+		pr_debug("USB_SPEED_SUPER\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_3;
 		break;
 	default:
-		pr_debug("USB speed unknown \r\n");
+		pr_debug("USB speed unknown\n");
 		break;
 	}
 
 exit:
 	rtwusb->nr_out_eps = j;
-	pr_debug("out eps num: %d \r\n", rtwusb->nr_out_eps);
+	pr_debug("out eps num: %d\n", rtwusb->nr_out_eps);
 	return ret;
 }
 
@@ -1385,9 +1385,6 @@ static int rtw_usb_probe(struct usb_interface *intf,
 		goto finish;
 	}
 
-	ret = -EINVAL;
-	goto finish;
-
 	rtwdev->dev = &intf->dev;
 
 	udev = usb_get_dev(interface_to_usbdev(intf));
@@ -1409,6 +1406,9 @@ static int rtw_usb_probe(struct usb_interface *intf,
 		rtw_err(rtwdev, "rtw_usb_parse failed, ret=%d\n", ret);
 		goto err_deinit_core;
 	}
+
+	ret = -EINVAL;
+	goto finish;
 
 	pr_info("%s: usb_interface_configure\n", __func__);
 	usb_interface_configure(rtwdev);
