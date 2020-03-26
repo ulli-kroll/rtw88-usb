@@ -1,9 +1,83 @@
-usb 2-1: new high-speed USB device number 15 using xhci_hcd
 usb 2-1: New USB device found, idVendor=0bda, idProduct=885a, bcdDevice= 0.00
 usb 2-1: New USB device strings: Mfr=1, Product=2, SerialNumber=0
 usb 2-1: Product: 802.11ax WLAN Adapter
 usb 2-1: Manufacturer: Realtek
 rtw_usb_probe ===>
 rtw_os_core_init: rtw_core_init
-rtwifi_usb: probe of 2-1:1.2 failed with error -22
+rtw_usb_probe: rtw_usb_parse
+
+usb endpoint descriptor (0):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=84
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: in endpoint num 4
+
+usb endpoint descriptor (1):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=5
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: out endpoint num 5
+
+usb endpoint descriptor (2):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=6
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: out endpoint num 6
+
+usb endpoint descriptor (3):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=7
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: out endpoint num 7
+
+usb endpoint descriptor (4):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=9
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: out endpoint num 9
+
+usb endpoint descriptor (5):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=a
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: out endpoint num 10
+
+usb endpoint descriptor (6):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=b
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: out endpoint num 11
+
+usb endpoint descriptor (7):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=c
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: out endpoint num 12
+USB_SPEED_HIGH
+out eps num: 7
+rtw_usb_probe: usb_interface_configure
+usb_interface_configure : bulkout_size: 512
+usb_interface_configure : TX Agg desc num: 3
+RTW: rtw_usb_set_queue_pipe_mapping OutEPQueueSel(0x07) OutEPNum(7)
+usb_interface_configure : bulkout_num: 7
 Firmware version 2.4.0, H2C version 2040
+Cut version: 0x0
+MP
+2T2R
+rtwifi_usb: probe of 2-1:1.2 failed with error -22
