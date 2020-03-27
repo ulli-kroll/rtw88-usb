@@ -61,6 +61,9 @@ void rtw_tx_fill_tx_desc(struct rtw_tx_pkt_info *pkt_info, struct sk_buff *skb)
 	SET_TX_DESC_SPE_RPT(txdesc, pkt_info->report);
 	SET_TX_DESC_SW_DEFINE(txdesc, pkt_info->sn);
 	SET_TX_DESC_USE_RTS(txdesc, pkt_info->rts);
+	SET_TX_DESC_DISQSELSEQ(txdesc, pkt_info->dis_qselseq);
+	SET_TX_DESC_EN_HWSEQ(txdesc, pkt_info->en_hwseq);
+	SET_TX_DESC_HW_SSN_SEL(txdesc, pkt_info->hw_ssn_sel);
 }
 EXPORT_SYMBOL(rtw_tx_fill_tx_desc);
 
@@ -319,6 +322,9 @@ void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 	pkt_info->rate_id = 6;
 	pkt_info->rate = hw_value;
 	pkt_info->dis_rate_fallback = true;
+	pkt_info->dis_qselseq = true;
+	pkt_info->en_hwseq = true;
+	pkt_info->hw_ssn_sel = 0;
 
 	if (ieee80211_is_mgmt(fc)) {
 		pkt_info->rate = DESC_RATE1M;
