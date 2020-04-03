@@ -7,8 +7,8 @@ CONFIG_RTW88_USB=m
 CONFIG_RTW88_8822B=y
 CONFIG_RTW88_8822C=y
 ccflags-y += -DDEBUG
-ccflags-y += -DCONFIG_RTW88_DEBUG=y
-ccflags-y += -DCONFIG_RTW88_DEBUGFS=y
+ccflags-y += -DCONFIG_RTW88_DEBUG
+ccflags-y += -DCONFIG_RTW88_DEBUGFS
 ifeq ($(CONFIG_RTW88_8822B), y)
 ccflags-y += -DCONFIG_RTW88_8822B
 endif
