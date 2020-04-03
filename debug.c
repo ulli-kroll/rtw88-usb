@@ -14,6 +14,7 @@
 #include "phy.h"
 #include "mac.h"
 
+#ifdef CONFIG_RTW88_DEBUGFS
 struct rtw_debugfs_priv {
 	struct rtw_dev *rtwdev;
 
@@ -222,6 +223,7 @@ void rtw_debugfs_deinit(struct rtw_dev *rtwdev)
 {
 	debugfs_remove_recursive(rtwdev->debugfs);
 }
+#endif /* CONFIG_RTW88_DEBUGFS */
 
 #ifdef CONFIG_RTW88_DEBUG
 
