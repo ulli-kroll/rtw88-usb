@@ -1582,6 +1582,8 @@ static const struct usb_device_id rtw_usb_id_table[] = {
 	{ RTK_USB_DEVICE(0x0b05, 0x1841, rtw8822b_hw_spec) },	/* ASUS AC55 B1 */
 	{ RTK_USB_DEVICE(0x2001, 0x331c, rtw8822b_hw_spec) },	/* D-Link DWA-182 rev D1 */
 	{ RTK_USB_DEVICE(0x13b1, 0x0043, rtw8822b_hw_spec) },	/* Linksys WUSB6400M */
+	{ RTK_USB_DEVICE(0x2357, 0x0115, rtw8822b_hw_spec) },	/* TP-LINK - T4Uv3 */
+	{ RTK_USB_DEVICE(0x2357, 0x012d, rtw8822b_hw_spec) },	/* TP-LINK - T3U */
 #endif
 #ifdef CONFIG_RTW88_8822C
 	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
