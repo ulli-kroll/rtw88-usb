@@ -1593,27 +1593,27 @@ static const struct usb_device_id rtw_usb_id_table[] = {
 	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
 				       0xb82b,
 				       0xff, 0xff, 0xff,
-				       rtw8822c_hw_spec) }, /* 8821CU */
+				       rtw8822c_hw_spec) },
 	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
 				       0xb820,
 				       0xff, 0xff, 0xff,
-				       rtw8822c_hw_spec) }, /* 8821CU */
+				       rtw8822c_hw_spec) },
 	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
 				       0xC821,
 				       0xff, 0xff, 0xff,
-				       rtw8822c_hw_spec) }, /* 8821CU */
+				       rtw8822c_hw_spec) },
 	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
 				       0xC820,
 				       0xff, 0xff, 0xff,
-				       rtw8822c_hw_spec) }, /* 8821CU */
+				       rtw8822c_hw_spec) },
 	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
 				       0xC82A,
 				       0xff, 0xff, 0xff,
-				       rtw8822c_hw_spec) }, /* 8821CU */
+				       rtw8822c_hw_spec) },
 	{ RTK_USB_DEVICE_AND_INTERFACE(RTW_USB_VENDOR_ID_REALTEK,
 				       0xC82B,
 				       0xff, 0xff, 0xff,
-				       rtw8822c_hw_spec) }, /* 8821CU */
+				       rtw8822c_hw_spec) },
 #endif
 	{},
 };
