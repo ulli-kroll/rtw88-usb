@@ -666,16 +666,6 @@ void rtw_fw_set_remote_wake_ctrl_cmd(struct rtw_dev *rtwdev, bool enable)
 	rtw_fw_send_h2c_command(rtwdev, h2c_pkt);
 }
 
-void rtw_fw_send_h2c2h_loopback(struct rtw_dev *rtwdev)
-{
-	u8 h2c_pkt[H2C_PKT_SIZE] = {0};
-
-	SET_H2C_CMD_ID_CLASS(h2c_pkt, H2C_CMD_H2C2HLB);
-
-	rtw_fw_send_h2c_command(rtwdev, h2c_pkt);
-}
-EXPORT_SYMBOL(rtw_fw_send_h2c2h_loopback);
-
 static u8 rtw_get_rsvd_page_location(struct rtw_dev *rtwdev,
 				     enum rtw_rsvd_packet_type type)
 {

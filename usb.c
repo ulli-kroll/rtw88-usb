@@ -669,7 +669,6 @@ static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 {
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	struct usb_device *usbd = rtwusb->udev;
-	struct rtw_loopback *loopback = &rtwdev->loopback;
 	unsigned int pipe;
 	int ret;
 	int transfer;
@@ -681,11 +680,6 @@ static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 	if (ret < 0)
 		pr_err("usb_bulk_msg error, ret=%d\n", ret);
 
-	if (unlikely(loopback->start)) {
-		loopback->cur++;
-		if (loopback->cur >= loopback->total)
-			up(&loopback->sema);
-	}
 	return ret;
 }
 
@@ -735,14 +729,10 @@ static inline void rtw_tx_ack_enqueue(struct rtw_usb *rtwusb,
 static inline void rtw_do_tx_ack_queue(struct rtw_usb *rtwusb)
 {
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
-	struct rtw_loopback *loopback = &rtwdev->loopback;
 	struct sk_buff *skb;
 
 	while ((skb = skb_dequeue(&rtwusb->tx_ack_queue))) {
-		if (unlikely(loopback->start))
-			dev_kfree_skb(skb);
-		else
-			rtw_indicate_tx_status(rtwdev, skb);
+		rtw_indicate_tx_status(rtwdev, skb);
 	}
 }
 
@@ -994,7 +984,6 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 			struct rtw_chip_info *chip = rtwdev->chip;
 			struct ieee80211_rx_status rx_status;
 			struct rtw_rx_pkt_stat pkt_stat;
-			struct rtw_loopback *loopback = &rtwdev->loopback;
 			u32 pkt_desc_sz = chip->rx_pkt_desc_sz;
 			u32 pkt_offset;
 
@@ -1030,15 +1019,8 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 			skb_put(skb, pkt_stat.pkt_len);
 			skb_reserve(skb, pkt_offset);
 
-			if (unlikely(loopback->start)) {
-				if (loopback->rx_buf && skb->len > 24)
-					memcpy(loopback->rx_buf, skb->data + 24,
-					       min(skb->len - 24,
-						   loopback->pktsize));
-			} else {
-				memcpy(skb->cb, &rx_status, sizeof(rx_status));
-				ieee80211_rx_irqsafe(rtwdev->hw, skb);
-			}
+			memcpy(skb->cb, &rx_status, sizeof(rx_status));
+			ieee80211_rx_irqsafe(rtwdev->hw, skb);
 		}
 	} while (1);
 
@@ -1052,7 +1034,6 @@ static void rtw_usb_read_port_complete(struct urb *urb)
 	struct rtw_dev *rtwdev = (struct rtw_dev *)rxcb->data;
 	struct sk_buff *skb = rxcb->rx_skb;
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
-	struct rtw_loopback *loopback = &rtwdev->loopback;
 
 	if (urb->status == 0) {
 		if (urb->actual_length >= RTW_USB_MAX_RECVBUF_SZ ||
@@ -1062,8 +1043,6 @@ static void rtw_usb_read_port_complete(struct urb *urb)
 			if (skb)
 				dev_kfree_skb(skb);
 		} else {
-			if (unlikely(loopback->start))
-				loopback->read_cnt++;
 			skb_queue_tail(&rtwusb->rx_queue, skb);
 			rtw_set_event(&rtwusb->rx_handler.event);
 		}

@@ -1075,7 +1075,6 @@ struct rtw_chip_info {
 	struct rtw_pwr_seq_cmd **pwr_on_seq;
 	struct rtw_pwr_seq_cmd **pwr_off_seq;
 	struct rtw_rqpn *rqpn_table;
-	struct rtw_rqpn *rqpn_table_loopback;
 	struct rtw_page_table *page_table;
 	struct rtw_intf_phy_para_table *intf_table;
 
@@ -1589,17 +1588,6 @@ struct rtw_hal {
 		     [DESC_RATE_MAX];
 };
 
-struct rtw_loopback {
-	struct semaphore	sema;
-	bool			start;
-	u32			pktsize;
-	u8			*tx_buf;
-	u8			*rx_buf;
-	int			total;
-	int			cur;
-	int			read_cnt;
-};
-
 struct rtw_dev {
 	struct ieee80211_hw *hw;
 	struct device *dev;
@@ -1671,9 +1659,6 @@ struct rtw_dev {
 	u8 mp_mode;
 	struct rtw_fw_state wow_fw;
 	struct rtw_wow_param wow;
-
-	/* loopback */
-	struct rtw_loopback loopback;
 
 	/* hci related data, must be last */
 	u8 priv[0] __aligned(sizeof(void *));

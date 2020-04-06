@@ -2110,24 +2110,6 @@ static struct rtw_rqpn rqpn_table_8822b[] = {
 	 RTW_DMA_MAPPING_EXTRA, RTW_DMA_MAPPING_HIGH},
 };
 
-static struct rtw_rqpn rqpn_table_8822b_loopback[] = {
-	{RTW_DMA_MAPPING_NORMAL, RTW_DMA_MAPPING_NORMAL,
-	 RTW_DMA_MAPPING_LOW, RTW_DMA_MAPPING_LOW,
-	 RTW_DMA_MAPPING_EXTRA, RTW_DMA_MAPPING_HIGH},
-	{RTW_DMA_MAPPING_NORMAL, RTW_DMA_MAPPING_NORMAL,
-	 RTW_DMA_MAPPING_LOW, RTW_DMA_MAPPING_LOW,
-	 RTW_DMA_MAPPING_EXTRA, RTW_DMA_MAPPING_HIGH},
-	{RTW_DMA_MAPPING_HIGH, RTW_DMA_MAPPING_HIGH,
-	 RTW_DMA_MAPPING_HIGH, RTW_DMA_MAPPING_NORMAL,
-	 RTW_DMA_MAPPING_HIGH, RTW_DMA_MAPPING_HIGH},
-	{RTW_DMA_MAPPING_HIGH, RTW_DMA_MAPPING_HIGH,
-	 RTW_DMA_MAPPING_LOW, RTW_DMA_MAPPING_NORMAL,
-	 RTW_DMA_MAPPING_HIGH, RTW_DMA_MAPPING_HIGH},
-	{RTW_DMA_MAPPING_NORMAL, RTW_DMA_MAPPING_NORMAL,
-	 RTW_DMA_MAPPING_LOW, RTW_DMA_MAPPING_LOW,
-	 RTW_DMA_MAPPING_EXTRA, RTW_DMA_MAPPING_HIGH},
-};
-
 static struct rtw_chip_ops rtw8822b_ops = {
 	.phy_set_param		= rtw8822b_phy_set_param,
 	.read_efuse		= rtw8822b_read_efuse,
@@ -2453,7 +2435,6 @@ struct rtw_chip_info rtw8822b_hw_spec = {
 	.pwr_off_seq = card_disable_flow_8822b,
 	.page_table = page_table_8822b,
 	.rqpn_table = rqpn_table_8822b,
-	.rqpn_table_loopback = rqpn_table_8822b_loopback,
 	.intf_table = &phy_para_table_8822b,
 	.dig = rtw8822b_dig,
 	.rf_base_addr = {0x2800, 0x2c00},

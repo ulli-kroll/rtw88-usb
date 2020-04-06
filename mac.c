@@ -815,25 +815,6 @@ static int txdma_queue_mapping(struct rtw_dev *rtwdev)
 		default:
 			return -EINVAL;
 		}
-	} else if (trx_mode == RTW_TRX_MODE_LOOPBACK) {
-		switch (rtw_hci_type(rtwdev)) {
-		case RTW_HCI_TYPE_PCIE:
-			rqpn = &chip->rqpn_table_loopback[1];
-			break;
-		case RTW_HCI_TYPE_USB:
-			if (rtwdev->hci.bulkout_num == 2)
-				rqpn = &chip->rqpn_table_loopback[2];
-			else if (rtwdev->hci.bulkout_num == 3)
-				rqpn = &chip->rqpn_table_loopback[3];
-			else if (rtwdev->hci.bulkout_num == 4)
-				rqpn = &chip->rqpn_table_loopback[4];
-			else
-				return -EINVAL;
-			break;
-		default:
-			return -EINVAL;
-		}
-
 	} else {
 		return -EINVAL;
 	}
