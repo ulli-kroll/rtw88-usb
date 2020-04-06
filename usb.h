@@ -137,7 +137,6 @@ struct rtw_usb {
 	u8 usb_txagg_num;
 
 	// TX - workqueue
-	bool init_done;
 	struct mutex tx_lock; /* mutex for tx */
 	struct sk_buff_head tx_queue[RTK_MAX_TX_QUEUE_NUM];
 	struct sk_buff_head tx_ack_queue;
