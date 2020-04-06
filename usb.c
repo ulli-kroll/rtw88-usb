@@ -134,6 +134,28 @@ struct txdesc_hdr {
 	u16 rsvd7;
 } __packed;
 
+static inline u8 rtw_txdesc_get_qsel(struct sk_buff *skb)
+{
+	struct txdesc_hdr *tdh;
+
+	tdh = (struct txdesc_hdr *)(skb->data);
+	return tdh->qsel;
+}
+
+static inline void rtw_usb_fill_tx_checksum(struct rtw_usb *rtwusb,
+					    struct sk_buff *skb, int agg_num)
+{
+	struct rtw_dev *rtwdev = rtwusb->rtwdev;
+	struct rtw_chip_info *chip = rtwdev->chip;
+	struct rtw_tx_pkt_info pkt_info;
+	struct txdesc_hdr *tdh;
+
+	tdh = (struct txdesc_hdr *)(skb->data);
+	tdh->dma_txagg_num = agg_num;
+	pkt_info.pkt_offset = tdh->pkt_offset;
+	chip->ops->fill_txdesc_checksum(rtwdev, &pkt_info, skb->data);
+}
+
 /*
  * usb read/write register functions
  */
@@ -398,7 +420,7 @@ static u8 rtw_tx_queue_mapping(struct sk_buff *skb)
 	return queue;
 }
 
-static u8 rtw_queue_to_qsel(struct sk_buff *skb, u8 queue)
+static inline u8 rtw_queue_to_qsel(struct sk_buff *skb, u8 queue)
 {
 	switch (queue) {
 	case RTW_TX_QUEUE_BCN:
@@ -414,7 +436,7 @@ static u8 rtw_queue_to_qsel(struct sk_buff *skb, u8 queue)
 	}
 }
 
-static u8 rtw_qsel_to_queue(u8 qsel)
+static inline u8 rtw_qsel_to_queue(u8 qsel)
 {
 	switch (qsel) {
 	case TX_DESC_QSEL_BEACON:
@@ -728,41 +750,37 @@ static inline void rtw_do_tx_ack_queue(struct rtw_usb *rtwusb)
 	struct sk_buff *skb;
 
 	while ((skb = skb_dequeue(&rtwusb->tx_ack_queue))) {
-		rtw_indicate_tx_status(rtwdev, skb);
+		u8 qsel, queue;
+
+		qsel = rtw_txdesc_get_qsel(skb);
+		queue = rtw_qsel_to_queue(qsel);
+
+		if (queue <= RTW_TX_QUEUE_VO)
+			rtw_indicate_tx_status(rtwdev, skb);
+		else
+			dev_kfree_skb(skb);
 	}
 }
 
-static inline void rtw_usb_fill_tx_checksum(struct  rtw_usb *rtwusb,
-					    struct sk_buff *skb, int agg_num)
-{
-	struct rtw_dev *rtwdev = rtwusb->rtwdev;
-	struct rtw_chip_info *chip = rtwdev->chip;
-	struct rtw_tx_pkt_info pkt_info;
-	struct txdesc_hdr *tdh;
-
-	tdh = (struct txdesc_hdr *)(skb->data);
-	tdh->dma_txagg_num = agg_num;
-	pkt_info.pkt_offset = tdh->pkt_offset;
-	chip->ops->fill_txdesc_checksum(rtwdev, &pkt_info, skb->data);
-}
-
-static inline void rtw_usb_tx_agg(struct rtw_usb *rtwusb, struct sk_buff *skb,
-				  u8 queue)
+static inline void rtw_usb_tx_agg(struct rtw_usb *rtwusb, struct sk_buff *skb)
 {
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
 	struct sk_buff_head *list;
 	struct sk_buff *skb_m = NULL, *skb1;
-	u8 *data_ptr;
-	int status, len, agg_num = 0;
 	unsigned long flags;
+	int status, len, agg_num = 0;
+	u8 *data_ptr, queue, qsel;
+
+	qsel = rtw_txdesc_get_qsel(skb);
+	queue = rtw_qsel_to_queue(qsel);
+	if (queue != RTW_TX_QUEUE_VO)
+		goto err_skb_m;
 
 	list = &rtwusb->tx_queue[queue];
 	if (skb_queue_empty(list))
 		goto err_skb_m;
 
-	if (queue != RTW_TX_QUEUE_VO)
-		goto err_skb_m;
-
+	
 	skb_m = dev_alloc_skb(RTW_USB_MAX_XMITBUF_SZ);
 	if (!skb_m)
 		goto err_skb_m;
@@ -812,7 +830,6 @@ write_port:
 void rtw_tx_func(struct rtw_usb *rtwusb)
 {
 	struct sk_buff *skb;
-	u8 queue;
 
 	while (1) {
 		mutex_lock(&rtwusb->tx_lock);
@@ -822,9 +839,8 @@ void rtw_tx_func(struct rtw_usb *rtwusb)
 			mutex_unlock(&rtwusb->tx_lock);
 			break;
 		}
-		queue = rtw_tx_queue_mapping(skb);
 
-		rtw_usb_tx_agg(rtwusb, skb, queue);
+		rtw_usb_tx_agg(rtwusb, skb);
 
 		mutex_unlock(&rtwusb->tx_lock);
 	}
