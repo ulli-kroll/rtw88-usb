@@ -831,53 +831,25 @@ void rtw_tx_func(struct rtw_usb *rtwusb)
 }
 
 static int
-rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
+rtw_usb_write_data(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
+		   u8 *buf)
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
-	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	struct sk_buff *skb;
-	struct rtw_tx_pkt_info pkt_info;
-	u32 desclen, len, headsize;
+	u32 desclen, len, headsize, size;
+	u8 addr, qsel;
 	u8 ret = 0;
-	u8 addr;
 
-	if (!rtwusb) {
-		pr_err("%s: rtwusb is NULL\n", __func__);
-		return -EINVAL;
-	}
-
+	size = pkt_info->tx_pkt_size;
+	qsel = pkt_info->qsel;
 	desclen = chip->tx_pkt_desc_sz;
-	len = desclen + size;
-	headsize = desclen;
-
-	skb = NULL;
-	memset(&pkt_info, 0, sizeof(pkt_info));
-	pkt_info.tx_pkt_size = size;
-	pkt_info.qsel = qsel;
-	if (qsel == TX_DESC_QSEL_BEACON) {
-		if (rtwusb->bulkout_size == 0) {
-			rtw_err(rtwdev, "%s: ERROR: bulkout_size is 0\n",
-				__func__);
-			return -EINVAL;
-		}
-		if (len % rtwusb->bulkout_size == 0) {
-			len = len + RTW_USB_PACKET_OFFSET_SZ;
-			headsize = desclen + RTW_USB_PACKET_OFFSET_SZ;
-			pkt_info.offset = desclen + RTW_USB_PACKET_OFFSET_SZ;
-			pkt_info.pkt_offset = 1;
-		} else {
-			pkt_info.offset = desclen;
-		}
-	} else if (qsel == TX_DESC_QSEL_H2C) {
-		;
-	} else {
-		rtw_err(rtwdev, "%s: qsel may be error(%d)\n", __func__, qsel);
-		return -EINVAL;
-	}
+	headsize = (pkt_info->offset)? pkt_info->offset : desclen;
+	len = headsize + size;
 
 	skb = dev_alloc_skb(len);
-	if (!skb)
+	if (unlikely(!skb)) {
 		return -ENOMEM;
+	}
 
 	skb_reserve(skb, headsize);
 
@@ -886,41 +858,66 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 	skb_push(skb, headsize);
 	memset(skb->data, 0, headsize);
 
-	rtw_tx_fill_tx_desc(&pkt_info, skb);
+	rtw_tx_fill_tx_desc(pkt_info, skb);
 
-	chip->ops->fill_txdesc_checksum(rtwdev, &pkt_info, skb->data);
+	chip->ops->fill_txdesc_checksum(rtwdev, pkt_info, skb->data);
 
 	addr = rtw_qsel_to_queue(qsel);
 
 	ret = rtw_usb_write_port(rtwdev, addr, len, skb);
-	if (ret) {
+	if (unlikely(ret)) {
 		pr_err("%s ,rtw_usb_write_port failed, ret=%d\n",
 		       __func__, ret);
-		goto exit;
 	}
-	dev_kfree_skb(skb);
 
-	return 0;
-
-exit:
 	dev_kfree_skb(skb);
-	return -EIO;
+	return ret;
 }
 
 static int rtw_usb_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
 					u32 size)
 {
-	rtw_dbg(rtwdev, RTW_DBG_USB, "%s: enter\n", __func__);
-	if (!rtwdev) {
-		pr_err("%s: rtwdev is NULL\n", __func__);
+	struct rtw_chip_info *chip = rtwdev->chip;
+	struct rtw_usb *rtwusb;
+	struct rtw_tx_pkt_info pkt_info;
+	u32 len, desclen;
+	u8 qsel = TX_DESC_QSEL_BEACON;
+
+	if (unlikely(!rtwdev))
 		return -EINVAL;
+
+	rtwusb = rtw_get_usb_priv(rtwdev);
+	if (unlikely(!rtwusb))
+		return -EINVAL;
+		
+
+	memset(&pkt_info, 0, sizeof(pkt_info));
+	pkt_info.tx_pkt_size = size;
+	pkt_info.qsel = qsel;
+
+	desclen = chip->tx_pkt_desc_sz;
+	len = desclen + size;
+	if (len % rtwusb->bulkout_size == 0) {
+		len = len + RTW_USB_PACKET_OFFSET_SZ;
+		pkt_info.offset = desclen + RTW_USB_PACKET_OFFSET_SZ;
+		pkt_info.pkt_offset = 1;
+	} else {
+		pkt_info.offset = desclen;
 	}
-	return rtw_usb_write_data(rtwdev, buf, size, TX_DESC_QSEL_BEACON);
+
+	return rtw_usb_write_data(rtwdev, &pkt_info, buf);
 }
 
 static int rtw_usb_write_data_h2c(struct rtw_dev *rtwdev, u8 *buf, u32 size)
 {
-	return rtw_usb_write_data(rtwdev, buf, size, TX_DESC_QSEL_H2C);
+	struct rtw_tx_pkt_info pkt_info;
+	u8 qsel = TX_DESC_QSEL_H2C;
+
+	memset(&pkt_info, 0, sizeof(pkt_info));
+	pkt_info.tx_pkt_size = size;
+	pkt_info.qsel = qsel;
+
+	return rtw_usb_write_data(rtwdev, &pkt_info, buf);
 }
 
 static int rtw_usb_tx_write(struct rtw_dev *rtwdev,
