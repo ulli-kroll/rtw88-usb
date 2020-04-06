@@ -580,10 +580,6 @@ static void usb_interface_configure(struct rtw_dev *rtwdev)
 	rtw_usb_set_queue_pipe_mapping(rtwdev, rtwusb->num_in_pipes,
 				       rtwusb->num_out_pipes);
 
-	// txdesc
-	rtwusb->txdesc_size = chip->tx_pkt_desc_sz;
-	rtwusb->txdesc_offset = rtwusb->txdesc_size + RTW_USB_PACKET_OFFSET_SZ;
-
 	// setup bulkout num
 	pr_info("%s : bulkout_num: %d\r\n", __func__, rtwdev->hci.bulkout_num);
 }
@@ -850,7 +846,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, u8 *buf, u32 size, u8 qsel)
 		return -EINVAL;
 	}
 
-	desclen = rtwusb->txdesc_size;
+	desclen = chip->tx_pkt_desc_sz;
 	len = desclen + size;
 	headsize = desclen;
 

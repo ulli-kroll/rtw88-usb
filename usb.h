@@ -135,8 +135,7 @@ struct rtw_usb {
 
 	// TX
 	u8 usb_txagg_num;
-	u32 txdesc_size;
-	u32 txdesc_offset;
+
 	// TX - workqueue
 	bool init_done;
 	struct mutex tx_lock; /* mutex for tx */
