@@ -134,33 +134,6 @@ struct txdesc_hdr {
 	u16 rsvd7;
 } __packed;
 
-static u16 show_txdesc(u8 *ptxdesc, bool is_agg)
-{
-	struct txdesc_hdr *tdh = (struct txdesc_hdr *)ptxdesc;
-
-	if (!is_agg && !tdh->dma_txagg_num) {
-		return 0;
-	}
-
-	if (!tdh->txpktsize) {
-		pr_err("%s: txpktsize == 0,parse failed\n", __func__);
-		return 0;
-	}
-
-	pr_info("**************\n");
-	pr_info("* txpktsize:%d\n", tdh->txpktsize);
-	pr_info("* pkt_offset:%d\n", tdh->pkt_offset);
-	pr_info("* dma_txagg_num:%d\n", tdh->dma_txagg_num);
-	pr_info("* padding_len:%d\n", tdh->padding_len);
-	pr_info("* sw_seq:%d\n", tdh->sw_seq);
-	pr_info("**************\n");
-
-	print_hex_dump(KERN_INFO, "txdesc: ", DUMP_PREFIX_OFFSET, 16, 1,
-		       ptxdesc, 48, 1);
-
-	return ALIGN(tdh->txpktsize, 4) + 48 + tdh->pkt_offset * 8;
-}
-
 /*
  * usb read/write register functions
  */
