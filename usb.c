@@ -681,7 +681,42 @@ static void rtw_indicate_tx_status(struct rtw_dev *rtwdev, struct sk_buff *skb)
 	ieee80211_tx_status_irqsafe(hw, skb);
 }
 
-static u32 rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
+static void usb_write_port_direct_complete(struct urb *urb)
+{
+	struct sk_buff *skb;
+
+	skb = (struct sk_buff *)urb->context;
+	dev_kfree_skb(skb);
+	usb_free_urb(urb);
+}
+
+static u32 rtw_usb_write_port_direct(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
+			      struct sk_buff *skb)
+{
+	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+	struct usb_device *usbd = rtwusb->udev;
+	struct urb *urb;
+	unsigned int pipe;
+	int ret;
+
+	pipe = rtw_usb_get_pipe(rtwusb, addr);
+
+	urb = usb_alloc_urb(0, GFP_ATOMIC);
+	if (!urb)
+		return -ENOMEM;
+
+	usb_fill_bulk_urb(urb, usbd, pipe, skb->data, (int)cnt,
+			  usb_write_port_direct_complete, skb);
+
+	ret = usb_submit_urb(urb, GFP_ATOMIC);
+	if (unlikely(ret)) {
+		usb_free_urb(urb);
+	}
+
+	return ret;
+}
+
+static u32 rtw_usb_write_port_wait(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 			      struct sk_buff *skb)
 {
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
@@ -814,7 +849,7 @@ err_skb_m:
 	rtw_tx_ack_enqueue(rtwusb, skb);
 
 write_port:
-	status = rtw_usb_write_port(rtwdev, queue, skb_m->len, skb_m);
+	status = rtw_usb_write_port_wait(rtwdev, queue, skb_m->len, skb_m);
 	if (status) {
 		pr_err("%s, rtw_usb_write_xmit failed, ret=%d\n",
 		       __func__, status);
@@ -847,9 +882,8 @@ void rtw_tx_func(struct rtw_usb *rtwusb)
 
 static int
 rtw_usb_write_data(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
-		   u8 *buf, bool direct)
+		   u8 *buf)
 {
-	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	struct rtw_chip_info *chip = rtwdev->chip;
 	struct sk_buff *skb;
 	u32 desclen, len, headsize, size;
@@ -880,15 +914,11 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
 
 	queue = rtw_qsel_to_queue(qsel);
 
-	if (direct) {
-		ret = rtw_usb_write_port(rtwdev, queue, len, skb);
-		if (unlikely(ret)) {
-			pr_err("%s ,rtw_usb_write_port failed, ret=%d\n",
-			       __func__, ret);
-		}
-		dev_kfree_skb(skb);
-	} else
-		skb_queue_tail(&rtwusb->tx_queue[queue], skb);
+	ret = rtw_usb_write_port_direct(rtwdev, queue, len, skb);
+	if (unlikely(ret)) {
+		pr_err("%s ,rtw_usb_write_port failed, ret=%d\n",
+		       __func__, ret);
+	}
 
 	return ret;
 }
@@ -901,7 +931,6 @@ static int rtw_usb_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
 	struct rtw_tx_pkt_info pkt_info;
 	u32 len, desclen;
 	u8 qsel = TX_DESC_QSEL_BEACON;
-	bool direct = true;
 
 	if (unlikely(!rtwdev))
 		return -EINVAL;
@@ -925,20 +954,19 @@ static int rtw_usb_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
 		pkt_info.offset = desclen;
 	}
 
-	return rtw_usb_write_data(rtwdev, &pkt_info, buf, direct);
+	return rtw_usb_write_data(rtwdev, &pkt_info, buf);
 }
 
 static int rtw_usb_write_data_h2c(struct rtw_dev *rtwdev, u8 *buf, u32 size)
 {
 	struct rtw_tx_pkt_info pkt_info;
 	u8 qsel = TX_DESC_QSEL_H2C;
-	bool direct = false;
 
 	memset(&pkt_info, 0, sizeof(pkt_info));
 	pkt_info.tx_pkt_size = size;
 	pkt_info.qsel = qsel;
 
-	return rtw_usb_write_data(rtwdev, &pkt_info, buf, direct);
+	return rtw_usb_write_data(rtwdev, &pkt_info, buf);
 }
 
 static int rtw_usb_tx_write(struct rtw_dev *rtwdev,
