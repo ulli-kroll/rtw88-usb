@@ -1,7 +1,7 @@
 # rtw88-usb
 
-It's unofficial release. Just for fun. And welcome to test and upstream to the Linux kernel. 
-( Some scheduling with atomic issue, still working to solve it. )
+It's unofficial release. Just for fun. 
+And welcome to test and upstream to the Linux kernel. 
 
 Driver for 802.11ac USB Adapter with chipset:
   RTL88x2BU / RTL88x2CU
@@ -56,6 +56,11 @@ Connect to the AP without security:
 ```console
 $ sudo iw wlanX connect <AP name>
 ```
+
+## Test
+test ok with general commands with the latest kernel
+ubuntu 18 + kernel v5.3 test with Network Manager ok. 
+
 ## Known Issues
 
 * Currently, this driver is not upstreamed to Linux kernel driver rtw88 yet. That means, loading this module will cause unpredictable results to other working Realtek wifi pcie device, especially to those laptops with Realtek wifi IC running kernel > v5.2.
