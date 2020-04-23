@@ -165,12 +165,11 @@ static inline u32
 rtw_read_rf(struct rtw_dev *rtwdev, enum rtw_rf_path rf_path,
 	    u32 addr, u32 mask)
 {
-	unsigned long flags;
 	u32 val;
 
-	spin_lock_irqsave(&rtwdev->rf_lock, flags);
+	mutex_lock(&rtwdev->rf_lock);
 	val = rtwdev->chip->ops->read_rf(rtwdev, rf_path, addr, mask);
-	spin_unlock_irqrestore(&rtwdev->rf_lock, flags);
+	mutex_unlock(&rtwdev->rf_lock);
 
 	return val;
 }
@@ -179,11 +178,9 @@ static inline void
 rtw_write_rf(struct rtw_dev *rtwdev, enum rtw_rf_path rf_path,
 	     u32 addr, u32 mask, u32 data)
 {
-	unsigned long flags;
-
-	spin_lock_irqsave(&rtwdev->rf_lock, flags);
+	mutex_lock(&rtwdev->rf_lock);
 	rtwdev->chip->ops->write_rf(rtwdev, rf_path, addr, mask, data);
-	spin_unlock_irqrestore(&rtwdev->rf_lock, flags);
+	mutex_unlock(&rtwdev->rf_lock);
 }
 
 static inline u32

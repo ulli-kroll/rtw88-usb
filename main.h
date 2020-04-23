@@ -1612,11 +1612,11 @@ struct rtw_dev {
 	/* ensures exclusive access from mac80211 callbacks */
 	struct mutex mutex;
 
+	/* read/write rf register */
+	struct mutex rf_lock;
+
 	/* lock for dm to use */
 	spinlock_t dm_lock;
-
-	/* read/write rf register */
-	spinlock_t rf_lock;
 
 	/* watch dog every 2 sec */
 	struct delayed_work watch_dog_work;
