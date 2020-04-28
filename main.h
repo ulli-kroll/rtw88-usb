@@ -1613,7 +1613,7 @@ struct rtw_dev {
 	struct mutex mutex;
 
 	/* read/write rf register */
-	struct mutex rf_lock;
+	struct mutex rf_lock; /* mutex lock to protect rf register operation */
 
 	/* lock for dm to use */
 	spinlock_t dm_lock;
@@ -1639,8 +1639,7 @@ struct rtw_dev {
 	struct {
 		/* incicate the mail box to use with fw */
 		u8 last_box_num;
-		/* protect to send h2c to fw */
-		spinlock_t lock;
+		struct mutex lock; /* mutex lock to protect to send h2c */
 		u32 seq;
 	} h2c;
 
