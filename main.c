@@ -180,7 +180,7 @@ static void rtw_watch_dog_work(struct work_struct *work)
 					      watch_dog_work.work);
 	struct rtw_traffic_stats *stats = &rtwdev->stats;
 	struct rtw_watch_dog_iter_data data = {};
-	//bool busy_traffic = test_bit(RTW_FLAG_BUSY_TRAFFIC, rtwdev->flags);
+	bool busy_traffic = test_bit(RTW_FLAG_BUSY_TRAFFIC, rtwdev->flags);
 	bool ps_active;
 
 	mutex_lock(&rtwdev->mutex);
@@ -191,10 +191,6 @@ static void rtw_watch_dog_work(struct work_struct *work)
 	ieee80211_queue_delayed_work(rtwdev->hw, &rtwdev->watch_dog_work,
 				     RTW_WATCH_DOG_DELAY_TIME);
 
-#if 1
-	set_bit(RTW_FLAG_BUSY_TRAFFIC, rtwdev->flags);
-	ps_active = true;
-#else
 	if (rtwdev->stats.tx_cnt > 100 || rtwdev->stats.rx_cnt > 100)
 		set_bit(RTW_FLAG_BUSY_TRAFFIC, rtwdev->flags);
 	else
@@ -208,7 +204,6 @@ static void rtw_watch_dog_work(struct work_struct *work)
 		ps_active = true;
 	else
 		ps_active = false;
-#endif
 
 	ewma_tp_add(&stats->tx_ewma_tp,
 		    (u32)(stats->tx_unicast >> RTW_TP_SHIFT));
@@ -227,8 +222,7 @@ static void rtw_watch_dog_work(struct work_struct *work)
 		goto unlock;
 
 	/* make sure BB/RF is working for dynamic mech */
-	//NeoJou : force no LPS
-	//rtw_leave_lps(rtwdev);
+	rtw_leave_lps(rtwdev);
 
 	rtw_phy_dynamic_mechanism(rtwdev);
 
@@ -245,8 +239,8 @@ static void rtw_watch_dog_work(struct work_struct *work)
 	 * get that vif and check if device is having traffic more than the
 	 * threshold.
 	 */
-	//if (rtwdev->ps_enabled && data.rtwvif && !ps_active)
-	//	rtw_enter_lps(rtwdev, data.rtwvif->port);
+	if (rtwdev->ps_enabled && data.rtwvif && !ps_active)
+		rtw_enter_lps(rtwdev, data.rtwvif->port);
 
 	rtwdev->watch_dog_cnt++;
 
@@ -1122,8 +1116,8 @@ static int rtw_chip_parameter_setup(struct rtw_dev *rtwdev)
 		rtwdev->hci.cpwm_addr = 0x03da;
 		break;
 	case RTW_HCI_TYPE_USB:
-		rtwdev->hci.rpwm_addr = 0xFE58;
-		rtwdev->hci.cpwm_addr = 0xFE57;
+		rtwdev->hci.rpwm_addr = 0xfe58;
+		rtwdev->hci.cpwm_addr = 0xfe57;
 		break;
 	default:
 		rtw_err(rtwdev, "unsupported hci type\n");
@@ -1399,7 +1393,6 @@ int rtw_core_init(struct rtw_dev *rtwdev)
 	skb_queue_head_init(&rtwdev->coex.queue);
 	skb_queue_head_init(&rtwdev->tx_report.queue);
 
-	spin_lock_init(&rtwdev->dm_lock);
 	spin_lock_init(&rtwdev->txq_lock);
 	spin_lock_init(&rtwdev->tx_report.q_lock);
 
@@ -1495,8 +1488,8 @@ int rtw_register_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
 	ieee80211_hw_set(hw, AMPDU_AGGREGATION);
 	ieee80211_hw_set(hw, MFP_CAPABLE);
 	ieee80211_hw_set(hw, REPORTS_TX_ACK_STATUS);
-//	ieee80211_hw_set(hw, SUPPORTS_PS);
-//	ieee80211_hw_set(hw, SUPPORTS_DYNAMIC_PS);
+	ieee80211_hw_set(hw, SUPPORTS_PS);
+	ieee80211_hw_set(hw, SUPPORTS_DYNAMIC_PS);
 	ieee80211_hw_set(hw, SUPPORT_FAST_XMIT);
 	ieee80211_hw_set(hw, SUPPORTS_AMSDU_IN_AMPDU);
 	ieee80211_hw_set(hw, HAS_RATE_CONTROL);

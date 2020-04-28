@@ -73,9 +73,6 @@ static int rtw_ops_config(struct ieee80211_hw *hw, u32 changed)
 
 	mutex_lock(&rtwdev->mutex);
 
-	//NeoJou: don't do IPS/LPS first
-	rtwdev->ps_enabled = false;
-#if 0
 	rtw_leave_lps_deep(rtwdev);
 
 	if ((changed & IEEE80211_CONF_CHANGE_IDLE) &&
@@ -95,17 +92,14 @@ static int rtw_ops_config(struct ieee80211_hw *hw, u32 changed)
 			rtw_leave_lps(rtwdev);
 		}
 	}
-#endif
 
 	if (changed & IEEE80211_CONF_CHANGE_CHANNEL)
 		rtw_set_channel(rtwdev);
 
-#if 0
 	if ((changed & IEEE80211_CONF_CHANGE_IDLE) &&
 	    (hw->conf.flags & IEEE80211_CONF_IDLE))
 		rtw_enter_ips(rtwdev);
-#endif
-//out:
+out:
 	mutex_unlock(&rtwdev->mutex);
 	return ret;
 }
@@ -169,7 +163,7 @@ static int rtw_ops_add_interface(struct ieee80211_hw *hw,
 
 	mutex_lock(&rtwdev->mutex);
 
-	//rtw_leave_lps_deep(rtwdev);
+	rtw_leave_lps_deep(rtwdev);
 
 	switch (vif->type) {
 	case NL80211_IFTYPE_AP:
@@ -213,7 +207,7 @@ static void rtw_ops_remove_interface(struct ieee80211_hw *hw,
 
 	mutex_lock(&rtwdev->mutex);
 
-	//rtw_leave_lps_deep(rtwdev);
+	rtw_leave_lps_deep(rtwdev);
 
 	rtw_txq_cleanup(rtwdev, vif->txq);
 
@@ -240,7 +234,7 @@ static void rtw_ops_configure_filter(struct ieee80211_hw *hw,
 
 	mutex_lock(&rtwdev->mutex);
 
-	//rtw_leave_lps_deep(rtwdev);
+	rtw_leave_lps_deep(rtwdev);
 
 	if (changed_flags & FIF_ALLMULTI) {
 		if (*new_flags & FIF_ALLMULTI)
@@ -335,7 +329,7 @@ static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
 
 	mutex_lock(&rtwdev->mutex);
 
-	//rtw_leave_lps_deep(rtwdev);
+	rtw_leave_lps_deep(rtwdev);
 
 	if (changed & BSS_CHANGED_ASSOC) {
 		struct rtw_chip_info *chip = rtwdev->chip;
@@ -358,7 +352,7 @@ static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
 			if (rtw_bf_support)
 				rtw_bf_assoc(rtwdev, vif, conf);
 		} else {
-			//rtw_leave_lps(rtwdev);
+			rtw_leave_lps(rtwdev);
 			net_type = RTW_NET_NO_LINK;
 			rtwvif->aid = 0;
 			rtw_reset_rsvd_page(rtwdev);
@@ -401,7 +395,7 @@ static int rtw_ops_conf_tx(struct ieee80211_hw *hw,
 
 	mutex_lock(&rtwdev->mutex);
 
-	//rtw_leave_lps_deep(rtwdev);
+	rtw_leave_lps_deep(rtwdev);
 
 	rtwvif->tx_params[ac] = *params;
 	__rtw_conf_tx(rtwdev, rtwvif, ac);
@@ -531,7 +525,7 @@ static int rtw_ops_set_key(struct ieee80211_hw *hw, enum set_key_cmd cmd,
 
 	mutex_lock(&rtwdev->mutex);
 
-	//rtw_leave_lps_deep(rtwdev);
+	rtw_leave_lps_deep(rtwdev);
 
 	if (key->flags & IEEE80211_KEY_FLAG_PAIRWISE) {
 		hw_key_idx = rtw_sec_get_free_cam(sec);

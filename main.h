@@ -1615,9 +1615,6 @@ struct rtw_dev {
 	/* read/write rf register */
 	struct mutex rf_lock; /* mutex lock to protect rf register operation */
 
-	/* lock for dm to use */
-	spinlock_t dm_lock;
-
 	/* watch dog every 2 sec */
 	struct delayed_work watch_dog_work;
 	u32 watch_dog_cnt;
