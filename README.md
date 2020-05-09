@@ -1,7 +1,6 @@
 # rtw88-usb
 
-It's unofficial release. Just for fun. 
-And welcome to test and upstream to the Linux kernel. 
+It's under GPL license and welcome to upstream to the Linux kernel if you want.  
 
 Driver for 802.11ac USB Adapter with chipset:
   RTL88x2BU / RTL88x2CU
