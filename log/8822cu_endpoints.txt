@@ -1,0 +1,47 @@
+usb endpoint descriptor (0):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=84
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: in endpoint num 4
+
+usb endpoint descriptor (1):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=5
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: out endpoint num 5
+
+usb endpoint descriptor (2):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=6
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: out endpoint num 6
+
+usb endpoint descriptor (3):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=87
+wMaxPacketSize=64
+bInterval=3
+usb 2-1: rtw_usb_parse: interrupt endpoint num 7
+
+usb endpoint descriptor (4):
+bLength=7
+bDescriptorType=5
+bEndpointAddress=8
+wMaxPacketSize=512
+bInterval=0
+usb 2-1: rtw_usb_parse: out endpoint num 8
+USB_SPEED_HIGH
+out eps num: 3 
+rtw_usb_probe: usb_interface_configure
+usb_interface_configure : bulkout_size: 512
+usb_interface_configure : TX Agg desc num: 3 
+RTW: rtw_usb_set_queue_pipe_mapping OutEPQueueSel(0x07) OutEPNum(3)
+usb_interface_configure : bulkout_num: 3
+
