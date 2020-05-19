@@ -660,7 +660,7 @@ static void rtw_usb_tx_handler(struct work_struct *work)
 						 work);
 	struct rtw_dev *rtwdev = my_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
-	u32 timeout = 0;
+	u32 timeout = USB_MSG_TIMEOUT;
 
 	do {
 		rtw_wait_event(&rtwusb->tx_handler.event, timeout);
@@ -1014,7 +1014,7 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 						 work);
 	struct rtw_dev *rtwdev = my_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
-	u32 timeout = 0;
+	u32 timeout = USB_MSG_TIMEOUT;
 	struct sk_buff *skb;
 
 	do {
@@ -1064,7 +1064,7 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 			memcpy(skb->cb, &rx_status, sizeof(rx_status));
 			ieee80211_rx_irqsafe(rtwdev->hw, skb);
 		}
-	} while (1);
+	} while (atomic_read(&rtwusb->rx_handler.handler_done) == 0);
 
 out:
 	skb_queue_purge(&rtwusb->rx_queue);
@@ -1381,7 +1381,7 @@ static int rtw_usb_init_rx(struct rtw_dev *rtwdev)
 	return 0;
 
 err_destroy_wq:
-	flush_workqueue(rtwusb->rxwq);
+	rtw_kill_handler(&rtwusb->rx_handler);
 	destroy_workqueue(rtwusb->rxwq);
 
 err:
@@ -1416,7 +1416,7 @@ static int rtw_usb_init_tx(struct rtw_dev *rtwdev)
 	return 0;
 
 err_destroy_wq:
-	flush_workqueue(rtwusb->txwq);
+	rtw_kill_handler(&rtwusb->tx_handler);
 	destroy_workqueue(rtwusb->txwq);
 
 err:
@@ -1487,17 +1487,19 @@ static int rtw_usb_probe(struct usb_interface *intf,
 		goto err_destroy_rxwq;
 	}
 
-	goto finish;
+	return 0;
 
-//err_destroy_hw:
+//err_destroy_register:
 	rtw_unregister_hw(rtwdev, rtwdev->hw);
 
 err_destroy_rxwq:
-	flush_workqueue(rtwusb->rxwq);
+	rtw_kill_handler(&rtwusb->rx_handler);
+	cancel_work_sync(&rtwusb->rx_handler_data->work);
 	destroy_workqueue(rtwusb->rxwq);
 
 err_destroy_txwq:
-	flush_workqueue(rtwusb->txwq);
+	rtw_kill_handler(&rtwusb->tx_handler);
+	cancel_work_sync(&rtwusb->tx_handler_data->work);
 	destroy_workqueue(rtwusb->txwq);
 
 err_destroy_usb:
