@@ -55,6 +55,30 @@ Connect to the AP without security:
 ```console
 $ sudo iw wlanX connect <AP name>
 ```
+## Wifi Sniffer - monitor mode
+```console
+$ sudo ifconfig wlanX down
+$ sudo iwconfig wlanX mode monitor
+$ sudo rfkill unblock all
+$ sudo ifconfig wlanX up
+```
+
+Then you can use "iwconfig" to check if the wireless mode is correct.
+```console
+e.g.
+    wlan1    IEEE 802.11  Mode:Monitor ... 
+```
+
+And you can use the program like wireshark to sniffer wifi packets.
+1. set up the sniffer channel
+```console
+$ sudo iwconfig wlanX channel xxx
+```
+
+2. run the program
+```console
+$ sudo wireshark
+```
 
 ## Test
 test ok with general commands with the latest kernel
