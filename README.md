@@ -14,6 +14,7 @@ For a backport version (backport to kernel v4.15), please check [this branch](ht
 A few known wireless cards that use this driver include 
 * [Edimax EW-7822ULC](http://us.edimax.com/edimax/merchandise/merchandise_detail/data/edimax/us/wireless_adapters_ac1200_dual-band/ew-7822ulc/)
 * [ASUS AC-53 NANO](https://www.asus.com/Networking/USB-AC53-Nano/)
+* [ASUS AC-55 (B1) AC1300](https://www.asus.com/Networking/USB-AC55-B1/)
 * [TPLink Archer T4U v3](https://www.tp-link.com/tw/support/download/archer-t4u/)
 
 
