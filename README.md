@@ -58,13 +58,13 @@ $ sudo iw wlanX connect <AP name>
 ```
 ## Wifi Sniffer - monitor mode
 ```console
-$ sudo ifconfig wlanX down
-$ sudo iwconfig wlanX mode monitor
+$ sudo ip link set wlanX down
+$ sudo iw dev wlanX set type monitor
 $ sudo rfkill unblock all
-$ sudo ifconfig wlanX up
+$ sudo ip link set wlanX up
 ```
 
-Then you can use "iwconfig" to check if the wireless mode is correct.
+Then you can use "iw <device> info" to check if the wireless mode is correct.
 ```console
 e.g.
     wlan1    IEEE 802.11  Mode:Monitor ... 
@@ -73,7 +73,7 @@ e.g.
 And you can use the program like wireshark to sniffer wifi packets.
 1. set up the sniffer channel
 ```console
-$ sudo iwconfig wlanX channel xxx
+$ sudo iw dev wlanX set channel xxx
 ```
 
 2. run the program
