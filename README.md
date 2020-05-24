@@ -14,6 +14,7 @@ For a backport version (backport to kernel v4.15), please check [this branch](ht
 A few known wireless cards that use this driver include 
 * [Edimax EW-7822ULC](http://us.edimax.com/edimax/merchandise/merchandise_detail/data/edimax/us/wireless_adapters_ac1200_dual-band/ew-7822ulc/)
 * [ASUS AC-53 NANO](https://www.asus.com/Networking/USB-AC53-Nano/)
+* [ASUS AC-55 (B1) AC1300](https://www.asus.com/Networking/USB-AC55-B1/)
 * [TPLink Archer T4U v3](https://www.tp-link.com/tw/support/download/archer-t4u/)
 
 
@@ -57,13 +58,13 @@ $ sudo iw wlanX connect <AP name>
 ```
 ## Wifi Sniffer - monitor mode
 ```console
-$ sudo ifconfig wlanX down
-$ sudo iwconfig wlanX mode monitor
+$ sudo ip link set wlanX down
+$ sudo iw dev wlanX set type monitor
 $ sudo rfkill unblock all
-$ sudo ifconfig wlanX up
+$ sudo ip link set wlanX up
 ```
 
-Then you can use "iwconfig" to check if the wireless mode is correct.
+Then you can use "iw <device> info" to check if the wireless mode is correct.
 ```console
 e.g.
     wlan1    IEEE 802.11  Mode:Monitor ... 
@@ -72,7 +73,7 @@ e.g.
 And you can use the program like wireshark to sniffer wifi packets.
 1. set up the sniffer channel
 ```console
-$ sudo iwconfig wlanX channel xxx
+$ sudo iw dev wlanX set channel xxx
 ```
 
 2. run the program
