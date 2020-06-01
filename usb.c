@@ -12,7 +12,7 @@
 #include "fw.h"
 #include "debug.h"
 
-#define USB_MSG_TIMEOUT	3000 /* (ms) */
+#define RTW_USB_MSG_TIMEOUT	3000 /* (ms) */
 
 struct txdesc_hdr {
 	u16 txpktsize;
@@ -660,7 +660,7 @@ static void rtw_usb_tx_handler(struct work_struct *work)
 						 work);
 	struct rtw_dev *rtwdev = my_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
-	u32 timeout = USB_MSG_TIMEOUT;
+	u32 timeout = RTW_USB_MSG_TIMEOUT;
 
 	do {
 		rtw_wait_event(&rtwusb->tx_handler.event, timeout);
@@ -728,7 +728,7 @@ static u32 rtw_usb_write_port_wait(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 	pipe = rtw_usb_get_pipe(rtwusb, addr);
 
 	ret = usb_bulk_msg(usbd, pipe, (void *)skb->data, (int)cnt,
-			   &transfer, USB_MSG_TIMEOUT);
+			   &transfer, RTW_USB_MSG_TIMEOUT);
 	if (ret < 0)
 		pr_err("usb_bulk_msg error, ret=%d\n", ret);
 
@@ -1014,7 +1014,7 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 						 work);
 	struct rtw_dev *rtwdev = my_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
-	u32 timeout = USB_MSG_TIMEOUT;
+	u32 timeout = RTW_USB_MSG_TIMEOUT;
 	struct sk_buff *skb;
 
 	do {
