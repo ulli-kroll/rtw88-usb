@@ -354,6 +354,12 @@ enum rtw_txq_flags {
 	RTW_TXQ_BLOCK_BA,
 };
 
+struct rtw_vif_cfgq {
+	struct list_head list;
+
+	struct rtw_vif *rtwvif;
+};
+
 enum rtw_flags {
 	RTW_FLAG_RUNNING,
 	RTW_FLAG_FW_RUNNING,
@@ -1655,6 +1661,8 @@ struct rtw_dev {
 	u8 mp_mode;
 	struct rtw_fw_state wow_fw;
 	struct rtw_wow_param wow;
+
+	struct list_head vif_cfgq;
 
 	/* hci related data, must be last */
 	u8 priv[0] __aligned(sizeof(void *));

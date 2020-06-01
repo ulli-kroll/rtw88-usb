@@ -36,14 +36,44 @@ int rtw_enter_ips(struct rtw_dev *rtwdev)
 	return 0;
 }
 
+static void rtw_init_vifs_cfgq(struct rtw_dev *rtwdev)
+{
+	INIT_LIST_HEAD(&rtwdev->vif_cfgq);
+}
+
+static void rtw_add_vifs_cfgq(struct rtw_dev *rtwdev, struct rtw_vif *rtwvif)
+{
+	struct rtw_vif_cfgq *vifcfg;
+
+	vifcfg = kmalloc(sizeof(*vifcfg), GFP_ATOMIC);
+	if (!vifcfg)
+		return;
+
+	INIT_LIST_HEAD(&vifcfg->list);
+	vifcfg->rtwvif = rtwvif;
+
+	list_add_tail(&vifcfg->list, &rtwdev->vif_cfgq);
+}
+
+static void rtw_iterate_vifs_cfgq(struct rtw_dev *rtwdev)
+{
+	struct rtw_vif_cfgq *vifcfg, *tmp;
+	u32 config = ~0;
+
+	list_for_each_entry_safe(vifcfg, tmp, &rtwdev->vif_cfgq, list) {
+		rtw_vif_port_config(rtwdev, vifcfg->rtwvif, config);
+		list_del(&vifcfg->list);
+		kfree(vifcfg);
+	}
+}
+
 static void rtw_restore_port_cfg_iter(void *data, u8 *mac,
 				      struct ieee80211_vif *vif)
 {
 	struct rtw_dev *rtwdev = data;
 	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
-	u32 config = ~0;
 
-	rtw_vif_port_config(rtwdev, rtwvif, config);
+	rtw_add_vifs_cfgq(rtwdev, rtwvif);
 }
 
 int rtw_leave_ips(struct rtw_dev *rtwdev)
@@ -58,7 +88,9 @@ int rtw_leave_ips(struct rtw_dev *rtwdev)
 		return ret;
 	}
 
+	rtw_init_vifs_cfgq(rtwdev);
 	rtw_iterate_vifs_atomic(rtwdev, rtw_restore_port_cfg_iter, rtwdev);
+	rtw_iterate_vifs_cfgq(rtwdev);
 
 	rtw_coex_ips_notify(rtwdev, COEX_IPS_LEAVE);
 
