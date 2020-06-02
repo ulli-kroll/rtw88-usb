@@ -1,6 +1,11 @@
 # rtw88-usb
 
-It's under GPL license and welcome to upstream to the Linux kernel if you want.  
+It's under GPL license, and please feel free to use it.
+Also welcome to upstream to the Linux kernel if you want, and please
+refer to the branch, for_kernel_upstream, which meets the Linux coding
+style, and may be easier to upstream.
+
+Thank to many people's kind help on this project. 
 
 Driver for 802.11ac USB Adapter with chipset:
   RTL88x2BU / RTL88x2CU
