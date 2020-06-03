@@ -1656,6 +1656,7 @@ struct rtw_dev {
 	struct rtw_fw_state wow_fw;
 	struct rtw_wow_param wow;
 
+	struct list_head vif_rssiq;
 
 	/* hci related data, must be last */
 	u8 priv[0] __aligned(sizeof(void *));
