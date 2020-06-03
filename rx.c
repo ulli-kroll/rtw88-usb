@@ -135,7 +135,7 @@ static void rtw_rx_addr_match(struct rtw_dev *rtwdev,
 	data.pkt_stat = pkt_stat;
 	data.bssid = get_hdr_bssid(hdr);
 
-	rtw_iterate_vifs_atomic(rtwdev, rtw_rx_addr_match_iter, &data);
+	rtw_iterate_vifs(rtwdev, rtw_rx_addr_match_iter, &data);
 }
 
 void rtw_rx_fill_rx_status(struct rtw_dev *rtwdev,

@@ -794,7 +794,7 @@ static int rtw_wow_set_wakeups(struct rtw_dev *rtwdev,
 	if (wowlan->nd_config)
 		rtw_wow_check_pno(rtwdev, wowlan->nd_config);
 
-	rtw_iterate_vifs_atomic(rtwdev, rtw_wow_vif_iter, rtwdev);
+	rtw_iterate_vifs(rtwdev, rtw_wow_vif_iter, rtwdev);
 	if (!rtw_wow->wow_vif)
 		return -EPERM;
 
