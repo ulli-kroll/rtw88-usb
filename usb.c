@@ -1128,11 +1128,6 @@ static u32 rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr,
 	size_t buf_addr;
 	size_t alignment = 0;
 
-	if (!rtw_usb_is_bus_ready(rtwdev)) {
-		pr_info("%s: cannot read USB port\n", __func__);
-		return 0;
-	}
-
 	urb = rxcb->rx_urb;
 	rxcb->data = (u8 *)rtwdev;
 
@@ -1171,8 +1166,10 @@ static void rtw_usb_inirp_init(struct rtw_dev *rtwdev)
 	int i;
 
 	pr_info("%s ===>\n", __func__);
-
-	rtw_usb_set_bus_ready(rtwdev, true);
+	if (rtw_usb_is_bus_ready(rtwdev)) {
+		pr_info("%s: Bus is ready already\n", __func__);
+		return;
+	}
 
 	for (i = 0; i < RTW_USB_RXCB_NUM; i++) {
 		rxcb = &rtwusb->rx_cb[i];
@@ -1189,6 +1186,7 @@ static void rtw_usb_inirp_init(struct rtw_dev *rtwdev)
 		rtw_usb_read_port(rtwdev, RTW_USB_BULK_IN_ADDR, rxcb);
 	}
 
+	rtw_usb_set_bus_ready(rtwdev, true);
 	return;
 
 err_exit:
@@ -1223,41 +1221,7 @@ static int rtw_usb_setup(struct rtw_dev *rtwdev)
 
 static int rtw_usb_start(struct rtw_dev *rtwdev)
 {
-	//struct rtw_chip_info *chip = rtwdev->chip;
-	//int ret;
-	u8 val8;
-
 	pr_debug("%s ===>\n", __func__);
-	// init_usb_cfg_88xx
-	val8 = BIT(1) |  (0x3 << 2);
-
-	if (rtw_read8(rtwdev, REG_SYS_CFG2 + 3) == 0x20) {
-		pr_info("%s: USB 3.0\n", __func__);
-		val8 |= (USB_BURST_SIZE_3_0 << 4);
-	} else {
-		if ((rtw_read8(rtwdev, REG_USB_USBSTAT) & 0x3) == 0x1) {
-			pr_info("%s: USB 2.0\n", __func__);
-			val8 |= (USB_BURST_SIZE_2_0_HS << 4);
-		} else {
-			pr_info("%s: USB 1.1\n", __func__);
-			val8 |= (USB_BURST_SIZE_2_0_FS << 4);
-		}
-	}
-
-	rtw_write8(rtwdev, REG_RXDMA_MODE, val8);
-	rtw_write16_set(rtwdev, REG_TXDMA_OFFSET_CHK, BIT_DROP_DATA_EN);
-
-#if 0
-	/* TODO: turn off rx agg switch first
-	 * need to turn on after implementing USB RX Aggregation
-	 */
-	ret = chip->ops->set_rx_agg_switch(rtwdev, false, RTW_USB_RXAGG_SIZE,
-					 RTW_USB_RXAGG_TIMEOUT);
-	if (ret) {
-		pr_err("%s: set_rx_agg_switch failed, ret=%d\n", __func__, ret);
-		return ret;
-	}
-#endif
 	rtw_usb_inirp_init(rtwdev);
 	return 0;
 }
