@@ -1658,6 +1658,7 @@ struct rtw_dev {
 
 	struct list_head vif_rssiq;
 	struct list_head vif_rainfoq;
+	struct list_head vif_ramaskq;
 
 	bool need_rfk;
 

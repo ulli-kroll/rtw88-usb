@@ -706,6 +706,43 @@ struct rtw_iter_bitrate_mask_data {
 	const struct cfg80211_bitrate_mask *mask;
 };
 
+struct rtw_vif_ramaskq {
+	struct list_head list;
+
+	struct rtw_sta_info *si;
+};
+
+static void rtw_init_vifs_ramaskq(struct rtw_dev *rtwdev)
+{
+	INIT_LIST_HEAD(&rtwdev->vif_ramaskq);
+}
+
+static void rtw_add_vifs_ramaskq(struct rtw_dev *rtwdev, struct rtw_sta_info *si)
+{
+	struct rtw_vif_ramaskq *viframaskq;
+
+	viframaskq = kmalloc(sizeof(*viframaskq), GFP_ATOMIC);
+	if (!viframaskq)
+		return;
+
+	INIT_LIST_HEAD(&viframaskq->list);
+	viframaskq->si = si;
+
+	list_add_tail(&viframaskq->list, &rtwdev->vif_ramaskq);
+}
+
+static void rtw_iterate_vifs_ramaskq(struct rtw_dev *rtwdev)
+{
+	struct rtw_vif_ramaskq *viframaskq, *tmp;
+
+	list_for_each_entry_safe(viframaskq, tmp, &rtwdev->vif_ramaskq, list) {
+		rtw_update_sta_info(rtwdev, viframaskq->si);
+		list_del(&viframaskq->list);
+		kfree(viframaskq);
+	}
+}
+
+
 static void rtw_ra_mask_info_update_iter(void *data, struct ieee80211_sta *sta)
 {
 	struct rtw_iter_bitrate_mask_data *br_data = data;
@@ -724,7 +761,7 @@ static void rtw_ra_mask_info_update_iter(void *data, struct ieee80211_sta *sta)
 	}
 
 	si->use_cfg_mask = true;
-	rtw_update_sta_info(br_data->rtwdev, si);
+	rtw_add_vifs_ramaskq(br_data->rtwdev, si);
 }
 
 static void rtw_ra_mask_info_update(struct rtw_dev *rtwdev,
@@ -736,7 +773,9 @@ static void rtw_ra_mask_info_update(struct rtw_dev *rtwdev,
 	br_data.rtwdev = rtwdev;
 	br_data.vif = vif;
 	br_data.mask = mask;
+	rtw_init_vifs_ramaskq(rtwdev);
 	rtw_iterate_stas_atomic(rtwdev, rtw_ra_mask_info_update_iter, &br_data);
+	rtw_iterate_vifs_ramaskq(rtwdev);
 }
 
 static int rtw_ops_set_bitrate_mask(struct ieee80211_hw *hw,
