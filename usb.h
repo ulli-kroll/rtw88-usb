@@ -111,37 +111,28 @@ struct rtw_usb {
 		u8 val8;
 	} usb_buf;
 
+	u32 pipe_interrupt;
+	u32 pipe_in;
+	u32 pipe_out[20];
+	u32 bulkout_size;
 	u8 num_in_pipes;
 	u8 num_out_pipes;
-	unsigned int pipe_interrupt;
-	unsigned int pipe_in;
-	unsigned int pipe_out[20];
 	u8 out_ep[4];
 	u8 out_ep_queue_sel;
-	//u8 out_ep_num;
-	int nr_out_eps;
 	u8 queue_to_pipe[8];
-	u32 bulkout_size;
-	u8  usb_speed;
+	u8 usb_speed;
 
-	//struct list_head urb_list;
 	atomic_t is_bus_drv_ready;
 
-	// workqueue
 	struct workqueue_struct *txwq, *rxwq;
 
-	// TX
 	u8 usb_txagg_num;
 
-	// TX - workqueue
-	struct mutex tx_lock; /* mutex for tx */
 	struct sk_buff_head tx_queue[RTK_MAX_TX_QUEUE_NUM];
 	struct sk_buff_head tx_ack_queue;
 	struct rtw_handler tx_handler;
 	struct rtw_work_data *tx_handler_data;
 
-	// RX
-	// RX - workqueue
 	struct rx_usb_ctrl_block rx_cb[RTW_USB_RXCB_NUM];
 	struct sk_buff_head rx_queue;
 	struct rtw_handler rx_handler;
