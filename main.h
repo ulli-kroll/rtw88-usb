@@ -1657,6 +1657,7 @@ struct rtw_dev {
 	struct rtw_wow_param wow;
 
 	struct list_head vif_rssiq;
+	struct list_head vif_rainfoq;
 
 	bool need_rfk;
 
