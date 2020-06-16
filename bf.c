@@ -46,7 +46,7 @@ void rtw_bf_assoc(struct rtw_dev *rtwdev, struct ieee80211_vif *vif,
 	if (!(chip->band & RTW_BAND_5G))
 		return;
 
-	rcu_read_lock();
+	//rcu_read_lock();
 
 	sta = ieee80211_find_sta(vif, bssid);
 	if (!sta) {
@@ -102,7 +102,8 @@ void rtw_bf_assoc(struct rtw_dev *rtwdev, struct ieee80211_vif *vif,
 	}
 
 out_unlock:
-	rcu_read_unlock();
+	//rcu_read_unlock();
+	return;
 }
 
 void rtw_bf_init_bfer_entry_mu(struct rtw_dev *rtwdev,

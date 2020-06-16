@@ -1,0 +1,739 @@
+Jun 15 17:32:18 neo-Inspiron-5558 kernel: [ 1255.979496] rtw_ops_ampdu_action: in_interrupt():0
+Jun 15 17:32:18 neo-Inspiron-5558 kernel: [ 1255.979500] wlan1: activated addBA response timer on 30:b5:c2:89:29:6e tid 0
+Jun 15 17:32:18 neo-Inspiron-5558 kernel: [ 1255.981309] wlan1: switched off addBA timer for 30:b5:c2:89:29:6e tid 0
+Jun 15 17:32:18 neo-Inspiron-5558 kernel: [ 1255.981312] wlan1: Aggregation is on for 30:b5:c2:89:29:6e tid 0
+Jun 15 17:32:18 neo-Inspiron-5558 kernel: [ 1255.981314] rtw_ops_ampdu_action: in_interrupt():0
+Jun 15 17:32:25 neo-Inspiron-5558 kernel: [ 1262.122074] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 17:32:25 neo-Inspiron-5558 kernel: [ 1262.122413] rtw_ops_configure_filter: in_interrupt():0
+Jun 15 17:32:25 neo-Inspiron-5558 kernel: [ 1262.170629] wlan1: AddBA Req buf_size=64 for 30:b5:c2:89:29:6e
+Jun 15 17:32:25 neo-Inspiron-5558 kernel: [ 1262.170632] rtw_ops_ampdu_action: in_interrupt():0
+Jun 15 17:32:25 neo-Inspiron-5558 kernel: [ 1262.170634] wlan1: Rx A-MPDU request on 30:b5:c2:89:29:6e tid 0 result 0
+Jun 15 17:35:31 neo-Inspiron-5558 kernel: [ 1449.030601] rfkill: input handler disabled
+Jun 15 17:35:33 neo-Inspiron-5558 kernel: [ 1451.015858] rfkill: input handler enabled
+Jun 15 17:39:36 neo-Inspiron-5558 kernel: [ 1693.702633] usb 2-3: USB disconnect, device number 2
+Jun 15 17:39:36 neo-Inspiron-5558 kernel: [ 1693.725538] ipheth 2-3:4.2: Apple iPhone USB Ethernet now disconnected
+Jun 15 17:39:46 neo-Inspiron-5558 kernel: [ 1703.973335] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:39:46 neo-Inspiron-5558 kernel: [ 1703.973337] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:39:46 neo-Inspiron-5558 kernel: [ 1703.973338] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:39:46 neo-Inspiron-5558 kernel: [ 1703.973338] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:39:46 neo-Inspiron-5558 kernel: [ 1703.973339] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:46:08 neo-Inspiron-5558 kernel: [ 2085.094662] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 17:46:08 neo-Inspiron-5558 kernel: [ 2085.094667] rtw_conf_tx: in_interrupt():0
+Jun 15 17:46:20 neo-Inspiron-5558 kernel: [ 2097.180778] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 17:46:20 neo-Inspiron-5558 kernel: [ 2097.180782] rtw_conf_tx: in_interrupt():0
+Jun 15 17:46:58 neo-Inspiron-5558 kernel: [ 2135.056923] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:46:58 neo-Inspiron-5558 kernel: [ 2135.056954] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:46:58 neo-Inspiron-5558 kernel: [ 2135.056959] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:46:58 neo-Inspiron-5558 kernel: [ 2135.056965] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:46:58 neo-Inspiron-5558 kernel: [ 2135.056970] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:46:58 neo-Inspiron-5558 kernel: [ 2135.056975] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:46:58 neo-Inspiron-5558 kernel: [ 2135.056981] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:46:58 neo-Inspiron-5558 kernel: [ 2135.056986] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:46:58 neo-Inspiron-5558 kernel: [ 2135.056992] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:46:58 neo-Inspiron-5558 kernel: [ 2135.056999] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:50:27 neo-Inspiron-5558 kernel: [ 2344.115182] net_ratelimit: 5 callbacks suppressed
+Jun 15 17:50:27 neo-Inspiron-5558 kernel: [ 2344.115187] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:50:55 neo-Inspiron-5558 kernel: [ 2372.540099] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:50:55 neo-Inspiron-5558 kernel: [ 2372.540104] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:57:09 neo-Inspiron-5558 kernel: [ 2746.796706] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:57:09 neo-Inspiron-5558 kernel: [ 2746.796737] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:57:09 neo-Inspiron-5558 kernel: [ 2746.796744] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:57:09 neo-Inspiron-5558 kernel: [ 2746.796752] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:57:09 neo-Inspiron-5558 kernel: [ 2746.796760] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:57:09 neo-Inspiron-5558 kernel: [ 2746.796768] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:57:09 neo-Inspiron-5558 kernel: [ 2746.796775] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:57:09 neo-Inspiron-5558 kernel: [ 2746.796782] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:57:09 neo-Inspiron-5558 kernel: [ 2746.796788] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 17:57:09 neo-Inspiron-5558 kernel: [ 2746.796796] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.285733] net_ratelimit: 1 callbacks suppressed
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.285740] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.341812] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.341818] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.341822] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.341825] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.341829] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.341832] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.341835] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.341839] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:03:12 neo-Inspiron-5558 kernel: [ 3109.341843] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:06:17 neo-Inspiron-5558 kernel: [ 3294.348082] net_ratelimit: 23 callbacks suppressed
+Jun 15 18:06:17 neo-Inspiron-5558 kernel: [ 3294.348119] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:06:17 neo-Inspiron-5558 kernel: [ 3294.348126] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:06:17 neo-Inspiron-5558 kernel: [ 3294.348135] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:06:17 neo-Inspiron-5558 kernel: [ 3294.348143] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:06:17 neo-Inspiron-5558 kernel: [ 3294.348152] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:06:17 neo-Inspiron-5558 kernel: [ 3294.348159] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:06:17 neo-Inspiron-5558 kernel: [ 3294.348165] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:06:17 neo-Inspiron-5558 kernel: [ 3294.348170] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:08:01 neo-Inspiron-5558 kernel: [ 3398.265229] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:08:01 neo-Inspiron-5558 kernel: [ 3398.265234] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:08:01 neo-Inspiron-5558 kernel: [ 3398.265236] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:08:01 neo-Inspiron-5558 kernel: [ 3398.265238] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:08:01 neo-Inspiron-5558 kernel: [ 3398.265240] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:08:01 neo-Inspiron-5558 kernel: [ 3398.265242] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:08:01 neo-Inspiron-5558 kernel: [ 3398.265245] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:08:01 neo-Inspiron-5558 kernel: [ 3398.265247] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:08:01 neo-Inspiron-5558 kernel: [ 3398.265250] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:08:01 neo-Inspiron-5558 kernel: [ 3398.265252] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:10 neo-Inspiron-5558 kernel: [ 3648.002166] net_ratelimit: 3 callbacks suppressed
+Jun 15 18:12:10 neo-Inspiron-5558 kernel: [ 3648.002171] wlan1: detected beacon loss from AP (missed 7 beacons) - probing
+Jun 15 18:12:38 neo-Inspiron-5558 kernel: [ 3675.501568] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:38 neo-Inspiron-5558 kernel: [ 3675.501573] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:38 neo-Inspiron-5558 kernel: [ 3675.501575] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:38 neo-Inspiron-5558 kernel: [ 3675.501577] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:38 neo-Inspiron-5558 kernel: [ 3675.501579] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:38 neo-Inspiron-5558 kernel: [ 3675.501582] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:38 neo-Inspiron-5558 kernel: [ 3675.501584] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:38 neo-Inspiron-5558 kernel: [ 3675.501586] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:38 neo-Inspiron-5558 kernel: [ 3675.501588] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:38 neo-Inspiron-5558 kernel: [ 3675.501591] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248235] net_ratelimit: 42 callbacks suppressed
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248240] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248244] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248246] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248248] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248251] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248253] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248255] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248258] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248260] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:12:47 neo-Inspiron-5558 kernel: [ 3684.248262] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120668] net_ratelimit: 36 callbacks suppressed
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120673] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120677] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120679] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120682] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120684] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120686] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120688] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120691] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120693] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:16:16 neo-Inspiron-5558 kernel: [ 3893.120695] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:20:10 neo-Inspiron-5558 kernel: [ 4127.970310] net_ratelimit: 32 callbacks suppressed
+Jun 15 18:20:10 neo-Inspiron-5558 kernel: [ 4127.970315] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:20:16 neo-Inspiron-5558 kernel: [ 4133.272006] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:20:16 neo-Inspiron-5558 kernel: [ 4133.272011] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:20:16 neo-Inspiron-5558 kernel: [ 4133.272013] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:20:16 neo-Inspiron-5558 kernel: [ 4133.272015] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:20:16 neo-Inspiron-5558 kernel: [ 4133.272017] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:20:16 neo-Inspiron-5558 kernel: [ 4133.272020] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:20:16 neo-Inspiron-5558 kernel: [ 4133.272022] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:20:16 neo-Inspiron-5558 kernel: [ 4133.272025] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:20:16 neo-Inspiron-5558 kernel: [ 4133.272028] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936133] ------------[ cut here ]------------
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936138] Rate marked as a VHT rate but data is invalid: MCS: 0, NSS: 0
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936234] WARNING: CPU: 0 PID: 9 at net/mac80211/rx.c:4590 ieee80211_rx_napi+0x61f/0xab0 [mac80211]
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936236] Modules linked in: rtwusb(OE) rtw88(OE) cmac rfcomm overlay bnep ipheth binfmt_misc intel_rapl_msr intel_rapl_common x86_pkg_temp_thermal intel_powerclamp coretemp kvm_intel kvm irqbypass snd_hda_codec_hdmi crct10dif_pclmul snd_hda_codec_realtek crc32_pclmul snd_hda_codec_generic dell_laptop ghash_clmulni_intel aesni_intel ledtrig_audio crypto_simd iwlmvm dell_smm_hwmon cryptd uvcvideo mac80211 snd_hda_intel glue_helper snd_intel_dspcfg snd_hda_codec libarc4 intel_cstate snd_hda_core videobuf2_vmalloc snd_hwdep videobuf2_memops intel_rapl_perf snd_pcm videobuf2_v4l2 videobuf2_common videodev mc nouveau input_leds snd_seq_midi snd_seq_midi_event joydev dell_wmi serio_raw i915 snd_rawmidi snd_seq dell_smbios sparse_keymap dcdbas cec dell_wmi_descriptor wmi_bmof ttm snd_seq_device iwlwifi drm_kms_helper btusb snd_timer btrtl btbcm cfg80211 btintel drm bluetooth snd ecdh_generic ecc i2c_algo_bit soundcore fb_sys_fops syscopyarea sysfillrect sysimgblt dell_rbtn lpc_ich acpi_pad
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936299]  mei_me mei mxm_wmi mac_hid sch_fq_codel parport_pc ppdev lp parport ip_tables x_tables autofs4 psmouse r8169 ahci libahci realtek i2c_hid wmi hid video [last unloaded: rtw88]
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936320] CPU: 0 PID: 9 Comm: ksoftirqd/0 Tainted: G           OE     5.5.6 #1
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936322] Hardware name: Dell Inc. Inspiron 5558/0WMF3P, BIOS A02 03/09/2015
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936365] RIP: 0010:ieee80211_rx_napi+0x61f/0xab0 [mac80211]
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936370] Code: fd ff ff 80 3d 46 da 09 00 00 0f 85 e1 fa ff ff 0f b6 53 4a 0f b6 f0 48 c7 c7 20 56 fa c0 c6 05 2b da 09 00 01 e8 51 63 f4 f5 <0f> 0b e9 c0 fa ff ff 0f 0b 0f b6 43 4c 3c 03 0f 86 20 fa ff ff 0f
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936372] RSP: 0018:ffffa4808007bd20 EFLAGS: 00010282
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936376] RAX: 0000000000000000 RBX: ffff944535751800 RCX: 0000000000000101
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936378] RDX: 0000000080000101 RSI: 0000000000000096 RDI: 00000000ffffffff
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936381] RBP: ffff9445357987c0 R08: 0000000000000001 R09: 0000000000000f07
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936383] R10: ffffa480824dfc18 R11: 0000000000000f07 R12: 0000000000000000
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936385] R13: ffff944535798d60 R14: ffffffffb7f4d4c3 R15: ffff944535798d28
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936388] FS:  0000000000000000(0000) GS:ffff94462b400000(0000) knlGS:0000000000000000
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936391] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936394] CR2: 00007f7700773000 CR3: 000000000a40a006 CR4: 00000000003606f0
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936396] Call Trace:
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936409]  ? __switch_to_asm+0x40/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936414]  ? __switch_to_asm+0x34/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936417]  ? __switch_to_asm+0x40/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936421]  ? __switch_to_asm+0x34/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936425]  ? __switch_to_asm+0x34/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936429]  ? __switch_to_asm+0x40/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936432]  ? __switch_to_asm+0x34/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936436]  ? __switch_to_asm+0x40/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936439]  ? __switch_to_asm+0x34/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936443]  ? __switch_to_asm+0x40/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936446]  ? __switch_to_asm+0x34/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936450]  ? __switch_to_asm+0x40/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936453]  ? __switch_to_asm+0x34/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936457]  ? __switch_to_asm+0x40/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936460]  ? __switch_to_asm+0x34/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936464]  ? __switch_to_asm+0x40/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936496]  ieee80211_tasklet_handler+0xbd/0xd0 [mac80211]
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936501]  ? __switch_to_asm+0x40/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936508]  tasklet_action_common.isra.19+0x66/0x130
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936514]  ? sort_range+0x20/0x20
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936520]  __do_softirq+0x135/0x318
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936526]  ? sort_range+0x20/0x20
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936531]  run_ksoftirqd+0x32/0x40
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936535]  smpboot_thread_fn+0x16e/0x230
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936541]  kthread+0xf8/0x130
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936547]  ? kthread_create_worker_on_cpu+0x70/0x70
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936552]  ret_from_fork+0x35/0x40
+Jun 15 18:25:49 neo-Inspiron-5558 kernel: [ 4466.936559] ---[ end trace 9ea2cafdec8674eb ]---
+Jun 15 18:44:30 neo-Inspiron-5558 kernel: [ 5587.505087] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:44:30 neo-Inspiron-5558 kernel: [ 5587.505117] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:48:52 neo-Inspiron-5558 kernel: [ 5849.438466] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:48:52 neo-Inspiron-5558 kernel: [ 5849.438497] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:48:52 neo-Inspiron-5558 kernel: [ 5849.438503] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:48:52 neo-Inspiron-5558 kernel: [ 5849.438507] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:48:52 neo-Inspiron-5558 kernel: [ 5849.438512] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:48:52 neo-Inspiron-5558 kernel: [ 5849.438518] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:48:52 neo-Inspiron-5558 kernel: [ 5849.438523] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:48:52 neo-Inspiron-5558 kernel: [ 5849.438528] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:48:52 neo-Inspiron-5558 kernel: [ 5849.438533] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:48:52 neo-Inspiron-5558 kernel: [ 5849.438538] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:50:47 neo-Inspiron-5558 kernel: [ 5964.211334] net_ratelimit: 15 callbacks suppressed
+Jun 15 18:50:47 neo-Inspiron-5558 kernel: [ 5964.211339] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:55:09 neo-Inspiron-5558 kernel: [ 6226.771830] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:56:57 neo-Inspiron-5558 kernel: [ 6334.732417] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 18:56:57 neo-Inspiron-5558 kernel: [ 6334.732420] rtw_conf_tx: in_interrupt():0
+Jun 15 18:57:20 neo-Inspiron-5558 kernel: [ 6357.156598] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 18:57:20 neo-Inspiron-5558 kernel: [ 6357.156604] rtw_conf_tx: in_interrupt():0
+Jun 15 18:58:00 neo-Inspiron-5558 kernel: [ 6397.702764] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:12 neo-Inspiron-5558 kernel: [ 6409.562407] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:12 neo-Inspiron-5558 kernel: [ 6409.562439] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:12 neo-Inspiron-5558 kernel: [ 6409.562446] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:12 neo-Inspiron-5558 kernel: [ 6409.562454] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:12 neo-Inspiron-5558 kernel: [ 6409.562461] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:12 neo-Inspiron-5558 kernel: [ 6409.562470] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:12 neo-Inspiron-5558 kernel: [ 6409.562476] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:12 neo-Inspiron-5558 kernel: [ 6409.562481] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:12 neo-Inspiron-5558 kernel: [ 6409.562487] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:12 neo-Inspiron-5558 kernel: [ 6409.562493] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825587] net_ratelimit: 14 callbacks suppressed
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825592] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825596] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825599] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825602] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825605] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825608] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825611] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825614] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825617] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:39 neo-Inspiron-5558 kernel: [ 6436.825620] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125338] net_ratelimit: 10 callbacks suppressed
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125371] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125378] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125396] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125404] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125410] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125416] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125422] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125429] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125436] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:58:48 neo-Inspiron-5558 kernel: [ 6445.125442] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716449] net_ratelimit: 2 callbacks suppressed
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716483] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716489] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716493] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716498] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716502] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716507] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716512] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716516] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716521] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 18:59:17 neo-Inspiron-5558 kernel: [ 6474.716532] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896023] net_ratelimit: 30 callbacks suppressed
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896057] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896073] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896090] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896097] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896104] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896111] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896118] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896128] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896135] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:03:53 neo-Inspiron-5558 kernel: [ 6750.896146] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722421] net_ratelimit: 22 callbacks suppressed
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722455] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722463] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722475] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722484] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722492] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722499] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722507] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722514] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722521] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:45 neo-Inspiron-5558 kernel: [ 6802.722528] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146250] net_ratelimit: 18 callbacks suppressed
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146255] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146258] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146260] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146263] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146265] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146267] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146269] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146271] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146274] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:04:51 neo-Inspiron-5558 kernel: [ 6808.146276] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152523] net_ratelimit: 14 callbacks suppressed
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152530] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152534] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152536] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152538] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152540] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152543] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152545] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152547] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152550] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:05:47 neo-Inspiron-5558 kernel: [ 6864.152552] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643854] net_ratelimit: 22 callbacks suppressed
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643887] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643894] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643912] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643919] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643925] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643936] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643948] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643957] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643963] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:06:08 neo-Inspiron-5558 kernel: [ 6885.643974] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945502] net_ratelimit: 45 callbacks suppressed
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945507] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945511] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945514] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945518] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945521] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945524] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945528] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945531] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945534] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:09:33 neo-Inspiron-5558 kernel: [ 7089.945537] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567308] net_ratelimit: 15 callbacks suppressed
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567341] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567347] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567353] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567358] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567363] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567368] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567373] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567379] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567384] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:10:02 neo-Inspiron-5558 kernel: [ 7119.567389] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.591925] net_ratelimit: 48 callbacks suppressed
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.591958] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.591965] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.591970] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.591976] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.591981] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.591987] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.591993] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.591998] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.592004] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:11:54 neo-Inspiron-5558 kernel: [ 7231.592010] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:14:37 neo-Inspiron-5558 kernel: [ 7394.889077] net_ratelimit: 4 callbacks suppressed
+Jun 15 19:14:37 neo-Inspiron-5558 kernel: [ 7394.889082] wlan1: detected beacon loss from AP (missed 7 beacons) - probing
+Jun 15 19:14:38 neo-Inspiron-5558 kernel: [ 7394.940512] wlan1: cancelling AP probe due to a received beacon
+Jun 15 19:16:56 neo-Inspiron-5558 kernel: [ 7533.179004] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 19:16:56 neo-Inspiron-5558 kernel: [ 7533.179008] rtw_conf_tx: in_interrupt():0
+Jun 15 19:17:20 neo-Inspiron-5558 kernel: [ 7557.142034] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 19:17:20 neo-Inspiron-5558 kernel: [ 7557.142038] rtw_conf_tx: in_interrupt():0
+Jun 15 19:17:55 neo-Inspiron-5558 kernel: [ 7592.057583] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 19:17:55 neo-Inspiron-5558 kernel: [ 7592.057587] rtw_conf_tx: in_interrupt():0
+Jun 15 19:18:20 neo-Inspiron-5558 kernel: [ 7617.145813] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 19:18:20 neo-Inspiron-5558 kernel: [ 7617.145820] rtw_conf_tx: in_interrupt():0
+Jun 15 19:20:00 neo-Inspiron-5558 kernel: [ 7717.394138] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 19:20:00 neo-Inspiron-5558 kernel: [ 7717.394143] rtw_conf_tx: in_interrupt():0
+Jun 15 19:20:20 neo-Inspiron-5558 kernel: [ 7737.157226] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 19:20:20 neo-Inspiron-5558 kernel: [ 7737.157230] rtw_conf_tx: in_interrupt():0
+Jun 15 19:23:47 neo-Inspiron-5558 kernel: [ 7943.949779] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.386994] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.387111] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.388929] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.390598] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.392282] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.393864] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.395254] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.396493] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.397274] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.397970] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.398645] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.399302] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.399906] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.400502] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.401091] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.401657] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.402214] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.402804] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.403381] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.403896] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.404396] rtw_usb_rx_handler: rx_queue overflow
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.510517] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.510521] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.510524] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.510526] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.510528] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.510530] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.510533] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.510535] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.510537] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:29:32 neo-Inspiron-5558 kernel: [ 8289.510540] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:32:34 neo-Inspiron-5558 kernel: [ 8471.925892] net_ratelimit: 52 callbacks suppressed
+Jun 15 19:32:34 neo-Inspiron-5558 kernel: [ 8471.925899] wlan1: detected beacon loss from AP (missed 7 beacons) - probing
+Jun 15 19:32:35 neo-Inspiron-5558 kernel: [ 8472.277226] wlan1: cancelling AP probe due to a received beacon
+Jun 15 19:35:56 neo-Inspiron-5558 kernel: [ 8673.769156] perf: interrupt took too long (2537 > 2500), lowering kernel.perf_event_max_sample_rate to 78750
+Jun 15 19:38:37 neo-Inspiron-5558 kernel: [ 8834.867149] wlan1: detected beacon loss from AP (missed 7 beacons) - probing
+Jun 15 19:38:37 neo-Inspiron-5558 kernel: [ 8834.871258] wlan1: cancelling AP probe due to a received beacon
+Jun 15 19:54:31 neo-Inspiron-5558 kernel: [ 9788.293053] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:54:31 neo-Inspiron-5558 kernel: [ 9788.293057] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:54:31 neo-Inspiron-5558 kernel: [ 9788.293060] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:54:31 neo-Inspiron-5558 kernel: [ 9788.293062] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:54:31 neo-Inspiron-5558 kernel: [ 9788.293065] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:54:31 neo-Inspiron-5558 kernel: [ 9788.293067] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:54:31 neo-Inspiron-5558 kernel: [ 9788.293070] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:54:31 neo-Inspiron-5558 kernel: [ 9788.293073] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:54:31 neo-Inspiron-5558 kernel: [ 9788.293075] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 19:54:31 neo-Inspiron-5558 kernel: [ 9788.293078] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:04:22 neo-Inspiron-5558 kernel: [10379.377800] perf: interrupt took too long (3180 > 3171), lowering kernel.perf_event_max_sample_rate to 62750
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418391] net_ratelimit: 25 callbacks suppressed
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418397] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418400] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418402] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418405] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418407] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418409] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418412] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418414] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418417] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:28:47 neo-Inspiron-5558 kernel: [11844.418419] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.645948] net_ratelimit: 8 callbacks suppressed
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.645987] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.646003] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.646015] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.646022] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.646030] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.646041] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.646048] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.646054] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.646060] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:34:47 neo-Inspiron-5558 kernel: [12204.646067] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:46:02 neo-Inspiron-5558 kernel: [12879.839903] net_ratelimit: 6 callbacks suppressed
+Jun 15 20:46:02 neo-Inspiron-5558 kernel: [12879.839909] wlan1: detected beacon loss from AP (missed 7 beacons) - probing
+Jun 15 20:46:03 neo-Inspiron-5558 kernel: [12880.133777] wlan1: cancelling AP probe due to a received beacon
+Jun 15 20:51:19 neo-Inspiron-5558 kernel: [13196.560381] perf: interrupt took too long (3993 > 3975), lowering kernel.perf_event_max_sample_rate to 50000
+Jun 15 20:56:05 neo-Inspiron-5558 kernel: [13482.840355] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 20:56:05 neo-Inspiron-5558 kernel: [13482.840386] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:04:34 neo-Inspiron-5558 kernel: [13990.957697] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:04:34 neo-Inspiron-5558 kernel: [13990.957728] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:04:34 neo-Inspiron-5558 kernel: [13990.957734] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:04:34 neo-Inspiron-5558 kernel: [13990.957752] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:04:34 neo-Inspiron-5558 kernel: [13990.957760] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:04:34 neo-Inspiron-5558 kernel: [13990.957766] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:04:34 neo-Inspiron-5558 kernel: [13990.957779] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:04:34 neo-Inspiron-5558 kernel: [13990.957789] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:04:34 neo-Inspiron-5558 kernel: [13990.957796] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:04:34 neo-Inspiron-5558 kernel: [13990.957801] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779527] net_ratelimit: 3 callbacks suppressed
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779559] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779567] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779586] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779594] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779603] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779614] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779623] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779630] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779636] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:05:56 neo-Inspiron-5558 kernel: [14073.779648] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763071] net_ratelimit: 45 callbacks suppressed
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763104] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763119] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763131] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763138] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763147] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763157] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763167] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763174] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763183] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:06:14 neo-Inspiron-5558 kernel: [14091.763190] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:08:47 neo-Inspiron-5558 kernel: [14244.087439] net_ratelimit: 45 callbacks suppressed
+Jun 15 21:08:47 neo-Inspiron-5558 kernel: [14244.087445] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:08:47 neo-Inspiron-5558 kernel: [14244.087449] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:09:56 neo-Inspiron-5558 kernel: [14313.397895] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:09:56 neo-Inspiron-5558 kernel: [14313.397928] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:09:56 neo-Inspiron-5558 kernel: [14313.397935] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:09:56 neo-Inspiron-5558 kernel: [14313.397948] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:09:56 neo-Inspiron-5558 kernel: [14313.397956] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:09:56 neo-Inspiron-5558 kernel: [14313.397963] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:09:56 neo-Inspiron-5558 kernel: [14313.397968] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:09:56 neo-Inspiron-5558 kernel: [14313.397974] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:09:56 neo-Inspiron-5558 kernel: [14313.397980] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:09:56 neo-Inspiron-5558 kernel: [14313.397988] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 21:31:39 neo-Inspiron-5558 kernel: [15616.037537] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 21:31:39 neo-Inspiron-5558 kernel: [15616.037542] rtw_conf_tx: in_interrupt():0
+Jun 15 21:31:50 neo-Inspiron-5558 kernel: [15627.096312] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 21:31:50 neo-Inspiron-5558 kernel: [15627.096318] rtw_conf_tx: in_interrupt():0
+Jun 15 21:38:33 neo-Inspiron-5558 kernel: [16030.342576] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 21:38:33 neo-Inspiron-5558 kernel: [16030.342581] rtw_conf_tx: in_interrupt():0
+Jun 15 21:38:50 neo-Inspiron-5558 kernel: [16047.035189] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 21:38:50 neo-Inspiron-5558 kernel: [16047.035195] rtw_conf_tx: in_interrupt():0
+Jun 15 21:41:50 neo-Inspiron-5558 kernel: [16227.666728] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 21:41:50 neo-Inspiron-5558 kernel: [16227.666732] rtw_conf_tx: in_interrupt():0
+Jun 15 21:42:05 neo-Inspiron-5558 kernel: [16242.002245] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 21:42:05 neo-Inspiron-5558 kernel: [16242.002250] rtw_conf_tx: in_interrupt():0
+Jun 15 21:59:13 neo-Inspiron-5558 kernel: [17270.699023] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 21:59:13 neo-Inspiron-5558 kernel: [17270.699028] rtw_conf_tx: in_interrupt():0
+Jun 15 21:59:35 neo-Inspiron-5558 kernel: [17291.997409] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 21:59:35 neo-Inspiron-5558 kernel: [17291.997413] rtw_conf_tx: in_interrupt():0
+Jun 15 22:01:36 neo-Inspiron-5558 kernel: [17413.647252] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:01:36 neo-Inspiron-5558 kernel: [17413.647256] rtw_conf_tx: in_interrupt():0
+Jun 15 22:01:50 neo-Inspiron-5558 kernel: [17427.061562] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:01:50 neo-Inspiron-5558 kernel: [17427.061567] rtw_conf_tx: in_interrupt():0
+Jun 15 22:07:29 neo-Inspiron-5558 kernel: [17766.017037] perf: interrupt took too long (4999 > 4991), lowering kernel.perf_event_max_sample_rate to 40000
+Jun 15 22:09:10 neo-Inspiron-5558 kernel: [17866.864394] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:09:10 neo-Inspiron-5558 kernel: [17866.864398] rtw_conf_tx: in_interrupt():0
+Jun 15 22:09:20 neo-Inspiron-5558 kernel: [17877.002018] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:09:20 neo-Inspiron-5558 kernel: [17877.002023] rtw_conf_tx: in_interrupt():0
+Jun 15 22:11:25 neo-Inspiron-5558 kernel: [18002.644758] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:11:25 neo-Inspiron-5558 kernel: [18002.644763] rtw_conf_tx: in_interrupt():0
+Jun 15 22:11:50 neo-Inspiron-5558 kernel: [18027.015317] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:11:50 neo-Inspiron-5558 kernel: [18027.015321] rtw_conf_tx: in_interrupt():0
+Jun 15 22:14:33 neo-Inspiron-5558 kernel: [18190.034336] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:14:33 neo-Inspiron-5558 kernel: [18190.034340] rtw_conf_tx: in_interrupt():0
+Jun 15 22:14:50 neo-Inspiron-5558 kernel: [18207.032742] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:14:50 neo-Inspiron-5558 kernel: [18207.032747] rtw_conf_tx: in_interrupt():0
+Jun 15 22:15:36 neo-Inspiron-5558 kernel: [18253.522612] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:15:36 neo-Inspiron-5558 kernel: [18253.522617] rtw_conf_tx: in_interrupt():0
+Jun 15 22:15:50 neo-Inspiron-5558 kernel: [18267.038552] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:15:50 neo-Inspiron-5558 kernel: [18267.038556] rtw_conf_tx: in_interrupt():0
+Jun 15 22:17:28 neo-Inspiron-5558 kernel: [18364.832004] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:17:28 neo-Inspiron-5558 kernel: [18364.832008] rtw_conf_tx: in_interrupt():0
+Jun 15 22:17:50 neo-Inspiron-5558 kernel: [18387.050910] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:17:50 neo-Inspiron-5558 kernel: [18387.050915] rtw_conf_tx: in_interrupt():0
+Jun 15 22:18:01 neo-Inspiron-5558 kernel: [18398.519275] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:18:01 neo-Inspiron-5558 kernel: [18398.519280] rtw_conf_tx: in_interrupt():0
+Jun 15 22:18:20 neo-Inspiron-5558 kernel: [18417.055870] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:18:20 neo-Inspiron-5558 kernel: [18417.055875] rtw_conf_tx: in_interrupt():0
+Jun 15 22:19:56 neo-Inspiron-5558 kernel: [18512.898958] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:19:56 neo-Inspiron-5558 kernel: [18512.898962] rtw_conf_tx: in_interrupt():0
+Jun 15 22:20:20 neo-Inspiron-5558 kernel: [18537.065216] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:20:20 neo-Inspiron-5558 kernel: [18537.065220] rtw_conf_tx: in_interrupt():0
+Jun 15 22:25:41 neo-Inspiron-5558 kernel: [18858.701334] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:25:41 neo-Inspiron-5558 kernel: [18858.701339] rtw_conf_tx: in_interrupt():0
+Jun 15 22:26:05 neo-Inspiron-5558 kernel: [18882.044589] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:26:05 neo-Inspiron-5558 kernel: [18882.044593] rtw_conf_tx: in_interrupt():0
+Jun 15 22:28:46 neo-Inspiron-5558 kernel: [19043.817445] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 22:28:46 neo-Inspiron-5558 kernel: [19043.817450] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 22:28:46 neo-Inspiron-5558 kernel: [19043.817452] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 22:28:46 neo-Inspiron-5558 kernel: [19043.817454] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 22:28:46 neo-Inspiron-5558 kernel: [19043.817456] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 22:28:46 neo-Inspiron-5558 kernel: [19043.817459] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 22:28:46 neo-Inspiron-5558 kernel: [19043.817461] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 22:28:46 neo-Inspiron-5558 kernel: [19043.817463] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 22:28:46 neo-Inspiron-5558 kernel: [19043.817466] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 22:28:46 neo-Inspiron-5558 kernel: [19043.817468] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 22:30:44 neo-Inspiron-5558 kernel: [19161.798262] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:30:44 neo-Inspiron-5558 kernel: [19161.798267] rtw_conf_tx: in_interrupt():0
+Jun 15 22:31:05 neo-Inspiron-5558 kernel: [19181.971828] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:31:05 neo-Inspiron-5558 kernel: [19181.971832] rtw_conf_tx: in_interrupt():0
+Jun 15 22:35:32 neo-Inspiron-5558 kernel: [19449.782881] net_ratelimit: 24 callbacks suppressed
+Jun 15 22:35:32 neo-Inspiron-5558 kernel: [19449.782889] wlan1: detected beacon loss from AP (missed 7 beacons) - probing
+Jun 15 22:35:33 neo-Inspiron-5558 kernel: [19449.846608] wlan1: cancelling AP probe due to a received beacon
+Jun 15 22:40:17 neo-Inspiron-5558 kernel: [19734.616752] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:40:17 neo-Inspiron-5558 kernel: [19734.616757] rtw_conf_tx: in_interrupt():0
+Jun 15 22:40:35 neo-Inspiron-5558 kernel: [19752.024444] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:40:35 neo-Inspiron-5558 kernel: [19752.024448] rtw_conf_tx: in_interrupt():0
+Jun 15 22:41:57 neo-Inspiron-5558 kernel: [19833.944322] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:41:57 neo-Inspiron-5558 kernel: [19833.944327] rtw_conf_tx: in_interrupt():0
+Jun 15 22:42:01 neo-Inspiron-5558 kernel: [19838.771904] wlan1: detected beacon loss from AP (missed 7 beacons) - probing
+Jun 15 22:42:02 neo-Inspiron-5558 kernel: [19839.063788] wlan1: cancelling AP probe due to a received beacon
+Jun 15 22:42:20 neo-Inspiron-5558 kernel: [19856.983523] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:42:20 neo-Inspiron-5558 kernel: [19856.983528] rtw_conf_tx: in_interrupt():0
+Jun 15 22:45:25 neo-Inspiron-5558 kernel: [20042.633610] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:45:25 neo-Inspiron-5558 kernel: [20042.633614] rtw_conf_tx: in_interrupt():0
+Jun 15 22:46:05 neo-Inspiron-5558 kernel: [20081.953571] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:46:05 neo-Inspiron-5558 kernel: [20081.953575] rtw_conf_tx: in_interrupt():0
+Jun 15 22:46:08 neo-Inspiron-5558 kernel: [20085.640146] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:46:08 neo-Inspiron-5558 kernel: [20085.640150] rtw_conf_tx: in_interrupt():0
+Jun 15 22:46:20 neo-Inspiron-5558 kernel: [20097.006075] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:46:20 neo-Inspiron-5558 kernel: [20097.006079] rtw_conf_tx: in_interrupt():0
+Jun 15 22:46:34 neo-Inspiron-5558 kernel: [20110.829886] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:46:34 neo-Inspiron-5558 kernel: [20110.829890] rtw_conf_tx: in_interrupt():0
+Jun 15 22:46:50 neo-Inspiron-5558 kernel: [20127.008829] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 22:46:50 neo-Inspiron-5558 kernel: [20127.008833] rtw_conf_tx: in_interrupt():0
+Jun 15 22:59:44 neo-Inspiron-5558 kernel: [20901.762210] wlan1: detected beacon loss from AP (missed 7 beacons) - probing
+Jun 15 22:59:44 neo-Inspiron-5558 kernel: [20901.764244] wlan1: cancelling AP probe due to a received beacon
+Jun 15 23:02:24 neo-Inspiron-5558 kernel: [21061.496206] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:24 neo-Inspiron-5558 kernel: [21061.496237] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:46 neo-Inspiron-5558 kernel: [21083.727039] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:46 neo-Inspiron-5558 kernel: [21083.727044] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:46 neo-Inspiron-5558 kernel: [21083.727046] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:46 neo-Inspiron-5558 kernel: [21083.727048] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:46 neo-Inspiron-5558 kernel: [21083.727050] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:46 neo-Inspiron-5558 kernel: [21083.727052] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:46 neo-Inspiron-5558 kernel: [21083.727055] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:46 neo-Inspiron-5558 kernel: [21083.727057] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:46 neo-Inspiron-5558 kernel: [21083.727059] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:02:46 neo-Inspiron-5558 kernel: [21083.727062] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:09:56 neo-Inspiron-5558 kernel: [21513.398814] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:09:56 neo-Inspiron-5558 kernel: [21513.398846] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:09:56 neo-Inspiron-5558 kernel: [21513.398852] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:09:56 neo-Inspiron-5558 kernel: [21513.398858] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:09:56 neo-Inspiron-5558 kernel: [21513.398863] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:09:56 neo-Inspiron-5558 kernel: [21513.398868] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:09:56 neo-Inspiron-5558 kernel: [21513.398873] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:09:56 neo-Inspiron-5558 kernel: [21513.398878] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:09:56 neo-Inspiron-5558 kernel: [21513.398885] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:09:56 neo-Inspiron-5558 kernel: [21513.398894] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802201] net_ratelimit: 13 callbacks suppressed
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802237] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802244] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802256] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802265] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802271] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802277] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802283] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802292] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802298] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:10:49 neo-Inspiron-5558 kernel: [21565.802304] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296557] net_ratelimit: 39 callbacks suppressed
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296590] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296598] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296606] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296614] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296622] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296629] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296635] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296642] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296648] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:13:12 neo-Inspiron-5558 kernel: [21709.296654] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:15:49 neo-Inspiron-5558 kernel: [21865.862745] net_ratelimit: 28 callbacks suppressed
+Jun 15 23:15:49 neo-Inspiron-5558 kernel: [21865.862750] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:15:49 neo-Inspiron-5558 kernel: [21865.862754] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:00 neo-Inspiron-5558 kernel: [22117.359403] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:00 neo-Inspiron-5558 kernel: [22117.359435] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:00 neo-Inspiron-5558 kernel: [22117.359439] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:00 neo-Inspiron-5558 kernel: [22117.359444] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:00 neo-Inspiron-5558 kernel: [22117.359448] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:00 neo-Inspiron-5558 kernel: [22117.359453] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:00 neo-Inspiron-5558 kernel: [22117.359457] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:00 neo-Inspiron-5558 kernel: [22117.359462] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:00 neo-Inspiron-5558 kernel: [22117.359466] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:00 neo-Inspiron-5558 kernel: [22117.359471] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:20:32 neo-Inspiron-5558 kernel: [22149.212528] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 23:20:32 neo-Inspiron-5558 kernel: [22149.212532] rtw_conf_tx: in_interrupt():0
+Jun 15 23:20:50 neo-Inspiron-5558 kernel: [22166.928023] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 23:20:50 neo-Inspiron-5558 kernel: [22166.928029] rtw_conf_tx: in_interrupt():0
+Jun 15 23:21:40 neo-Inspiron-5558 kernel: [22217.411743] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 23:21:40 neo-Inspiron-5558 kernel: [22217.411747] rtw_conf_tx: in_interrupt():0
+Jun 15 23:22:05 neo-Inspiron-5558 kernel: [22241.987870] rtw_ops_bss_info_changed: in_interrupt():0
+Jun 15 23:22:05 neo-Inspiron-5558 kernel: [22241.987874] rtw_conf_tx: in_interrupt():0
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718268] net_ratelimit: 47 callbacks suppressed
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718300] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718305] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718310] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718315] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718319] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718324] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718329] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718334] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718339] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:23:01 neo-Inspiron-5558 kernel: [22298.718344] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797298] net_ratelimit: 7 callbacks suppressed
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797330] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797335] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797340] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797344] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797349] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797353] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797358] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797363] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797367] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:35:28 neo-Inspiron-5558 kernel: [23044.797377] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856031] net_ratelimit: 16 callbacks suppressed
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856062] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856068] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856072] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856076] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856081] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856085] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856089] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856094] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856099] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:17 neo-Inspiron-5558 kernel: [23093.856103] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483663] net_ratelimit: 35 callbacks suppressed
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483700] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483707] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483724] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483731] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483737] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483743] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483748] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483754] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483761] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:36:31 neo-Inspiron-5558 kernel: [23108.483768] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858515] net_ratelimit: 53 callbacks suppressed
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858549] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858557] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858569] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858577] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858584] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858590] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858597] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858603] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858609] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:37:17 neo-Inspiron-5558 kernel: [23153.858615] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:38:46 neo-Inspiron-5558 kernel: [23243.698122] net_ratelimit: 37 callbacks suppressed
+Jun 15 23:38:46 neo-Inspiron-5558 kernel: [23243.698128] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:49:47 neo-Inspiron-5558 kernel: [23904.461451] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:49:47 neo-Inspiron-5558 kernel: [23904.461484] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:49:47 neo-Inspiron-5558 kernel: [23904.461491] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:49:47 neo-Inspiron-5558 kernel: [23904.461500] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:49:47 neo-Inspiron-5558 kernel: [23904.461508] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:49:47 neo-Inspiron-5558 kernel: [23904.461517] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:49:47 neo-Inspiron-5558 kernel: [23904.461525] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:49:47 neo-Inspiron-5558 kernel: [23904.461532] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:49:47 neo-Inspiron-5558 kernel: [23904.461539] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:49:47 neo-Inspiron-5558 kernel: [23904.461546] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:51:54 neo-Inspiron-5558 kernel: [24031.646747] net_ratelimit: 22 callbacks suppressed
+Jun 15 23:51:54 neo-Inspiron-5558 kernel: [24031.646779] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:51:54 neo-Inspiron-5558 kernel: [24031.646784] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:51:54 neo-Inspiron-5558 kernel: [24031.646789] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:51:54 neo-Inspiron-5558 kernel: [24031.646794] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:51:54 neo-Inspiron-5558 kernel: [24031.646799] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:51:54 neo-Inspiron-5558 kernel: [24031.646803] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:51:54 neo-Inspiron-5558 kernel: [24031.646808] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:53:05 neo-Inspiron-5558 kernel: [24102.713252] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:53:05 neo-Inspiron-5558 kernel: [24102.713283] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:53:05 neo-Inspiron-5558 kernel: [24102.713288] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 15 23:53:05 neo-Inspiron-5558 kernel: [24102.713292] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:00:46 neo-Inspiron-5558 kernel: [24563.011699] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:00:46 neo-Inspiron-5558 kernel: [24563.011729] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:00:46 neo-Inspiron-5558 kernel: [24563.011734] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:00:46 neo-Inspiron-5558 kernel: [24563.011739] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:00:46 neo-Inspiron-5558 kernel: [24563.011744] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:00:46 neo-Inspiron-5558 kernel: [24563.011748] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:00:46 neo-Inspiron-5558 kernel: [24563.011753] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:00:46 neo-Inspiron-5558 kernel: [24563.011758] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:00:46 neo-Inspiron-5558 kernel: [24563.011763] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:00:46 neo-Inspiron-5558 kernel: [24563.011768] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:02 neo-Inspiron-5558 kernel: [24759.007675] net_ratelimit: 55 callbacks suppressed
+Jun 16 00:04:02 neo-Inspiron-5558 kernel: [24759.007706] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:14 neo-Inspiron-5558 kernel: [24770.791434] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:14 neo-Inspiron-5558 kernel: [24770.791462] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:14 neo-Inspiron-5558 kernel: [24770.791467] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:14 neo-Inspiron-5558 kernel: [24770.791472] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:14 neo-Inspiron-5558 kernel: [24770.791477] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:14 neo-Inspiron-5558 kernel: [24770.791482] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:14 neo-Inspiron-5558 kernel: [24770.791486] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:14 neo-Inspiron-5558 kernel: [24770.791491] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:14 neo-Inspiron-5558 kernel: [24770.791496] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:14 neo-Inspiron-5558 kernel: [24770.791501] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811088] net_ratelimit: 48 callbacks suppressed
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811128] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811135] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811153] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811161] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811166] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811172] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811177] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811184] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811190] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:04:31 neo-Inspiron-5558 kernel: [24787.811196] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673290] net_ratelimit: 64 callbacks suppressed
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673322] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673327] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673332] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673336] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673340] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673345] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673350] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673354] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673359] wlan1: release an RX reorder frame due to timeout on earlier frames
+Jun 16 00:05:58 neo-Inspiron-5558 kernel: [24875.673369] wlan1: release an RX reorder frame due to timeout on earlier frames

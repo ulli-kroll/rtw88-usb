@@ -20,6 +20,7 @@ static void rtw_ops_tx(struct ieee80211_hw *hw,
 {
 	struct rtw_dev *rtwdev = hw->priv;
 
+	/* in_interrupt */
 	if (!test_bit(RTW_FLAG_RUNNING, rtwdev->flags)) {
 		ieee80211_free_txskb(hw, skb);
 		return;
@@ -34,6 +35,7 @@ static void rtw_ops_wake_tx_queue(struct ieee80211_hw *hw,
 	struct rtw_dev *rtwdev = hw->priv;
 	struct rtw_txq *rtwtxq = (struct rtw_txq *)txq->drv_priv;
 
+	/* in_interrupt */
 	if (!test_bit(RTW_FLAG_RUNNING, rtwdev->flags))
 		return;
 
@@ -50,6 +52,7 @@ static int rtw_ops_start(struct ieee80211_hw *hw)
 	struct rtw_dev *rtwdev = hw->priv;
 	int ret;
 
+	/* not in interrupt */
 	mutex_lock(&rtwdev->mutex);
 	ret = rtw_core_start(rtwdev);
 	mutex_unlock(&rtwdev->mutex);
@@ -61,6 +64,7 @@ static void rtw_ops_stop(struct ieee80211_hw *hw)
 {
 	struct rtw_dev *rtwdev = hw->priv;
 
+	/* not in interrupt */
 	mutex_lock(&rtwdev->mutex);
 	rtw_core_stop(rtwdev);
 	mutex_unlock(&rtwdev->mutex);
@@ -71,6 +75,7 @@ static int rtw_ops_config(struct ieee80211_hw *hw, u32 changed)
 	struct rtw_dev *rtwdev = hw->priv;
 	int ret = 0;
 
+	/* not in interrupt */
 	mutex_lock(&rtwdev->mutex);
 
 	rtw_leave_lps_deep(rtwdev);
@@ -86,8 +91,10 @@ static int rtw_ops_config(struct ieee80211_hw *hw, u32 changed)
 
 	if (changed & IEEE80211_CONF_CHANGE_PS) {
 		if (hw->conf.flags & IEEE80211_CONF_PS) {
-			rtwdev->ps_enabled = true;
+			pr_info("%s: IEEE80211_CONF_PS enter\n", __func__);
+			//rtwdev->ps_enabled = true;
 		} else {
+			pr_info("%s: IEEE80211_CONF_PS leave\n", __func__);
 			rtwdev->ps_enabled = false;
 			rtw_leave_lps(rtwdev);
 		}
@@ -152,6 +159,9 @@ static int rtw_ops_add_interface(struct ieee80211_hw *hw,
 	u8 port = 0;
 	u8 bcn_ctrl = 0;
 
+	/* not in interrupt */
+	mutex_lock(&rtwdev->mutex);
+
 	rtwvif->port = port;
 	rtwvif->stats.tx_unicast = 0;
 	rtwvif->stats.rx_unicast = 0;
@@ -160,8 +170,6 @@ static int rtw_ops_add_interface(struct ieee80211_hw *hw,
 	memset(&rtwvif->bfee, 0, sizeof(struct rtw_bfee));
 	rtwvif->conf = &rtw_vif_port[port];
 	rtw_txq_init(rtwdev, vif->txq);
-
-	mutex_lock(&rtwdev->mutex);
 
 	rtw_leave_lps_deep(rtwdev);
 
@@ -203,6 +211,7 @@ static void rtw_ops_remove_interface(struct ieee80211_hw *hw,
 	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
 	u32 config = 0;
 
+	/* not in interrupt */
 	rtw_info(rtwdev, "stop vif %pM on port %d\n", vif->addr, rtwvif->port);
 
 	mutex_lock(&rtwdev->mutex);
@@ -229,10 +238,12 @@ static void rtw_ops_configure_filter(struct ieee80211_hw *hw,
 {
 	struct rtw_dev *rtwdev = hw->priv;
 
+	/* not in interrupt */
+	mutex_lock(&rtwdev->mutex);
+
 	*new_flags &= FIF_ALLMULTI | FIF_OTHER_BSS | FIF_FCSFAIL |
 		      FIF_BCN_PRBRESP_PROMISC;
 
-	mutex_lock(&rtwdev->mutex);
 
 	rtw_leave_lps_deep(rtwdev);
 
@@ -327,6 +338,7 @@ static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
 	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
 	u32 config = 0;
 
+	// not in interrupt
 	mutex_lock(&rtwdev->mutex);
 
 	rtw_leave_lps_deep(rtwdev);
@@ -347,8 +359,8 @@ static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
 			rtw_fw_download_rsvd_page(rtwdev, vif);
 			rtw_send_rsvd_page_h2c(rtwdev);
 			rtw_coex_media_status_notify(rtwdev, conf->assoc);
-			if (rtw_bf_support)
-				rtw_bf_assoc(rtwdev, vif, conf);
+			//if (rtw_bf_support)
+			//	rtw_bf_assoc(rtwdev, vif, conf);
 		} else {
 			rtw_leave_lps(rtwdev);
 			net_type = RTW_NET_NO_LINK;
@@ -391,6 +403,7 @@ static int rtw_ops_conf_tx(struct ieee80211_hw *hw,
 	struct rtw_dev *rtwdev = hw->priv;
 	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
 
+	/* not in interrupt */
 	mutex_lock(&rtwdev->mutex);
 
 	rtw_leave_lps_deep(rtwdev);
@@ -428,6 +441,7 @@ static int rtw_ops_sta_add(struct ieee80211_hw *hw,
 	int i;
 	int ret = 0;
 
+	/* not in interrupt */
 	mutex_lock(&rtwdev->mutex);
 
 	si->mac_id = rtw_acquire_macid(rtwdev);
@@ -464,6 +478,7 @@ static int rtw_ops_sta_remove(struct ieee80211_hw *hw,
 	struct rtw_sta_info *si = (struct rtw_sta_info *)sta->drv_priv;
 	int i;
 
+	/* not in interrupt */
 	mutex_lock(&rtwdev->mutex);
 
 	rtw_release_macid(rtwdev, si->mac_id);
@@ -492,6 +507,8 @@ static int rtw_ops_set_key(struct ieee80211_hw *hw, enum set_key_cmd cmd,
 	u8 hw_key_type;
 	u8 hw_key_idx;
 	int ret = 0;
+
+	/* not in interrupt */
 
 	switch (key->cipher) {
 	case WLAN_CIPHER_SUITE_WEP40:
@@ -570,6 +587,8 @@ static int rtw_ops_ampdu_action(struct ieee80211_hw *hw,
 	struct ieee80211_txq *txq = sta->txq[tid];
 	struct rtw_txq *rtwtxq = (struct rtw_txq *)txq->drv_priv;
 
+	/* not in interrupt */
+
 	switch (params->action) {
 	case IEEE80211_AMPDU_TX_START:
 		return IEEE80211_AMPDU_TX_START_IMMEDIATE;
@@ -600,6 +619,8 @@ static bool rtw_ops_can_aggregate_in_amsdu(struct ieee80211_hw *hw,
 	struct rtw_dev *rtwdev = hw->priv;
 	struct rtw_hal *hal = &rtwdev->hal;
 
+	//in_interrupt
+
 	/* we don't want to enable TX AMSDU on 2.4G */
 	if (hal->current_band_type == RTW_BAND_2G)
 		return false;
@@ -615,6 +636,7 @@ static void rtw_ops_sw_scan_start(struct ieee80211_hw *hw,
 	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
 	u32 config = 0;
 
+	/* not in interrupt */
 	mutex_lock(&rtwdev->mutex);
 
 	rtw_leave_lps(rtwdev);
@@ -638,6 +660,7 @@ static void rtw_ops_sw_scan_complete(struct ieee80211_hw *hw,
 	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
 	u32 config = 0;
 
+	/* not in interrupt */
 	mutex_lock(&rtwdev->mutex);
 
 	clear_bit(RTW_FLAG_SCANNING, rtwdev->flags);
@@ -658,10 +681,13 @@ static void rtw_ops_mgd_prepare_tx(struct ieee80211_hw *hw,
 {
 	struct rtw_dev *rtwdev = hw->priv;
 
+	/* not in interrupt */
 	mutex_lock(&rtwdev->mutex);
+
 	rtw_leave_lps_deep(rtwdev);
 	rtw_coex_connect_notify(rtwdev, COEX_ASSOCIATE_START);
 	rtw_chip_prepare_tx(rtwdev);
+
 	mutex_unlock(&rtwdev->mutex);
 }
 
@@ -669,10 +695,12 @@ static int rtw_ops_set_rts_threshold(struct ieee80211_hw *hw, u32 value)
 {
 	struct rtw_dev *rtwdev = hw->priv;
 
+	pr_info("%s: in_interrupt():%lu\n", __func__, in_interrupt());
 	mutex_lock(&rtwdev->mutex);
-	rtwdev->rts_threshold = value;
-	mutex_unlock(&rtwdev->mutex);
 
+	rtwdev->rts_threshold = value;
+
+	mutex_unlock(&rtwdev->mutex);
 	return 0;
 }
 
@@ -682,6 +710,8 @@ static void rtw_ops_sta_statistics(struct ieee80211_hw *hw,
 				   struct station_info *sinfo)
 {
 	struct rtw_sta_info *si = (struct rtw_sta_info *)sta->drv_priv;
+
+	pr_info("%s: in_interrupt():%lu\n", __func__, in_interrupt());
 
 	sinfo->txrate = si->ra_report.txrate;
 	sinfo->filled |= BIT_ULL(NL80211_STA_INFO_TX_BITRATE);
@@ -693,10 +723,12 @@ static void rtw_ops_flush(struct ieee80211_hw *hw,
 {
 	struct rtw_dev *rtwdev = hw->priv;
 
+	/* not in interrupt */
 	mutex_lock(&rtwdev->mutex);
-	rtw_leave_lps_deep(rtwdev);
 
+	rtw_leave_lps_deep(rtwdev);
 	rtw_mac_flush_queues(rtwdev, queues, drop);
+
 	mutex_unlock(&rtwdev->mutex);
 }
 
@@ -784,6 +816,8 @@ static int rtw_ops_set_bitrate_mask(struct ieee80211_hw *hw,
 {
 	struct rtw_dev *rtwdev = hw->priv;
 
+	pr_info("%s: in_interrupt():%lu\n", __func__, in_interrupt());
+
 	rtw_ra_mask_info_update(rtwdev, vif, mask);
 
 	return 0;
@@ -796,12 +830,14 @@ static int rtw_ops_suspend(struct ieee80211_hw *hw,
 	struct rtw_dev *rtwdev = hw->priv;
 	int ret;
 
+	pr_info("%s: in_interrupt():%lu\n", __func__, in_interrupt());
 	mutex_lock(&rtwdev->mutex);
+
 	ret = rtw_wow_suspend(rtwdev, wowlan);
 	if (ret)
 		rtw_err(rtwdev, "failed to suspend for wow %d\n", ret);
-	mutex_unlock(&rtwdev->mutex);
 
+	mutex_unlock(&rtwdev->mutex);
 	return ret ? 1 : 0;
 }
 
@@ -810,18 +846,22 @@ static int rtw_ops_resume(struct ieee80211_hw *hw)
 	struct rtw_dev *rtwdev = hw->priv;
 	int ret;
 
+	pr_info("%s: in_interrupt():%lu\n", __func__, in_interrupt());
 	mutex_lock(&rtwdev->mutex);
+
 	ret = rtw_wow_resume(rtwdev);
 	if (ret)
 		rtw_err(rtwdev, "failed to resume for wow %d\n", ret);
-	mutex_unlock(&rtwdev->mutex);
 
+	mutex_unlock(&rtwdev->mutex);
 	return ret ? 1 : 0;
 }
 
 static void rtw_ops_set_wakeup(struct ieee80211_hw *hw, bool enabled)
 {
 	struct rtw_dev *rtwdev = hw->priv;
+
+	pr_info("%s: in_interrupt():%lu\n", __func__, in_interrupt());
 
 	device_set_wakeup_enable(rtwdev->dev, enabled);
 }

@@ -58,7 +58,7 @@ static inline void rtw_hci_stop(struct rtw_dev *rtwdev)
 
 static inline void rtw_hci_deep_ps(struct rtw_dev *rtwdev, bool enter)
 {
-	rtwdev->hci.ops->deep_ps(rtwdev, enter);
+	//rtwdev->hci.ops->deep_ps(rtwdev, enter);
 }
 
 static inline void rtw_hci_link_ps(struct rtw_dev *rtwdev, bool enter)

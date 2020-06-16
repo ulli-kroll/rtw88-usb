@@ -469,13 +469,13 @@ static void rtw_txq_push(struct rtw_dev *rtwdev,
 {
 	int i;
 
-	rcu_read_lock();
+	//rcu_read_lock();
 
 	for (i = 0; i < frames; i++)
 		if (!rtw_txq_dequeue(rtwdev, rtwtxq))
 			break;
 
-	rcu_read_unlock();
+	//rcu_read_unlock();
 }
 
 void rtw_tx_tasklet(unsigned long data)

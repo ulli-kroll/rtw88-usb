@@ -1206,6 +1206,7 @@ static void rtw8822c_phy_set_param(struct rtw_dev *rtwdev)
 	rtw8822c_pwrtrack_init(rtwdev);
 
 	rtw_bf_phy_init(rtwdev);
+
 }
 
 #define WLAN_TXQ_RPT_EN		0x1F
