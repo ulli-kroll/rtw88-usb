@@ -57,6 +57,10 @@
 	le32p_replace_bits((__le32 *)(txdesc) + 0x07, value, GENMASK(15, 0))
 #define SET_TX_DESC_DMA_TXAGG_NUM(txdesc, value)                             \
 	le32p_replace_bits((__le32 *)(txdesc) + 0x07, value, GENMASK(31, 24))
+#define GET_TX_DESC_PKT_OFFSET(txdesc) \
+	le32_get_bits(*((__le32 *)(txdesc) + 0x01), GENMASK(28, 24))
+#define GET_TX_DESC_QSEL(txdesc) \
+	le32_get_bits(*((__le32 *)(txdesc) + 0x01), GENMASK(12, 8))
 
 enum rtw_tx_desc_queue_select {
 	TX_DESC_QSEL_TID0	= 0,
@@ -110,6 +114,52 @@ void fill_txdesc_checksum_common(u8 *txdesc, size_t words)
 		chksum ^= *data++;
 
 	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, le16_to_cpu(chksum));
+}
+
+static inline
+u8 rtw_tx_queue_to_qsel(struct sk_buff *skb, u8 queue)
+{
+	switch (queue) {
+	case RTW_TX_QUEUE_BCN:
+		return TX_DESC_QSEL_BEACON;
+	case RTW_TX_QUEUE_H2C:
+		return TX_DESC_QSEL_H2C;
+	case RTW_TX_QUEUE_MGMT:
+		return TX_DESC_QSEL_MGMT;
+	case RTW_TX_QUEUE_HI0:
+		return TX_DESC_QSEL_HIGH;
+	default:
+		return skb->priority;
+	}
+}
+
+static inline
+u8 rtw_tx_qsel_to_queue(u8 qsel)
+{
+	switch (qsel) {
+	case TX_DESC_QSEL_BEACON:
+		return RTW_TX_QUEUE_BCN;
+	case TX_DESC_QSEL_H2C:
+		return RTW_TX_QUEUE_H2C;
+	case TX_DESC_QSEL_MGMT:
+		return RTW_TX_QUEUE_MGMT;
+	case TX_DESC_QSEL_HIGH:
+		return RTW_TX_QUEUE_HI0;
+	case TX_DESC_QSEL_TID6:
+	case TX_DESC_QSEL_TID7:
+		return RTW_TX_QUEUE_VO;
+	case TX_DESC_QSEL_TID4:
+	case TX_DESC_QSEL_TID5:
+		return RTW_TX_QUEUE_VI;
+	case TX_DESC_QSEL_TID0:
+	case TX_DESC_QSEL_TID3:
+		return RTW_TX_QUEUE_BE;
+	case TX_DESC_QSEL_TID1:
+	case TX_DESC_QSEL_TID2:
+		return RTW_TX_QUEUE_BK;
+	default:
+		return RTW_TX_QUEUE_BCN;
+	}
 }
 
 #endif

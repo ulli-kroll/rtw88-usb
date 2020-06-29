@@ -14,145 +14,15 @@
 
 #define RTW_USB_MSG_TIMEOUT	3000 /* (ms) */
 
-struct txdesc_hdr {
-	u16 txpktsize;
-	u8 offset;
-	u8 bmc:1;
-	u8 htc:1;
-	u8 ls:1;
-	u8 amsdu_pad_en:1;
-	u8 bcnpkt_tsf_ctrl:1;
-	u8 noacm:1;
-	u8 gf:1;
-	u8 disqsellseq:1;
-
-	u8 macid:7;
-	u8 rsvd1:1;
-	u8 qsel:5;
-	u8 rdg_nav_ext:1;
-	u8 lsig_txop_en:1;
-	u8 tx_pkt_after_pifs:1;
-	u8 rate_id:5;
-	u8 en_desc_id:1;
-	u8 sectype:2;
-	u8 pkt_offset:5;
-	u8 moredata:1;
-	u8 rsvd2:2;
-
-	u16 p_aid:9;
-	u16 tri_frame:1;
-	u16 cca_rts:2;
-	u16 agg_en:1;
-	u16 rdg_en:1;
-	u16 null0:1;
-	u16 null1:1;
-	u8 bk:1;
-	u8 morefrag:1;
-	u8 raw:1;
-	u8 spe_rpt_en:1;
-	u8 ampdu_density:3;
-	u8 bt_null:1;
-	u8 g_id:6;
-	u8 ftm_en:1;
-	u8 hw_aes_iv:1;
-
-	u8 wheader_len:5;
-	u8 rsvd3:1;
-	u8 hw_ssn_sel:2;
-	u8 userate:1;
-	u8 disrtsfb:1;
-	u8 disdatafb:1;
-	u8 cts2self:1;
-	u8 rts:1;
-	u8 hw_rts_en:1;
-	u8 chk_en:1;
-	u8 navusehdr:1;
-	u8 use_max_time_en:1;
-	u8 max_agg_num:5;
-	u8 ndpa:2;
-	u8 ampdu_max_time;
-
-	u8 datarate:7;
-	u8 try_rate:1;
-	u16 data_rty_lowest_rate:5;
-	u16 rtw_rty_lowest_rate:4;
-	u16 rty_lmt_en:1;
-	u16 rts_data_rty_lmt:6;
-	u8 rtsrate:5;
-	u8 pcts_en:1;
-	u8 pcts_mask_idx:2;
-
-	u8 data_sc:4;
-	u8 data_short:1;
-	u8 data_bw:2;
-	u8 data_ldpc:1;
-	u16 data_stbc:2;
-	u16 vcs_stbc:2;
-	u16 rts_short:1;
-	u16 signaling_ta_pkt_sc:4;
-	u16 signaling_ta_pkt_en:1;
-	u16 multiple_port:3;
-	u16 port_id:3;
-	u8 rsvd4:4;
-	u8 txpwr_ofset:3;
-	u8 polluted:1;
-
-	u16 sw_define:12;
-	u16 mbssid:4;
-	u8 antsel_a:2;
-	u8 antsel_b:2;
-	u8 antsel_c:2;
-	u8 ant_mapa:2;
-	u8 ant_mapb:2;
-	u8 ant_mapc:2;
-	u8 ant_mapd:2;
-	u8 antsel_d:2;
-
-	u16 txdesc_checksum;
-	u8 rsvd5:4;
-	u8 ntx_map:4;
-	u8 dma_txagg_num;
-
-	u8 rts_rc:6;
-	u8 bar_rc:2;
-	u8 data_rc:6;
-	u8 en_hwexseq:1;
-	u8 en_hwseq:1;
-	u8 nextheadpage_l;
-	u8 tailpage_l;
-
-	u16 padding_len:11;
-	u8 txbf_path:1;
-	u16 sw_seq:12;
-	u8 nextheadpage_h:4;
-	u8 tailpage_h:4;
-
-	u8 snd_pkt_sel:2;
-	u8 rsvd6:2;
-	u8 mu_rc:4;
-	u8 mu_datarate;
-	u16 rsvd7;
-} __packed;
-
-static inline u8 rtw_txdesc_get_qsel(struct sk_buff *skb)
-{
-	struct txdesc_hdr *tdh;
-
-	tdh = (struct txdesc_hdr *)(skb->data);
-	return tdh->qsel;
-}
-
 static inline void rtw_usb_fill_tx_checksum(struct rtw_usb *rtwusb,
 					    struct sk_buff *skb, int agg_num)
 {
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
 	struct rtw_chip_info *chip = rtwdev->chip;
 	struct rtw_tx_pkt_info pkt_info;
-	struct txdesc_hdr *tdh;
 
-	tdh = (struct txdesc_hdr *)(skb->data);
-	tdh->dma_txagg_num = agg_num;
-	pkt_info.pkt_offset = tdh->pkt_offset;
+	SET_TX_DESC_DMA_TXAGG_NUM(skb->data, agg_num);
+	pkt_info.pkt_offset = GET_TX_DESC_PKT_OFFSET(skb->data);
 	chip->ops->fill_txdesc_checksum(rtwdev, &pkt_info, skb->data);
 }
 
@@ -768,8 +638,8 @@ static void rtw_usb_do_tx_ack_queue(struct rtw_usb *rtwusb)
 	while ((skb = skb_dequeue(&rtwusb->tx_ack_queue))) {
 		u8 qsel, queue;
 
-		qsel = rtw_txdesc_get_qsel(skb);
-		queue = rtw_qsel_to_queue(qsel);
+		qsel = GET_TX_DESC_QSEL(skb->data);
+		queue = rtw_tx_qsel_to_queue(qsel);
 
 		if (queue <= RTW_TX_QUEUE_VO)
 			rtw_indicate_tx_status(rtwdev, skb);
@@ -841,8 +711,8 @@ static void rtw_usb_tx_agg(struct rtw_usb *rtwusb, struct sk_buff *skb)
 	int ret;
 	u8 queue, qsel;
 
-	qsel = rtw_txdesc_get_qsel(skb);
-	queue = rtw_qsel_to_queue(qsel);
+	qsel = GET_TX_DESC_QSEL(skb->data);
+	queue = rtw_tx_qsel_to_queue(qsel);
 
 	skb_head = rtw_usb_tx_agg_check(rtwusb, skb, queue);
 
