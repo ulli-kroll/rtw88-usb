@@ -898,7 +898,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
 
 	skb_reserve(skb, headsize);
 
-	memcpy((u8 *)skb_put(skb, size), buf, size);
+	skb_put_data(skb, buf, size);
 
 	skb_push(skb, headsize);
 	memset(skb->data, 0, headsize);
