@@ -1102,7 +1102,7 @@ static int rtw_usb_init_tx(struct rtw_dev *rtwdev)
 		pr_err("%s: create_singlethread_workqueue failed\n", __func__);
 		goto err;
 	}
-	rtw_tx_queue_init(rtwusb);
+	rtw_usb_tx_queue_init(rtwusb);
 	rtwusb->tx_handler_data = kmalloc(sizeof(*rtwusb->tx_handler_data),
 					  GFP_KERNEL);
 	if (!rtwusb->tx_handler_data)
