@@ -654,9 +654,10 @@ static void rtw_kill_handler(struct rtw_handler *handler)
 void rtw_tx_func(struct rtw_usb *rtwusb);
 static void rtw_usb_tx_handler(struct work_struct *work)
 {
-	struct rtw_work_data *my_data = container_of(work, struct rtw_work_data,
-						 work);
-	struct rtw_dev *rtwdev = my_data->rtwdev;
+	struct rtw_usb_work_data *work_data = container_of(work,
+					struct rtw_usb_work_data,
+					work);
+	struct rtw_dev *rtwdev = work_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	u32 timeout = RTW_USB_MSG_TIMEOUT;
 
@@ -1002,12 +1003,13 @@ static u32 rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr,
 
 static void rtw_usb_rx_handler(struct work_struct *work)
 {
-	struct rtw_work_data *my_data = container_of(work, struct rtw_work_data,
-						 work);
-	struct rtw_dev *rtwdev = my_data->rtwdev;
+	struct rtw_usb_work_data *work_data = container_of(work,
+					struct rtw_usb_work_data,
+					work);
+	struct rtw_dev *rtwdev = work_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
-	u32 timeout = RTW_USB_MSG_TIMEOUT;
 	struct sk_buff *skb;
+	u32 timeout = RTW_USB_MSG_TIMEOUT;
 
 	do {
 		rtw_wait_event(&rtwusb->rx_handler.event, timeout);
