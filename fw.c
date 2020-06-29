@@ -268,31 +268,22 @@ struct rtw_h2c_cmd {
 	__le32 msg_ext;
 } __packed;
 
+
 static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 				    u8 *h2c)
 {
-	struct rtw_h2c_cmd *h2c_box = (struct rtw_h2c_cmd *)h2c;
+	struct rtw_h2c_cmd *h2c_cmd = (struct rtw_h2c_cmd *)h2c;
 	u8 box;
 	u8 box_state;
 	u32 box_reg, box_ex_reg;
-	u32 h2c_wait;
+	int ret;
 
-	//static u16 pre_seq = 0;
-	//u16 seq;
-
-	//pr_info("send H2C content %02x%02x%02x%02x %02x%02x%02x%02x\n",
-	//	h2c[3], h2c[2], h2c[1], h2c[0],
-	//	h2c[7], h2c[6], h2c[5], h2c[4]);
-
-	// before sending H2C
-	//do {
-	//seq = rtw_read32(rtwdev, 0x1c8);
-	//pr_info("%s: seq=%x, pre_seq=%x\n", __func__, seq, pre_seq);
-	//} while (seq == pre_seq);
+	rtw_dbg(rtwdev, RTW_DBG_FW,
+		"send H2C content %02x%02x%02x%02x %02x%02x%02x%02x\n",
+		h2c[3], h2c[2], h2c[1], h2c[0],
+		h2c[7], h2c[6], h2c[5], h2c[4]);
 
 	mutex_lock(&rtwdev->h2c.lock);
-
-	//pre_seq = seq;
 
 	box = rtwdev->h2c.last_box_num;
 	switch (box) {
@@ -317,18 +308,17 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 		goto out;
 	}
 
-	h2c_wait = 20;
-	do {
-		box_state = rtw_read8(rtwdev, REG_HMETFR);
-	} while ((box_state >> box) & 0x1 && --h2c_wait > 0);
+	ret = read_poll_timeout_atomic(rtw_read8, box_state,
+				       !((box_state >> box) & 0x1), 100, 3000,
+				       false, rtwdev, REG_HMETFR);
 
-	if (!h2c_wait) {
+	if (ret) {
 		rtw_err(rtwdev, "failed to send h2c command\n");
 		goto out;
 	}
 
-	rtw_write32(rtwdev, box_ex_reg, le32_to_cpu(h2c_box->msg_ext));
-	rtw_write32(rtwdev, box_reg, le32_to_cpu(h2c_box->msg));
+	rtw_write32(rtwdev, box_ex_reg, le32_to_cpu(h2c_cmd->msg_ext));
+	rtw_write32(rtwdev, box_reg, le32_to_cpu(h2c_cmd->msg));
 
 	if (++rtwdev->h2c.last_box_num >= 4)
 		rtwdev->h2c.last_box_num = 0;
