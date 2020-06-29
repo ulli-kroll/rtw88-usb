@@ -101,11 +101,11 @@ struct rtw_usb {
 		u8 val8;
 	} usb_buf;
 
-	u32 pipe_interrupt;
-	u32 pipe_in;
 	u32 bulkout_size;
 	u8 num_in_pipes;
 	u8 num_out_pipes;
+	u8 pipe_interrupt;
+	u8 pipe_in;
 	u8 out_ep[4];
 	u8 out_ep_queue_sel;
 	u8 queue_to_pipe[8];
@@ -125,8 +125,7 @@ struct rtw_usb {
 	struct rtw_usb_work_data *rx_handler_data;
 };
 
-static inline struct
-rtw_usb_tx_data *rtw_usb_get_tx_data(struct sk_buff *skb)
+static inline struct rtw_usb_tx_data *rtw_usb_get_tx_data(struct sk_buff *skb)
 {
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
 
