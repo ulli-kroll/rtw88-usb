@@ -3,10 +3,10 @@
  */
 
 #include "main.h"
-#include "tx.h"
 #include "fw.h"
 #include "ps.h"
 #include "debug.h"
+#include "tx.h"
 
 static
 void rtw_tx_stats(struct rtw_dev *rtwdev, struct ieee80211_vif *vif,

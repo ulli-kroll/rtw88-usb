@@ -4,13 +4,13 @@
 
 #include "main.h"
 #include "coex.h"
-#include "fw.h"
-#include "tx.h"
 #include "reg.h"
 #include "sec.h"
 #include "debug.h"
+#include "tx.h"
 #include "util.h"
 #include "wow.h"
+#include "fw.h"
 
 #define C2H_DBG_CONTENT_MAX_LENGTH	228
 #define C2H_DBG_HDR_LEN			4

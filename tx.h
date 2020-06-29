@@ -134,7 +134,7 @@ u8 rtw_tx_queue_to_qsel(struct sk_buff *skb, u8 queue)
 }
 
 static inline
-u8 rtw_tx_qsel_to_queue(u8 qsel)
+u8 rtw_tx_qsel_to_queue(struct rtw_dev *rtwdev, u8 qsel)
 {
 	switch (qsel) {
 	case TX_DESC_QSEL_BEACON:
@@ -158,6 +158,7 @@ u8 rtw_tx_qsel_to_queue(u8 qsel)
 	case TX_DESC_QSEL_TID2:
 		return RTW_TX_QUEUE_BK;
 	default:
+		rtw_err(rtwdev, "unknown qsel: %u\n", qsel);
 		return RTW_TX_QUEUE_BCN;
 	}
 }

@@ -6,11 +6,11 @@
 #include <linux/usb.h>
 #include <linux/mutex.h>
 #include "main.h"
-#include "usb.h"
+#include "debug.h"
 #include "tx.h"
 #include "rx.h"
 #include "fw.h"
-#include "debug.h"
+#include "usb.h"
 
 #define RTW_USB_MSG_TIMEOUT	3000 /* (ms) */
 
@@ -292,36 +292,6 @@ static u8 rtw_tx_queue_mapping(struct sk_buff *skb)
 		queue = rtw_usb_ac_to_hwq[q_mapping];
 
 	return queue;
-}
-
-static inline u8 rtw_qsel_to_queue(u8 qsel)
-{
-	switch (qsel) {
-	case TX_DESC_QSEL_BEACON:
-		return RTW_TX_QUEUE_BCN;
-	case TX_DESC_QSEL_H2C:
-		return RTW_TX_QUEUE_H2C;
-	case TX_DESC_QSEL_MGMT:
-		return RTW_TX_QUEUE_MGMT;
-	case TX_DESC_QSEL_HIGH:
-		return RTW_TX_QUEUE_HI0;
-	/* skb->priority */
-	case TX_DESC_QSEL_TID6:
-	case TX_DESC_QSEL_TID7:
-		return RTW_TX_QUEUE_VO;
-	case TX_DESC_QSEL_TID4:
-	case TX_DESC_QSEL_TID5:
-		return RTW_TX_QUEUE_VI;
-	case TX_DESC_QSEL_TID0:
-	case TX_DESC_QSEL_TID3:
-		return RTW_TX_QUEUE_BE;
-	case TX_DESC_QSEL_TID1:
-	case TX_DESC_QSEL_TID2:
-		return RTW_TX_QUEUE_BK;
-	default:
-		pr_err("%s: qsel(%d) is out of range\n", __func__, qsel);
-		return -1;
-	}
 }
 
 static unsigned int rtw_usb_get_pipe(struct rtw_usb *rtwusb, u32 addr)
@@ -629,7 +599,7 @@ static void rtw_usb_do_tx_ack_queue(struct rtw_usb *rtwusb)
 		u8 qsel, queue;
 
 		qsel = GET_TX_DESC_QSEL(skb->data);
-		queue = rtw_tx_qsel_to_queue(qsel);
+		queue = rtw_tx_qsel_to_queue(rtwdev, qsel);
 
 		if (queue <= RTW_TX_QUEUE_VO)
 			rtw_indicate_tx_status(rtwdev, skb);
@@ -702,7 +672,7 @@ static void rtw_usb_tx_agg(struct rtw_usb *rtwusb, struct sk_buff *skb)
 	u8 queue, qsel;
 
 	qsel = GET_TX_DESC_QSEL(skb->data);
-	queue = rtw_tx_qsel_to_queue(qsel);
+	queue = rtw_tx_qsel_to_queue(rtwdev, qsel);
 
 	skb_head = rtw_usb_tx_agg_check(rtwusb, skb, queue);
 
@@ -768,7 +738,7 @@ rtw_usb_write_data(struct rtw_dev *rtwdev, struct rtw_tx_pkt_info *pkt_info,
 
 	chip->ops->fill_txdesc_checksum(rtwdev, pkt_info, skb->data);
 
-	queue = rtw_qsel_to_queue(qsel);
+	queue = rtw_tx_qsel_to_queue(rtwdev, qsel);
 
 	ret = rtw_usb_write_port_direct(rtwdev, queue, len, skb);
 	if (unlikely(ret)) {

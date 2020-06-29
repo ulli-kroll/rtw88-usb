@@ -3,18 +3,18 @@
  */
 
 #include "main.h"
+#include "debug.h"
 #include "coex.h"
 #include "fw.h"
 #include "tx.h"
 #include "rx.h"
 #include "phy.h"
-#include "rtw8822c.h"
 #include "rtw8822c_table.h"
 #include "mac.h"
 #include "reg.h"
-#include "debug.h"
 #include "util.h"
 #include "bf.h"
+#include "rtw8822c.h"
 
 static void rtw8822c_config_trx_mode(struct rtw_dev *rtwdev, u8 tx_path,
 				     u8 rx_path, bool is_tx2_path);

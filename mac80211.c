@@ -4,6 +4,7 @@
 
 #include "main.h"
 #include "sec.h"
+#include "debug.h"
 #include "tx.h"
 #include "fw.h"
 #include "mac.h"
@@ -11,7 +12,6 @@
 #include "ps.h"
 #include "reg.h"
 #include "bf.h"
-#include "debug.h"
 #include "wow.h"
 
 static void rtw_ops_tx(struct ieee80211_hw *hw,

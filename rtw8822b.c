@@ -3,6 +3,7 @@
  */
 
 #include "main.h"
+#include "debug.h"
 #include "coex.h"
 #include "fw.h"
 #include "tx.h"
@@ -12,7 +13,6 @@
 #include "rtw8822b_table.h"
 #include "mac.h"
 #include "reg.h"
-#include "debug.h"
 #include "bf.h"
 
 static void rtw8822b_config_trx_mode(struct rtw_dev *rtwdev, u8 tx_path,
