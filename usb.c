@@ -294,22 +294,6 @@ static u8 rtw_tx_queue_mapping(struct sk_buff *skb)
 	return queue;
 }
 
-static inline u8 rtw_queue_to_qsel(struct sk_buff *skb, u8 queue)
-{
-	switch (queue) {
-	case RTW_TX_QUEUE_BCN:
-		return TX_DESC_QSEL_BEACON;
-	case RTW_TX_QUEUE_H2C:
-		return TX_DESC_QSEL_H2C;
-	case RTW_TX_QUEUE_MGMT:
-		return TX_DESC_QSEL_MGMT;
-	case RTW_TX_QUEUE_HI0:
-		return TX_DESC_QSEL_HIGH;
-	default:
-		return skb->priority;
-	}
-}
-
 static inline u8 rtw_qsel_to_queue(u8 qsel)
 {
 	switch (qsel) {
@@ -853,7 +837,7 @@ static int rtw_usb_tx_write(struct rtw_dev *rtwdev,
 
 	pkt_desc = skb_push(skb, chip->tx_pkt_desc_sz);
 	memset(pkt_desc, 0, chip->tx_pkt_desc_sz);
-	pkt_info->qsel = rtw_queue_to_qsel(skb, queue);
+	pkt_info->qsel = rtw_tx_queue_to_qsel(skb, queue);
 	rtw_tx_fill_tx_desc(pkt_info, skb);
 
 	chip->ops->fill_txdesc_checksum(rtwdev, pkt_info, skb->data);
