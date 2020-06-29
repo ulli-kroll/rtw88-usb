@@ -13,6 +13,7 @@
 #include "usb.h"
 
 #define RTW_USB_MSG_TIMEOUT	3000 /* (ms) */
+#define RTW_USB_MAX_RXQ_LEN	128
 
 /* RTW queue / pipe functions */
 static u8 rtw_usb_ac_to_hwq[] = {
@@ -771,13 +772,13 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 			skb_put(skb, pkt_stat.pkt_len + pkt_offset);
 			*((u32 *)skb->cb) = pkt_offset;
 			rtw_fw_c2h_cmd_handle(rtwdev, skb);
-			dev_kfree_skb_any(skb);
+			dev_kfree_skb(skb);
 			continue;
 		}
 
-		if (skb_queue_len(&rtwusb->rx_queue) >= 64) {
+		if (skb_queue_len(&rtwusb->rx_queue) >= RTW_USB_MAX_RXQ_LEN) {
 			rtw_err(rtwdev, "failed to get rx_queue, overflow\n");
-			dev_kfree_skb_any(skb);
+			dev_kfree_skb(skb);
 			continue;
 		}
 
