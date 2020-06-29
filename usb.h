@@ -7,9 +7,9 @@
 #define RTW_USB_CONTROL_MSG_TIMEOUT	500
 
 #define RTW_USB_IS_FULL_SPEED_USB(rtwusb) \
-	(rtwusb->usb_speed == RTW_USB_SPEED_1_1)
-#define RTW_USB_IS_HIGH_SPEED(rtwusb)	(rtwusb->usb_speed == RTW_USB_SPEED_2)
-#define RTW_USB_IS_SUPER_SPEED(rtwusb)	(rtwusb->usb_speed == RTW_USB_SPEED_3)
+	((rtwusb)->usb_speed == RTW_USB_SPEED_1_1)
+#define RTW_USB_IS_HIGH_SPEED(rtwusb)	((rtwusb)->usb_speed == RTW_USB_SPEED_2)
+#define RTW_USB_IS_SUPER_SPEED(rtwusb)	((rtwusb)->usb_speed == RTW_USB_SPEED_3)
 
 #define RTW_USB_SUPER_SPEED_BULK_SIZE	1024
 #define RTW_USB_HIGH_SPEED_BULK_SIZE	512
@@ -57,7 +57,7 @@
 	.driver_info = (kernel_ulong_t) & (hw_config),
 
 /* defined functions */
-#define rtw_get_usb_priv(rtwdev) ((struct rtw_usb *)rtwdev->priv)
+#define rtw_get_usb_priv(rtwdev) (struct rtw_usb *)((rtwdev)->priv)
 
 enum rtw_usb_burst_size {
 	USB_BURST_SIZE_3_0 = 0x0,
