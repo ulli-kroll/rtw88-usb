@@ -923,7 +923,7 @@ static int rtw_usb_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
 {
 	struct rtw_chip_info *chip = rtwdev->chip;
 	struct rtw_usb *rtwusb;
-	struct rtw_tx_pkt_info pkt_info;
+	struct rtw_tx_pkt_info pkt_info = {0};
 	u32 len, desclen;
 	u8 qsel = TX_DESC_QSEL_BEACON;
 
@@ -933,9 +933,7 @@ static int rtw_usb_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
 	rtwusb = rtw_get_usb_priv(rtwdev);
 	if (unlikely(!rtwusb))
 		return -EINVAL;
-		
 
-	memset(&pkt_info, 0, sizeof(pkt_info));
 	pkt_info.tx_pkt_size = size;
 	pkt_info.qsel = qsel;
 
@@ -954,10 +952,9 @@ static int rtw_usb_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
 
 static int rtw_usb_write_data_h2c(struct rtw_dev *rtwdev, u8 *buf, u32 size)
 {
-	struct rtw_tx_pkt_info pkt_info;
+	struct rtw_tx_pkt_info pkt_info = {0};
 	u8 qsel = TX_DESC_QSEL_H2C;
 
-	memset(&pkt_info, 0, sizeof(pkt_info));
 	pkt_info.tx_pkt_size = size;
 	pkt_info.qsel = qsel;
 
