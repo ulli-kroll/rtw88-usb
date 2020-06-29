@@ -536,6 +536,11 @@ static void rtw_usb_tx_queue_purge(struct rtw_usb *rtwusb)
 	skb_queue_purge(&rtwusb->tx_ack_queue);
 }
 
+static void rtw_usb_rx_queue_purge(struct rtw_usb *rtwusb)
+{
+	skb_queue_purge(&rtwusb->rx_queue);
+}
+
 static void rtw_usb_tx_ack_enqueue(struct rtw_usb *rtwusb,
 				   struct sk_buff *skb)
 {
@@ -1000,51 +1005,6 @@ static struct rtw_hci_ops rtw_usb_ops = {
 	.write_data_h2c = rtw_usb_write_data_h2c,
 };
 
-/* struct usb_driver relative functions */
-
-static int rtw_os_core_init(struct rtw_dev **prtwdev,
-			    const struct usb_device_id *id)
-{
-	int drv_data_size;
-	struct ieee80211_hw *hw;
-	struct rtw_dev *rtwdev;
-	struct rtw_usb *rtwusb;
-	int ret;
-
-	*prtwdev = NULL;
-
-	drv_data_size = sizeof(struct rtw_dev) + sizeof(struct rtw_usb);
-	hw = ieee80211_alloc_hw(drv_data_size, &rtw_ops);
-	if (!hw) {
-		pr_err("ieee80211_alloc_hw: No memory for device\n");
-		ret = -ENOMEM;
-		goto finish;
-	}
-
-	rtwdev = hw->priv;
-	rtwdev->hw = hw;
-	rtwdev->chip = (struct rtw_chip_info *)id->driver_info;
-
-	pr_info("%s: rtw_core_init\n", __func__);
-	ret = rtw_core_init(rtwdev);
-	if (ret) {
-		pr_err("%s : rtw_core_init: ret=%d\n", __func__, ret);
-		goto err_release_hw;
-	}
-
-	rtwusb = rtw_get_usb_priv(rtwdev);
-	rtwusb->rtwdev = rtwdev;
-
-	*prtwdev = rtwdev;
-	return 0;
-
-err_release_hw:
-	ieee80211_free_hw(hw);
-
-finish:
-	return ret;
-}
-
 static int rtw_usb_init_rx(struct rtw_dev *rtwdev)
 {
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
@@ -1068,6 +1028,16 @@ err_destroy_wq:
 	destroy_workqueue(rtwusb->rxwq);
 err:
 	return -ENOMEM;
+}
+
+static void rtw_usb_deinit_rx(struct rtw_dev *rtwdev)
+{
+	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+
+	rtw_usb_rx_queue_purge(rtwusb);
+	flush_workqueue(rtwusb->rxwq);
+	destroy_workqueue(rtwusb->rxwq);
+	kfree(rtwusb->rx_handler_data);
 }
 
 static int rtw_usb_init_tx(struct rtw_dev *rtwdev)
@@ -1094,53 +1064,91 @@ err:
 	return -ENOMEM;
 }
 
+static void rtw_usb_deinit_tx(struct rtw_dev *rtwdev)
+{
+	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+
+	rtw_usb_tx_queue_purge(rtwusb);
+	flush_workqueue(rtwusb->txwq);
+	destroy_workqueue(rtwusb->txwq);
+	kfree(rtwusb->tx_handler_data);
+}
+
+static int rtw_usb_intf_init(struct rtw_dev *rtwdev,
+			     struct usb_interface *intf)
+{
+	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+	struct usb_device *udev = usb_get_dev(interface_to_usbdev(intf));
+	int ret;
+
+	rtwusb->udev = udev;
+	rtwusb->rtwdev = rtwdev;
+	ret = rtw_usb_parse(rtwdev, intf);
+	if (ret) {
+		rtw_err(rtwdev, "failed to check USB configuration, ret=%d\n",
+			ret);
+		return ret;
+	}
+
+	usb_set_intfdata(intf, rtwdev->hw);
+	rtw_usb_interface_configure(rtwdev);
+	SET_IEEE80211_DEV(rtwdev->hw, &intf->dev);
+	mutex_init(&rtwusb->usb_buf_mutex);
+
+	return 0;
+}
+
+static void rtw_usb_intf_deinit(struct rtw_dev *rtwdev,
+				struct usb_interface *intf)
+{
+	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+
+	usb_put_dev(rtwusb->udev);
+	usb_set_intfdata(intf, NULL);
+	mutex_destroy(&rtwusb->usb_buf_mutex);
+}
+
 static int rtw_usb_probe(struct usb_interface *intf,
 			 const struct usb_device_id *id)
 {
 	struct rtw_dev *rtwdev;
-	struct usb_device *udev;
-	struct rtw_usb *rtwusb;
-	int ret = 0;
+	struct ieee80211_hw *hw;
+	int drv_data_size;
+	int ret;
 
-	pr_info("%s ===>\n", __func__);
+	drv_data_size = sizeof(struct rtw_dev) + sizeof(struct rtw_usb);
+	hw = ieee80211_alloc_hw(drv_data_size, &rtw_ops);
+	if (!hw)
+		return -ENOMEM;
 
-	ret = rtw_os_core_init(&rtwdev, id);
-	if (ret) {
-		pr_err("rtw_os_core_init fail, ret=%d\n", ret);
-		goto finish;
-	}
-
+	rtwdev = hw->priv;
+	rtwdev->hw = hw;
 	rtwdev->dev = &intf->dev;
-
-	udev = usb_get_dev(interface_to_usbdev(intf));
-
+	rtwdev->chip = (struct rtw_chip_info *)id->driver_info;
 	rtwdev->hci.ops = &rtw_usb_ops;
 	rtwdev->hci.type = RTW_HCI_TYPE_USB;
 
-	usb_set_intfdata(intf, rtwdev->hw);
+	ret = rtw_core_init(rtwdev);
+	if (ret)
+		goto err_release_hw;
 
-	rtwusb = rtw_get_usb_priv(rtwdev);
-	rtwusb->udev = udev;
-	mutex_init(&rtwusb->usb_buf_mutex);
-
-	ret = rtw_usb_parse(rtwdev, intf);
+	ret = rtw_usb_intf_init(rtwdev, intf);
 	if (ret) {
-		rtw_err(rtwdev, "rtw_usb_parse failed, ret=%d\n", ret);
+		rtw_err(rtwdev, "failed to init USB interface\n");
 		goto err_deinit_core;
 	}
 
-	rtw_usb_interface_configure(rtwdev);
-
-	SET_IEEE80211_DEV(rtwdev->hw, &intf->dev);
-
 	ret = rtw_usb_init_tx(rtwdev);
-	if (ret)
+	if (ret) {
+		rtw_err(rtwdev, "failed to init USB TX\n");
 		goto err_destroy_usb;
+	}
 
 	ret = rtw_usb_init_rx(rtwdev);
-	if (ret)
+	if (ret) {
+		rtw_err(rtwdev, "failed to init USB RX\n");
 		goto err_destroy_txwq;
-
+	}
 
 	ret = rtw_chip_info_setup(rtwdev);
 	if (ret) {
@@ -1150,32 +1158,27 @@ static int rtw_usb_probe(struct usb_interface *intf,
 
 	ret = rtw_register_hw(rtwdev, rtwdev->hw);
 	if (ret) {
-		pr_err("%s : rtw_register_hw failed: ret=%d\n", __func__, ret);
+		rtw_err(rtwdev, "failed to register hw\n");
 		goto err_destroy_rxwq;
 	}
 
 	return 0;
 
-//err_destroy_register:
-	rtw_unregister_hw(rtwdev, rtwdev->hw);
-
 err_destroy_rxwq:
-	cancel_work_sync(&rtwusb->rx_handler_data->work);
-	destroy_workqueue(rtwusb->rxwq);
+	rtw_usb_deinit_rx(rtwdev);
 
 err_destroy_txwq:
-	cancel_work_sync(&rtwusb->tx_handler_data->work);
-	destroy_workqueue(rtwusb->txwq);
+	rtw_usb_deinit_tx(rtwdev);
 
 err_destroy_usb:
-	usb_put_dev(rtwusb->udev);
-	usb_set_intfdata(intf, NULL);
+	rtw_usb_intf_deinit(rtwdev, intf);
 
 err_deinit_core:
 	rtw_core_deinit(rtwdev);
-	mutex_destroy(&rtwusb->usb_buf_mutex);
 
-finish:
+err_release_hw:
+	ieee80211_free_hw(hw);
+
 	return ret;
 }
 
@@ -1187,31 +1190,18 @@ static void rtw_usb_disconnect(struct usb_interface *intf)
 
 	if (!hw)
 		return;
-
 	rtwdev = hw->priv;
 	rtwusb = rtw_get_usb_priv(rtwdev);
 
-	rtw_usb_tx_queue_purge(rtwusb);
-	skb_queue_purge(&rtwusb->rx_queue);
-	cancel_work_sync(&rtwusb->rx_handler_data->work);
-	cancel_work_sync(&rtwusb->tx_handler_data->work);
-	destroy_workqueue(rtwusb->rxwq);
-	destroy_workqueue(rtwusb->txwq);
-
-	kfree(rtwusb->tx_handler_data);
-	kfree(rtwusb->rx_handler_data);
-
 	rtw_unregister_hw(rtwdev, hw);
+	rtw_usb_deinit_tx(rtwdev);
+	rtw_usb_deinit_rx(rtwdev);
 
-	if (rtwusb->udev->state != USB_STATE_NOTATTACHED) {
-		pr_info("Device still attached, trying to reset\n");
+	if (rtwusb->udev->state != USB_STATE_NOTATTACHED)
 		usb_reset_device(rtwusb->udev);
-	}
 
-	usb_put_dev(rtwusb->udev);
-	usb_set_intfdata(intf, NULL);
+	rtw_usb_intf_deinit(rtwdev, intf);
 	rtw_core_deinit(rtwdev);
-	mutex_destroy(&rtwusb->usb_buf_mutex);
 	ieee80211_free_hw(hw);
 }
 
