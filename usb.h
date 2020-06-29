@@ -74,16 +74,6 @@ enum rtw_usb_speed {
 	RTW_USB_SPEED_3		= 3,
 };
 
-struct rtw_event {
-	atomic_t event_condition;
-	wait_queue_head_t event_queue;
-};
-
-struct rtw_handler {
-	struct rtw_event event;
-	atomic_t handler_done;
-};
-
 struct rx_usb_ctrl_block {
 	u8 *data;
 	struct urb *rx_urb;
@@ -113,7 +103,6 @@ struct rtw_usb {
 
 	u32 pipe_interrupt;
 	u32 pipe_in;
-	u32 pipe_out[20];
 	u32 bulkout_size;
 	u8 num_in_pipes;
 	u8 num_out_pipes;
@@ -121,21 +110,18 @@ struct rtw_usb {
 	u8 out_ep_queue_sel;
 	u8 queue_to_pipe[8];
 	u8 usb_speed;
+	u8 usb_txagg_num;
 
 	atomic_t is_bus_drv_ready;
 
-	struct workqueue_struct *txwq, *rxwq;
-
-	u8 usb_txagg_num;
-
+	struct workqueue_struct *txwq;
 	struct sk_buff_head tx_queue[RTK_MAX_TX_QUEUE_NUM];
 	struct sk_buff_head tx_ack_queue;
-	struct rtw_handler tx_handler;
 	struct rtw_usb_work_data *tx_handler_data;
 
+	struct workqueue_struct *rxwq;
 	struct rx_usb_ctrl_block rx_cb[RTW_USB_RXCB_NUM];
 	struct sk_buff_head rx_queue;
-	struct rtw_handler rx_handler;
 	struct rtw_usb_work_data *rx_handler_data;
 };
 
