@@ -18,7 +18,7 @@
 
 unsigned int rtw_fw_lps_deep_mode;
 EXPORT_SYMBOL(rtw_fw_lps_deep_mode);
-bool rtw_bf_support = false;
+bool rtw_bf_support = true;
 unsigned int rtw_debug_mask;
 EXPORT_SYMBOL(rtw_debug_mask);
 
@@ -229,8 +229,6 @@ static void rtw_watch_dog_work(struct work_struct *work)
 	data.rtwdev = rtwdev;
 	rtw_iterate_vifs(rtwdev, rtw_vif_watch_dog_iter, &data);
 
-	rtwdev->ps_enabled = false;
-#if 0
 	/* fw supports only one station associated to enter lps, if there are
 	 * more than two stations associated to the AP, then we can not enter
 	 * lps, because fw does not handle the overlapped beacon interval
@@ -242,7 +240,7 @@ static void rtw_watch_dog_work(struct work_struct *work)
 	 */
 	if (rtwdev->ps_enabled && data.rtwvif && !ps_active)
 		rtw_enter_lps(rtwdev, data.rtwvif->port);
-#endif
+
 	rtwdev->watch_dog_cnt++;
 
 unlock:
@@ -1508,8 +1506,8 @@ int rtw_register_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
 	ieee80211_hw_set(hw, AMPDU_AGGREGATION);
 	ieee80211_hw_set(hw, MFP_CAPABLE);
 	ieee80211_hw_set(hw, REPORTS_TX_ACK_STATUS);
-//	ieee80211_hw_set(hw, SUPPORTS_PS);
-//	ieee80211_hw_set(hw, SUPPORTS_DYNAMIC_PS);
+	ieee80211_hw_set(hw, SUPPORTS_PS);
+	ieee80211_hw_set(hw, SUPPORTS_DYNAMIC_PS);
 	ieee80211_hw_set(hw, SUPPORT_FAST_XMIT);
 	ieee80211_hw_set(hw, SUPPORTS_AMSDU_IN_AMPDU);
 	ieee80211_hw_set(hw, HAS_RATE_CONTROL);

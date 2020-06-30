@@ -91,10 +91,10 @@ static int rtw_ops_config(struct ieee80211_hw *hw, u32 changed)
 
 	if (changed & IEEE80211_CONF_CHANGE_PS) {
 		if (hw->conf.flags & IEEE80211_CONF_PS) {
-			pr_info("%s: IEEE80211_CONF_PS enter\n", __func__);
-			//rtwdev->ps_enabled = true;
+			rtw_info(rtwdev, "IEEE80211_CONF_PS enter\n");
+			rtwdev->ps_enabled = true;
 		} else {
-			pr_info("%s: IEEE80211_CONF_PS leave\n", __func__);
+			rtw_info(rtwdev, "IEEE80211_CONF_PS leave\n");
 			rtwdev->ps_enabled = false;
 			rtw_leave_lps(rtwdev);
 		}
@@ -359,8 +359,8 @@ static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
 			rtw_fw_download_rsvd_page(rtwdev, vif);
 			rtw_send_rsvd_page_h2c(rtwdev);
 			rtw_coex_media_status_notify(rtwdev, conf->assoc);
-			//if (rtw_bf_support)
-			//	rtw_bf_assoc(rtwdev, vif, conf);
+			if (rtw_bf_support)
+				rtw_bf_assoc(rtwdev, vif, conf);
 		} else {
 			rtw_leave_lps(rtwdev);
 			net_type = RTW_NET_NO_LINK;

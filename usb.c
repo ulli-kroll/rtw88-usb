@@ -938,7 +938,7 @@ static void rtw_usb_inirp_deinit(struct rtw_dev *rtwdev)
 
 static int rtw_usb_setup(struct rtw_dev *rtwdev)
 {
-	pr_debug("%s ===>\n", __func__);
+	/* empty function for rtw_hci_ops */
 	return 0;
 }
 
@@ -955,17 +955,17 @@ static void rtw_usb_stop(struct rtw_dev *rtwdev)
 
 static void rtw_usb_deep_ps(struct rtw_dev *rtwdev, bool enter)
 {
-	pr_debug("%s ===>\n", __func__);
+	rtw_info(rtwdev, "USB deep ps: %d\n", enter);
 }
 
 static void rtw_usb_link_ps(struct rtw_dev *rtwdev, bool enter)
 {
-	pr_info("%s TODO ===>\n", __func__);
+	rtw_info(rtwdev, "USB link ps: %d\n", enter);
 }
 
 static void rtw_usb_interface_cfg(struct rtw_dev *rtwdev)
 {
-	pr_debug("%s ===>\n", __func__);
+	/* empty function for rtw_hci_ops */
 }
 
 static struct rtw_hci_ops rtw_usb_ops = {
