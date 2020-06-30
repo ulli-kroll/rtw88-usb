@@ -443,7 +443,7 @@ static void rtw_usb_tx_handler(struct work_struct *work)
 			index--;
 		}
 
-		if ((index < 0) && !is_empty ) {
+		if (index < 0 && !is_empty) {
 			index = RTK_MAX_TX_QUEUE_NUM - 1;
 			is_empty = true;
 		}
@@ -1201,7 +1201,7 @@ static const struct usb_device_id rtw_usb_id_table[] = {
 			 RTW_USB_PRODUCT_ID_REALTEK_8822B,
 			 rtw8822b_hw_spec) },
 	{ RTK_USB_DEVICE(RTW_USB_VENDOR_ID_EDIMAX,
-			 0xB822, rtw8822b_hw_spec) }, 	/* Edimax */
+			 0xB822, rtw8822b_hw_spec) },	/* Edimax */
 	{ RTK_USB_DEVICE(RTW_USB_VENDOR_ID_EDIMAX,
 			 0xC822, rtw8822b_hw_spec) },	/* Edimax */
 	{ RTK_USB_DEVICE(0x0b05, 0x184c,

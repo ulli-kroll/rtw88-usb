@@ -54,7 +54,7 @@
 
 #define RTK_USB_DEVICE(vend, dev, hw_config)	\
 	USB_DEVICE(vend, dev),			\
-	.driver_info = (kernel_ulong_t) & (hw_config),
+	.driver_info = (kernel_ulong_t)&(hw_config),
 
 /* defined functions */
 #define rtw_get_usb_priv(rtwdev) (struct rtw_usb *)((rtwdev)->priv)
