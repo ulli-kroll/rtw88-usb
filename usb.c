@@ -467,8 +467,7 @@ static void rtw_usb_write_port_direct_complete(struct urb *urb)
 	struct sk_buff *skb;
 
 	skb = (struct sk_buff *)urb->context;
-	dev_kfree_skb(skb);
-	usb_free_urb(urb);
+	dev_kfree_skb_any(skb);
 }
 
 static int rtw_usb_write_port_direct(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
@@ -489,7 +488,8 @@ static int rtw_usb_write_port_direct(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 			  rtw_usb_write_port_direct_complete, skb);
 	ret = usb_submit_urb(urb, GFP_ATOMIC);
 	if (unlikely(ret))
-		usb_free_urb(urb);
+		rtw_err(rtwdev, "failed to submit write urb, ret=%d\n", ret);
+	usb_free_urb(urb);
 
 	return ret;
 }
@@ -805,13 +805,15 @@ static void rtw_usb_read_port_complete(struct urb *urb)
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
 	struct sk_buff *skb = rxcb->rx_skb;
 
+	rxcb->rx_urb = NULL;
+
 	if (urb->status == 0) {
 		if (urb->actual_length >= RTW_USB_MAX_RECVBUF_SZ ||
 		    urb->actual_length < 24) {
 			rtw_err(rtwdev, "failed to get urb length:%d\n",
 				urb->actual_length);
 			if (skb)
-				dev_kfree_skb(skb);
+				dev_kfree_skb_any(skb);
 		} else {
 			skb_queue_tail(&rtwusb->rx_queue, skb);
 			queue_work(rtwusb->rxwq,
@@ -845,7 +847,7 @@ static void rtw_usb_read_port_complete(struct urb *urb)
 			break;
 		}
 		if (skb)
-			dev_kfree_skb(skb);
+			dev_kfree_skb_any(skb);
 	}
 }
 
@@ -861,18 +863,25 @@ static void rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr,
 	u32 len;
 	int ret;
 
-	urb = rxcb->rx_urb;
+
+	urb = usb_alloc_urb(0, GFP_ATOMIC);
+	if (!urb)
+		return;
+
 	rxcb->data = (void *)rtwdev;
 	pipe = rtw_usb_get_pipe(rtwusb, RTW_USB_BULK_IN_ADDR);
 
 	len = RTW_USB_MAX_RECVBUF_SZ + RTW_USB_RECVBUFF_ALIGN_SZ;
 	skb = dev_alloc_skb(len);
-	if (!skb)
+	if (!skb) {
+		usb_free_urb(urb);
 		return;
+	}
 
 	alignment = (size_t)skb->data & (RTW_USB_RECVBUFF_ALIGN_SZ - 1);
 	skb_reserve(skb, RTW_USB_RECVBUFF_ALIGN_SZ - alignment);
 	urb->transfer_buffer = skb->data;
+	rxcb->rx_urb = urb;
 	rxcb->rx_skb = skb;
 	usb_fill_bulk_urb(urb, usbd, pipe,
 			  urb->transfer_buffer,
@@ -882,6 +891,8 @@ static void rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr,
 	ret = usb_submit_urb(urb, GFP_ATOMIC);
 	if (ret)
 		rtw_err(rtwdev, "failed to submit USB urb, ret=%d\n", ret);
+
+	usb_free_urb(urb);
 }
 
 static void rtw_usb_inirp_init(struct rtw_dev *rtwdev)
@@ -902,23 +913,11 @@ static void rtw_usb_inirp_init(struct rtw_dev *rtwdev)
 
 	for (i = 0; i < RTW_USB_RXCB_NUM; i++) {
 		rxcb = &rtwusb->rx_cb[i];
-		rxcb->rx_urb = usb_alloc_urb(0, GFP_KERNEL);
-		if (!rxcb->rx_urb)
-			goto err_exit;
 		rtw_usb_read_port(rtwdev, RTW_USB_BULK_IN_ADDR, rxcb);
 	}
 
 	rtw_usb_set_bus_ready(rtwdev, true);
 	return;
-
-err_exit:
-	for (i = 0; i < RTW_USB_RXCB_NUM; i++) {
-		rxcb = &rtwusb->rx_cb[i];
-		if (rxcb->rx_urb) {
-			usb_kill_urb(rxcb->rx_urb);
-			rxcb->rx_urb = NULL;
-		}
-	}
 }
 
 static void rtw_usb_inirp_deinit(struct rtw_dev *rtwdev)
@@ -931,8 +930,10 @@ static void rtw_usb_inirp_deinit(struct rtw_dev *rtwdev)
 
 	for (i = 0; i < RTW_USB_RXCB_NUM; i++) {
 		rxcb = &rtwusb->rx_cb[i];
-		if (rxcb->rx_urb)
+		if (rxcb->rx_urb) {
 			usb_kill_urb(rxcb->rx_urb);
+			usb_free_urb(rxcb->rx_urb);
+		}
 	}
 }
 
