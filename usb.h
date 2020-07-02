@@ -111,7 +111,7 @@ struct rtw_usb {
 
 	struct workqueue_struct *txwq;
 	struct sk_buff_head tx_queue[RTK_MAX_TX_QUEUE_NUM];
-	struct sk_buff_head tx_ack_queue;
+//	struct sk_buff_head tx_ack_queue;
 	struct rtw_usb_work_data *tx_handler_data;
 
 	struct workqueue_struct *rxwq;
