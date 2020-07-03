@@ -192,42 +192,6 @@ struct rtw_phy_stat_iter_data {
 	u8 min_rssi;
 };
 
-struct rtw_vif_rssiq {
-	struct list_head list;
-
-	struct rtw_sta_info *si;
-};
-
-static void rtw_init_vifs_rssiq(struct rtw_dev *rtwdev)
-{
-	INIT_LIST_HEAD(&rtwdev->vif_rssiq);
-}
-
-static void rtw_add_vifs_rssiq(struct rtw_dev *rtwdev, struct rtw_sta_info *si)
-{
-	struct rtw_vif_rssiq *vifrssiq;
-
-	vifrssiq = kmalloc(sizeof(*vifrssiq), GFP_ATOMIC);
-	if (!vifrssiq)
-		return;
-
-	INIT_LIST_HEAD(&vifrssiq->list);
-	vifrssiq->si = si;
-
-	list_add_tail(&vifrssiq->list, &rtwdev->vif_rssiq);
-}
-
-static void rtw_iterate_vifs_rssiq(struct rtw_dev *rtwdev)
-{
-	struct rtw_vif_rssiq *vifrssiq, *tmp;
-
-	list_for_each_entry_safe(vifrssiq, tmp, &rtwdev->vif_rssiq, list) {
-		rtw_fw_send_rssi_info(rtwdev, vifrssiq->si);
-		list_del(&vifrssiq->list);
-		kfree(vifrssiq);
-	}
-}
-
 static void rtw_phy_stat_rssi_iter(void *data, struct ieee80211_sta *sta)
 {
 	struct rtw_phy_stat_iter_data *iter_data = data;
@@ -238,7 +202,7 @@ static void rtw_phy_stat_rssi_iter(void *data, struct ieee80211_sta *sta)
 	rssi = ewma_rssi_read(&si->avg_rssi);
 	si->rssi_level = rtw_phy_get_rssi_level(si->rssi_level, rssi);
 
-	rtw_add_vifs_rssiq(rtwdev, si);
+	rtw_fw_send_rssi_info(rtwdev, si);
 
 	iter_data->min_rssi = min_t(u8, rssi, iter_data->min_rssi);
 }
@@ -250,9 +214,8 @@ static void rtw_phy_stat_rssi(struct rtw_dev *rtwdev)
 
 	data.rtwdev = rtwdev;
 	data.min_rssi = U8_MAX;
-	rtw_init_vifs_rssiq(rtwdev);
+
 	rtw_iterate_stas_atomic(rtwdev, rtw_phy_stat_rssi_iter, &data);
-	rtw_iterate_vifs_rssiq(rtwdev);
 
 	dm_info->pre_min_rssi = dm_info->min_rssi;
 	dm_info->min_rssi = data.min_rssi;
