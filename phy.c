@@ -445,48 +445,12 @@ static void rtw_phy_dig(struct rtw_dev *rtwdev)
 		rtw_phy_dig_write(rtwdev, cur_igi);
 }
 
-struct rtw_vif_rainfoq {
-	struct list_head list;
-
-	struct rtw_sta_info *si;
-};
-
-static void rtw_init_vifs_rainfoq(struct rtw_dev *rtwdev)
-{
-	INIT_LIST_HEAD(&rtwdev->vif_rainfoq);
-}
-
-static void rtw_add_vifs_rainfoq(struct rtw_dev *rtwdev, struct rtw_sta_info *si)
-{
-	struct rtw_vif_rainfoq *vifrainfoq;
-
-	vifrainfoq = kmalloc(sizeof(*vifrainfoq), GFP_ATOMIC);
-	if (!vifrainfoq)
-		return;
-
-	INIT_LIST_HEAD(&vifrainfoq->list);
-	vifrainfoq->si = si;
-
-	list_add_tail(&vifrainfoq->list, &rtwdev->vif_rainfoq);
-}
-
-static void rtw_iterate_vifs_rainfoq(struct rtw_dev *rtwdev)
-{
-	struct rtw_vif_rainfoq *vifrainfoq, *tmp;
-
-	list_for_each_entry_safe(vifrainfoq, tmp, &rtwdev->vif_rainfoq, list) {
-		rtw_update_sta_info(rtwdev, vifrainfoq->si);
-		list_del(&vifrainfoq->list);
-		kfree(vifrainfoq);
-	}
-}
-
 static void rtw_phy_ra_info_update_iter(void *data, struct ieee80211_sta *sta)
 {
 	struct rtw_dev *rtwdev = data;
 	struct rtw_sta_info *si = (struct rtw_sta_info *)sta->drv_priv;
 
-	rtw_add_vifs_rainfoq(rtwdev, si);
+	rtw_update_sta_info(rtwdev, si);
 }
 
 static void rtw_phy_ra_info_update(struct rtw_dev *rtwdev)
@@ -494,9 +458,7 @@ static void rtw_phy_ra_info_update(struct rtw_dev *rtwdev)
 	if (rtwdev->watch_dog_cnt & 0x3)
 		return;
 
-	rtw_init_vifs_rainfoq(rtwdev);
 	rtw_iterate_stas_atomic(rtwdev, rtw_phy_ra_info_update_iter, rtwdev);
-	rtw_iterate_vifs_rainfoq(rtwdev);
 }
 
 static void rtw_phy_dpk_track(struct rtw_dev *rtwdev)
