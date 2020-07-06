@@ -62,7 +62,7 @@
 
 /**
  * read_poll_timeout_atomic - Periodically poll an address until a condition is
- * 				met or a timeout occurs
+ *			      met or a timeout occurs
  * @op: accessor function (takes @addr as its only argument)
  * @addr: Address to poll
  * @val: Variable to read the value into
@@ -1742,8 +1742,6 @@ struct rtw_dev {
 	u8 mp_mode;
 	struct rtw_fw_state wow_fw;
 	struct rtw_wow_param wow;
-
-	struct list_head vif_ramaskq;
 
 	bool need_rfk;
 
