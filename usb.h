@@ -4,7 +4,6 @@
 #define RTW_USB_CMD_READ		0xc0
 #define RTW_USB_CMD_WRITE		0x40
 #define RTW_USB_CMD_REQ			0x05
-#define RTW_USB_CONTROL_MSG_TIMEOUT	500
 
 #define RTW_USB_IS_FULL_SPEED_USB(rtwusb) \
 	((rtwusb)->usb_speed == RTW_USB_SPEED_1_1)
@@ -94,8 +93,6 @@ struct rtw_usb {
 	struct rtw_dev *rtwdev;
 	struct usb_device *udev;
 
-	struct mutex usb_buf_mutex; /* mutex for usb_buf */
-
 	u32 bulkout_size;
 	u8 num_in_pipes;
 	u8 num_out_pipes;
@@ -111,7 +108,6 @@ struct rtw_usb {
 
 	struct workqueue_struct *txwq;
 	struct sk_buff_head tx_queue[RTK_MAX_TX_QUEUE_NUM];
-//	struct sk_buff_head tx_ack_queue;
 	struct rtw_usb_work_data *tx_handler_data;
 
 	struct workqueue_struct *rxwq;
