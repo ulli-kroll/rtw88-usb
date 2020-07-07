@@ -464,17 +464,47 @@ void rtw_vif_port_config(struct rtw_dev *rtwdev,
 	if (config & PORT_SET_NET_TYPE) {
 		addr = rtwvif->conf->net_type.addr;
 		mask = rtwvif->conf->net_type.mask;
-		rtw_write32_mask(rtwdev, addr, mask, rtwvif->net_type);
+
+		switch (rtw_hci_type(rtwdev)) {
+		case RTW_HCI_TYPE_USB:
+			rtw_write32_atomic_mask(rtwdev, addr, mask,
+						rtwvif->net_type);
+			break;
+		case RTW_HCI_TYPE_PCIE:
+		default:
+			rtw_write32_mask(rtwdev, addr, mask, rtwvif->net_type);
+			break;
+		}
 	}
 	if (config & PORT_SET_AID) {
 		addr = rtwvif->conf->aid.addr;
 		mask = rtwvif->conf->aid.mask;
-		rtw_write32_mask(rtwdev, addr, mask, rtwvif->aid);
+
+		switch (rtw_hci_type(rtwdev)) {
+		case RTW_HCI_TYPE_USB:
+			rtw_write32_atomic_mask(rtwdev, addr, mask,
+						rtwvif->aid);
+			break;
+		case RTW_HCI_TYPE_PCIE:
+		default:
+			rtw_write32_mask(rtwdev, addr, mask, rtwvif->aid);
+			break;
+		}
 	}
 	if (config & PORT_SET_BCN_CTRL) {
 		addr = rtwvif->conf->bcn_ctrl.addr;
 		mask = rtwvif->conf->bcn_ctrl.mask;
-		rtw_write8_mask(rtwdev, addr, mask, rtwvif->bcn_ctrl);
+
+		switch (rtw_hci_type(rtwdev)) {
+		case RTW_HCI_TYPE_USB:
+			rtw_write8_atomic_mask(rtwdev, addr, mask,
+					       rtwvif->bcn_ctrl);
+			break;
+		case RTW_HCI_TYPE_PCIE:
+		default:
+			rtw_write8_mask(rtwdev, addr, mask, rtwvif->bcn_ctrl);
+			break;
+		}
 	}
 }
 
