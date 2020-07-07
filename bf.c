@@ -381,8 +381,6 @@ void rtw_bf_cfg_csi_rate(struct rtw_dev *rtwdev, u8 rssi, u8 cur_rate,
 			cur_rrsr |= BIT(DESC_RATE54M);
 			csi_cfg |= (DESC_RATE54M & BIT_MASK_CSI_RATE_VAL) <<
 				   BIT_SHIFT_CSI_RATE;
-			rtw_write16(rtwdev, REG_RRSR, cur_rrsr);
-			rtw_write32(rtwdev, REG_BBPSF_CTRL, csi_cfg);
 		}
 		*new_rate = DESC_RATE54M;
 	} else {
@@ -390,9 +388,19 @@ void rtw_bf_cfg_csi_rate(struct rtw_dev *rtwdev, u8 rssi, u8 cur_rate,
 			cur_rrsr &= ~BIT(DESC_RATE54M);
 			csi_cfg |= (DESC_RATE54M & BIT_MASK_CSI_RATE_VAL) <<
 				   BIT_SHIFT_CSI_RATE;
-			rtw_write16(rtwdev, REG_RRSR, cur_rrsr);
-			rtw_write32(rtwdev, REG_BBPSF_CTRL, csi_cfg);
 		}
 		*new_rate = DESC_RATE24M;
+	}
+
+	switch (rtw_hci_type(rtwdev)) {
+	case RTW_HCI_TYPE_USB:
+		rtw_write16_atomic(rtwdev, REG_RRSR, cur_rrsr);
+		rtw_write32_atomic(rtwdev, REG_BBPSF_CTRL, csi_cfg);
+		break;
+	case RTW_HCI_TYPE_PCIE:
+	default:
+		rtw_write16(rtwdev, REG_RRSR, cur_rrsr);
+		rtw_write32(rtwdev, REG_BBPSF_CTRL, csi_cfg);
+		break;
 	}
 }

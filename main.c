@@ -227,7 +227,7 @@ static void rtw_watch_dog_work(struct work_struct *work)
 	rtw_phy_dynamic_mechanism(rtwdev);
 
 	data.rtwdev = rtwdev;
-	rtw_iterate_vifs(rtwdev, rtw_vif_watch_dog_iter, &data);
+	rtw_iterate_vifs_atomic(rtwdev, rtw_vif_watch_dog_iter, &data);
 
 	/* fw supports only one station associated to enter lps, if there are
 	 * more than two stations associated to the AP, then we can not enter
@@ -428,7 +428,6 @@ void rtw_chip_prepare_tx(struct rtw_dev *rtwdev)
 		rtwdev->need_rfk = false;
 		chip->ops->phy_calibration(rtwdev);
 	}
-
 }
 
 static void rtw_vif_write_addr(struct rtw_dev *rtwdev, u32 start, u8 *addr)
