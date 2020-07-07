@@ -1210,6 +1210,7 @@ static struct rtw_hci_ops rtw_usb_ops = {
 	.write8 = rtw_usb_write8,
 	.write16 = rtw_usb_write16,
 	.write32 = rtw_usb_write32,
+
 	.read8_atomic = rtw_usb_read8_atomic,
 	.read16_atomic = rtw_usb_read16_atomic,
 	.read32_atomic = rtw_usb_read32_atomic,
