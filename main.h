@@ -1700,7 +1700,7 @@ struct rtw_dev {
 	struct mutex mutex;
 
 	/* read/write rf register */
-	struct mutex rf_lock; /* mutex lock to protect rf register operation */
+	spinlock_t rf_lock;
 
 	/* watch dog every 2 sec */
 	struct delayed_work watch_dog_work;

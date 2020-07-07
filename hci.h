@@ -183,9 +183,9 @@ rtw_read_rf(struct rtw_dev *rtwdev, enum rtw_rf_path rf_path,
 {
 	u32 val;
 
-	mutex_lock(&rtwdev->rf_lock);
+	spin_lock(&rtwdev->rf_lock);
 	val = rtwdev->chip->ops->read_rf(rtwdev, rf_path, addr, mask);
-	mutex_unlock(&rtwdev->rf_lock);
+	spin_unlock(&rtwdev->rf_lock);
 
 	return val;
 }
@@ -194,9 +194,9 @@ static inline void
 rtw_write_rf(struct rtw_dev *rtwdev, enum rtw_rf_path rf_path,
 	     u32 addr, u32 mask, u32 data)
 {
-	mutex_lock(&rtwdev->rf_lock);
+	spin_lock(&rtwdev->rf_lock);
 	rtwdev->chip->ops->write_rf(rtwdev, rf_path, addr, mask, data);
-	mutex_unlock(&rtwdev->rf_lock);
+	spin_unlock(&rtwdev->rf_lock);
 }
 
 static inline u32

@@ -1412,9 +1412,9 @@ int rtw_core_init(struct rtw_dev *rtwdev)
 
 	spin_lock_init(&rtwdev->txq_lock);
 	spin_lock_init(&rtwdev->tx_report.q_lock);
+	spin_lock_init(&rtwdev->rf_lock);
 
 	mutex_init(&rtwdev->mutex);
-	mutex_init(&rtwdev->rf_lock);
 	mutex_init(&rtwdev->h2c.lock);
 	mutex_init(&rtwdev->coex.mutex);
 	mutex_init(&rtwdev->hal.tx_power_mutex);
@@ -1481,7 +1481,6 @@ void rtw_core_deinit(struct rtw_dev *rtwdev)
 	}
 
 	mutex_destroy(&rtwdev->mutex);
-	mutex_destroy(&rtwdev->rf_lock);
 	mutex_destroy(&rtwdev->coex.mutex);
 	mutex_destroy(&rtwdev->hal.tx_power_mutex);
 }
