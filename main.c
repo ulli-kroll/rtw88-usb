@@ -434,8 +434,17 @@ static void rtw_vif_write_addr(struct rtw_dev *rtwdev, u32 start, u8 *addr)
 {
 	int i;
 
-	for (i = 0; i < ETH_ALEN; i++)
-		rtw_write8(rtwdev, start + i, addr[i]);
+	switch (rtw_hci_type(rtwdev)) {
+	case RTW_HCI_TYPE_USB:
+		for (i = 0; i < ETH_ALEN; i++)
+			rtw_write8_atomic(rtwdev, start + i, addr[i]);
+		break;
+	case RTW_HCI_TYPE_PCIE:
+	default:
+		for (i = 0; i < ETH_ALEN; i++)
+			rtw_write8(rtwdev, start + i, addr[i]);
+		break;
+	}
 }
 
 void rtw_vif_port_config(struct rtw_dev *rtwdev,
