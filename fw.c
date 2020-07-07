@@ -283,7 +283,7 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 		h2c[3], h2c[2], h2c[1], h2c[0],
 		h2c[7], h2c[6], h2c[5], h2c[4]);
 
-	mutex_lock(&rtwdev->h2c.lock);
+	spin_lock(&rtwdev->h2c.lock);
 
 	box = rtwdev->h2c.last_box_num;
 	switch (box) {
@@ -344,14 +344,14 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 		rtwdev->h2c.last_box_num = 0;
 
 out:
-	mutex_unlock(&rtwdev->h2c.lock);
+	spin_unlock(&rtwdev->h2c.lock);
 }
 
 static void rtw_fw_send_h2c_packet(struct rtw_dev *rtwdev, u8 *h2c_pkt)
 {
 	int ret;
 
-	mutex_lock(&rtwdev->h2c.lock);
+	spin_lock(&rtwdev->h2c.lock);
 
 	FW_OFFLOAD_H2C_SET_SEQ_NUM(h2c_pkt, rtwdev->h2c.seq);
 	ret = rtw_hci_write_data_h2c(rtwdev, h2c_pkt, H2C_PKT_SIZE);
@@ -359,7 +359,7 @@ static void rtw_fw_send_h2c_packet(struct rtw_dev *rtwdev, u8 *h2c_pkt)
 		rtw_err(rtwdev, "failed to send h2c packet\n");
 	rtwdev->h2c.seq++;
 
-	mutex_unlock(&rtwdev->h2c.lock);
+	spin_unlock(&rtwdev->h2c.lock);
 }
 
 void

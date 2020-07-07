@@ -1723,7 +1723,8 @@ struct rtw_dev {
 	struct {
 		/* incicate the mail box to use with fw */
 		u8 last_box_num;
-		struct mutex lock; /* mutex lock to protect to send h2c */
+		/* protect to send h2c to fw */
+		spinlock_t lock;
 		u32 seq;
 	} h2c;
 
