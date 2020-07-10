@@ -186,7 +186,7 @@ static u32 rtw_usb_read32_atomic(struct rtw_dev *rtwdev, u32 addr)
 	if (!buf)
 		return 0;
 
-	rtw_usb_ctrl_atomic(rtwdev, udev, usb_sndctrlpipe(udev, 0),
+	rtw_usb_ctrl_atomic(rtwdev, udev, usb_rcvctrlpipe(udev, 0),
 			    RTW_USB_CMD_READ, addr, 0, buf, sizeof(*buf));
 	data = *buf;
 	kfree(buf);
