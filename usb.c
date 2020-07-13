@@ -60,12 +60,14 @@ static void rtw_usb_ctrl_atomic_cb(struct urb *urb)
 {
 	struct rtw_usb_ctrlcb_t *ctx;
 
-	if (!urb)
+	if (unlikely(!urb))
 		return;
 
 	ctx = (struct rtw_usb_ctrlcb_t *)urb->context;
-	atomic_set(&ctx->done, 1);
-	ctx->status = urb->status;
+	if (likely(ctx)) {
+		atomic_set(&ctx->done, 1);
+		ctx->status = urb->status;
+	}
 
 	/* free dr */
 	kfree(urb->setup_packet);
