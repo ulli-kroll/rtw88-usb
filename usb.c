@@ -148,7 +148,7 @@ static u8 rtw_usb_read8_atomic(struct rtw_dev *rtwdev, u32 addr)
 	if (!buf)
 		return 0;
 
-	rtw_usb_ctrl_atomic(rtwdev, udev, usb_sndctrlpipe(udev, 0),
+	rtw_usb_ctrl_atomic(rtwdev, udev, usb_rcvctrlpipe(udev, 0),
 			    RTW_USB_CMD_READ, addr, 0, buf, sizeof(*buf));
 	data = *buf;
 	kfree(buf);
@@ -167,7 +167,7 @@ static u16 rtw_usb_read16_atomic(struct rtw_dev *rtwdev, u32 addr)
 	if (!buf)
 		return 0;
 
-	rtw_usb_ctrl_atomic(rtwdev, udev, usb_sndctrlpipe(udev, 0),
+	rtw_usb_ctrl_atomic(rtwdev, udev, usb_rcvctrlpipe(udev, 0),
 			    RTW_USB_CMD_READ, addr, 0, buf, sizeof(*buf));
 	data = *buf;
 	kfree(buf);
@@ -577,39 +577,33 @@ static void rtw_usb_set_queue_pipe_mapping(struct rtw_dev *rtwdev, u8 in_pipes,
 					   RTW_USB_TX_SEL_LQ |
 					   RTW_USB_TX_SEL_NQ;
 		rtwdev->hci.bulkout_num = 4;
+
+		rtw_usb_three_outpipe_mapping(rtwusb);
 		break;
 	case 3:
 		rtwusb->out_ep_queue_sel = RTW_USB_TX_SEL_HQ |
 					   RTW_USB_TX_SEL_LQ |
 					   RTW_USB_TX_SEL_NQ;
 		rtwdev->hci.bulkout_num = 3;
+
+		rtw_usb_three_outpipe_mapping(rtwusb);
 		break;
 	case 2:
 		rtwusb->out_ep_queue_sel = RTW_USB_TX_SEL_HQ |
 					   RTW_USB_TX_SEL_NQ;
 		rtwdev->hci.bulkout_num = 2;
+
+		rtw_usb_two_outpipe_mapping(rtwusb);
 		break;
 	case 1:
 		rtwusb->out_ep_queue_sel = RTW_USB_TX_SEL_HQ;
 		rtwdev->hci.bulkout_num = 1;
-		break;
-	default:
-		break;
-	}
 
-	switch (out_pipes) {
-	case 2:
-		rtw_usb_two_outpipe_mapping(rtwusb);
-		break;
-	case 3:
-	case 4:
-		rtw_usb_three_outpipe_mapping(rtwusb);
-		break;
-	case 1:
 		rtw_usb_one_outpipe_mapping(rtwusb);
 		break;
 	default:
 		rtw_err(rtwdev, "failed to get out_pipes(%d)\n", out_pipes);
+		break;
 	}
 }
 
