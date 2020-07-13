@@ -1225,7 +1225,7 @@ static int rtw_usb_init_rx(struct rtw_dev *rtwdev)
 	rtwusb->rxwq = create_singlethread_workqueue("rtw88_usb: rx wq");
 	if (!rtwusb->rxwq) {
 		rtw_err(rtwdev, "failed to create RX work queue\n");
-		goto err_destroy_wq;
+		return -ENOMEM;
 	}
 
 	skb_queue_head_init(&rtwusb->rx_queue);
@@ -1239,8 +1239,7 @@ static int rtw_usb_init_rx(struct rtw_dev *rtwdev)
 	return 0;
 
 err_destroy_wq:
-	if (rtwusb->rxwq)
-		destroy_workqueue(rtwusb->rxwq);
+	destroy_workqueue(rtwusb->rxwq);
 	return -ENOMEM;
 }
 
@@ -1261,7 +1260,7 @@ static int rtw_usb_init_tx(struct rtw_dev *rtwdev)
 	rtwusb->txwq = create_singlethread_workqueue("rtw88_usb: tx wq");
 	if (!rtwusb->txwq) {
 		rtw_err(rtwdev, "failed to create TX work queue\n");
-		goto err_destroy_wq;
+		return -ENOMEM;
 	}
 
 	rtw_usb_tx_queue_init(rtwusb);
@@ -1275,8 +1274,7 @@ static int rtw_usb_init_tx(struct rtw_dev *rtwdev)
 	return 0;
 
 err_destroy_wq:
-	if (rtwusb->txwq)
-		destroy_workqueue(rtwusb->txwq);
+	destroy_workqueue(rtwusb->txwq);
 	return -ENOMEM;
 }
 
