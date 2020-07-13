@@ -1177,12 +1177,12 @@ static void rtw_usb_stop(struct rtw_dev *rtwdev)
 
 static void rtw_usb_deep_ps(struct rtw_dev *rtwdev, bool enter)
 {
-	rtw_info(rtwdev, "USB deep ps: %d\n", enter);
+	/* empty function for rtw_hci_ops */
 }
 
 static void rtw_usb_link_ps(struct rtw_dev *rtwdev, bool enter)
 {
-	rtw_info(rtwdev, "USB link ps: %d\n", enter);
+	/* empty function for rtw_hci_ops */
 }
 
 static void rtw_usb_interface_cfg(struct rtw_dev *rtwdev)
