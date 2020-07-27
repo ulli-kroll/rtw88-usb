@@ -25,7 +25,6 @@ struct rtw_usb_txcb_t {
 
 struct rtw_usb_ctrlcb_t {
 	atomic_t done;
-	__u8 req_type;
 	int status;
 };
 
@@ -101,7 +100,6 @@ static int rtw_usb_ctrl_atomic(struct rtw_dev *rtwdev,
 		goto err_free_dr;
 
 	atomic_set(&ctx->done, 0);
-	ctx->req_type = req_type;
 	usb_fill_control_urb(urb, dev, pipe, (unsigned char *)dr, databuf, size,
 			     rtw_usb_ctrl_atomic_cb, ctx);
 	ret = usb_submit_urb(urb, GFP_ATOMIC);
