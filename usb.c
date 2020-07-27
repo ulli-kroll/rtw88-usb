@@ -24,7 +24,7 @@ struct rtw_usb_txcb_t {
 };
 
 struct rtw_usb_ctrlcb_t {
-	atomic_t done;
+	bool done;
 	int status;
 };
 
@@ -62,7 +62,7 @@ static void rtw_usb_ctrl_atomic_cb(struct urb *urb)
 
 	ctx = (struct rtw_usb_ctrlcb_t *)urb->context;
 	if (ctx) {
-		atomic_set(&ctx->done, 1);
+		ctx->done = true;
 		ctx->status = urb->status;
 	}
 
@@ -99,7 +99,7 @@ static int rtw_usb_ctrl_atomic(struct rtw_dev *rtwdev,
 	if (!urb)
 		goto err_free_dr;
 
-	atomic_set(&ctx->done, 0);
+	ctx->done = false;
 	usb_fill_control_urb(urb, dev, pipe, (unsigned char *)dr, databuf, size,
 			     rtw_usb_ctrl_atomic_cb, ctx);
 	ret = usb_submit_urb(urb, GFP_ATOMIC);
@@ -109,9 +109,9 @@ static int rtw_usb_ctrl_atomic(struct rtw_dev *rtwdev,
 	}
 
 	done = false;
-	read_poll_timeout_atomic(atomic_read, done, done, 100,
+	read_poll_timeout_atomic((bool), done, done, 100,
 				 RTW_USB_CONTROL_MSG_TIMEOUT, false,
-				 &ctx->done);
+				 ctx->done);
 	if (!done) {
 		usb_kill_urb(urb);
 		rtw_err(rtwdev, "failed to wait usb ctrl req:%u\n", req_type);
