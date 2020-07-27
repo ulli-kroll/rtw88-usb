@@ -1,3 +1,7 @@
+/* SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause */
+/* Copyright(c) 2018-2019  Realtek Corporation
+ */
+
 #ifndef __RTW_USB_H_
 #define __RTW_USB_H_
 
@@ -35,27 +39,6 @@
 
 #define RTW_USB_RXCB_NUM		4
 
-#define REG_SYS_CFG2		0x00FC
-#define REG_USB_USBSTAT		0xFE11
-#define REG_RXDMA_MODE		0x785
-#define REG_TXDMA_OFFSET_CHK	0x20C
-#define BIT_DROP_DATA_EN	BIT(9)
-
-/* USB Vendor/Product IDs */
-#define RTW_USB_VENDOR_ID_REALTEK		0x0BDA
-#define RTW_USB_VENDOR_ID_NETGEAR		0x0846
-#define RTW_USB_VENDOR_ID_EDIMAX		0x7392
-#define RTW_USB_PRODUCT_ID_REALTEK_8812B	0xB812
-#define RTW_USB_PRODUCT_ID_REALTEK_8822B	0xB82C
-#define RTW_USB_PRODUCT_ID_REALTEK_8822C	0xC82C
-
-/* helper for USB Ids */
-
-#define RTK_USB_DEVICE(vend, dev, hw_config)	\
-	USB_DEVICE(vend, dev),			\
-	.driver_info = (kernel_ulong_t)&(hw_config),
-
-/* defined functions */
 #define rtw_get_usb_priv(rtwdev) (struct rtw_usb *)((rtwdev)->priv)
 
 enum rtw_usb_burst_size {
@@ -104,13 +87,11 @@ struct rtw_usb {
 	u8 usb_speed;
 	u8 usb_txagg_num;
 
-	atomic_t is_bus_drv_ready;
+	struct workqueue_struct *txwq, *rxwq;
 
-	struct workqueue_struct *txwq;
 	struct sk_buff_head tx_queue[RTK_MAX_TX_QUEUE_NUM];
 	struct rtw_usb_work_data *tx_handler_data;
 
-	struct workqueue_struct *rxwq;
 	struct rx_usb_ctrl_block rx_cb[RTW_USB_RXCB_NUM];
 	struct sk_buff_head rx_queue;
 	struct rtw_usb_work_data *rx_handler_data;
@@ -125,5 +106,4 @@ static inline struct rtw_usb_tx_data *rtw_usb_get_tx_data(struct sk_buff *skb)
 
 	return (struct rtw_usb_tx_data *)info->status.status_driver_data;
 }
-
 #endif

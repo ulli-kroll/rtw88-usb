@@ -65,7 +65,7 @@ static inline void rtw_hci_stop(struct rtw_dev *rtwdev)
 
 static inline void rtw_hci_deep_ps(struct rtw_dev *rtwdev, bool enter)
 {
-	//rtwdev->hci.ops->deep_ps(rtwdev, enter);
+	rtwdev->hci.ops->deep_ps(rtwdev, enter);
 }
 
 static inline void rtw_hci_link_ps(struct rtw_dev *rtwdev, bool enter)
@@ -259,8 +259,8 @@ rtw_read8_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
 	return ret;
 }
 
-static inline u32
-rtw_read32_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
+static inline
+u32 rtw_read32_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
 {
 	u32 shift = __ffs(mask);
 	u32 orig;
@@ -272,8 +272,8 @@ rtw_read32_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
 	return ret;
 }
 
-static inline u16
-rtw_read16_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
+static inline
+u16 rtw_read16_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
 {
 	u32 shift = __ffs(mask);
 	u32 orig;
@@ -285,8 +285,8 @@ rtw_read16_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
 	return ret;
 }
 
-static inline u8
-rtw_read8_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
+static inline
+u8 rtw_read8_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
 {
 	u32 shift = __ffs(mask);
 	u32 orig;
@@ -326,8 +326,9 @@ rtw_write8_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask, u8 data)
 	rtw_write8(rtwdev, addr, set);
 }
 
-static inline void
-rtw_write32_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask, u32 data)
+static inline
+void rtw_write32_atomic_mask(struct rtw_dev *rtwdev,
+			     u32 addr, u32 mask, u32 data)
 {
 	u32 shift = __ffs(mask);
 	u32 orig;
@@ -340,8 +341,9 @@ rtw_write32_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask, u32 data)
 	rtw_write32_atomic(rtwdev, addr, set);
 }
 
-static inline void
-rtw_write8_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask, u8 data)
+static inline
+void rtw_write8_atomic_mask(struct rtw_dev *rtwdev,
+			    u32 addr, u32 mask, u8 data)
 {
 	u32 shift;
 	u8 orig, set;

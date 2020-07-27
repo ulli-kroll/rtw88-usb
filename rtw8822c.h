@@ -171,6 +171,8 @@ const struct rtw_table name ## _tbl = {			\
 #define REG_DFIRBW	0x810
 #define REG_ANTMAP0	0x820
 #define REG_ANTMAP	0x824
+#define REG_EDCCA_DECISION	0x844
+#define BIT_EDCCA_OPTION	GENMASK(30, 29)
 #define REG_DYMPRITH	0x86c
 #define REG_DYMENTH0	0x870
 #define REG_DYMENTH	0x874
@@ -309,4 +311,32 @@ const struct rtw_table name ## _tbl = {			\
 #define BIT_GS_PWSF		GENMASK(27, 0)
 #define BIT_RPT_DGAIN		GENMASK(27, 16)
 #define BIT_TX_CFIR		GENMASK(31, 30)
+
+#define PPG_THERMAL_A 0x1ef
+#define PPG_THERMAL_B 0x1b0
+#define RF_THEMAL_MASK GENMASK(19, 16)
+#define PPG_2GL_TXAB 0x1d4
+#define PPG_2GM_TXAB 0x1ee
+#define PPG_2GH_TXAB 0x1d2
+#define PPG_2G_A_MASK GENMASK(3, 0)
+#define PPG_2G_B_MASK GENMASK(7, 4)
+#define PPG_5GL1_TXA 0x1ec
+#define PPG_5GL2_TXA 0x1e8
+#define PPG_5GM1_TXA 0x1e4
+#define PPG_5GM2_TXA 0x1e0
+#define PPG_5GH1_TXA 0x1dc
+#define PPG_5GL1_TXB 0x1eb
+#define PPG_5GL2_TXB 0x1e7
+#define PPG_5GM1_TXB 0x1e3
+#define PPG_5GM2_TXB 0x1df
+#define PPG_5GH1_TXB 0x1db
+#define PPG_5G_MASK GENMASK(4, 0)
+#define PPG_PABIAS_2GA 0x1d6
+#define PPG_PABIAS_2GB 0x1d5
+#define PPG_PABIAS_5GA 0x1d8
+#define PPG_PABIAS_5GB 0x1d7
+#define PPG_PABIAS_MASK GENMASK(3, 0)
+#define RF_PABIAS_2G_MASK GENMASK(15, 12)
+#define RF_PABIAS_5G_MASK GENMASK(19, 16)
+
 #endif
