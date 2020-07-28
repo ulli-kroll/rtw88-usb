@@ -366,20 +366,19 @@ static int rtw_usb_parse(struct rtw_dev *rtwdev,
 	struct usb_endpoint_descriptor *endpoint;
 	struct usb_device *usbd = interface_to_usbdev(interface);
 	int endpoints = interface_desc->bNumEndpoints;
-	int i, j = 0, ret = 0;
-	u8 dir, xtype, num;
+	int i, ret = 0;
+	u8 num;
 
 	rtwusb->num_in_pipes = 0;
 	rtwusb->num_out_pipes = 0;
 	for (i = 0; i < endpoints; i++) {
 		endpoint = &host_interface->endpoint[i].desc;
-		dir = endpoint->bEndpointAddress & USB_ENDPOINT_DIR_MASK;
 		num = usb_endpoint_num(endpoint);
-		xtype = usb_endpoint_type(endpoint);
 
 		if (usb_endpoint_dir_in(endpoint) &&
 		    usb_endpoint_xfer_bulk(endpoint)) {
 			if (rtwusb->pipe_in) {
+				rtw_err(rtwdev, "IN pipes overflow\n");
 				ret = -EINVAL;
 				goto exit;
 			}
@@ -391,6 +390,7 @@ static int rtw_usb_parse(struct rtw_dev *rtwdev,
 		if (usb_endpoint_dir_in(endpoint) &&
 		    usb_endpoint_xfer_int(endpoint)) {
 			if (rtwusb->pipe_interrupt) {
+				rtw_err(rtwdev, "INT pipes overflow\n");
 				ret = -EINVAL;
 				goto exit;
 			}
@@ -400,27 +400,29 @@ static int rtw_usb_parse(struct rtw_dev *rtwdev,
 
 		if (usb_endpoint_dir_out(endpoint) &&
 		    usb_endpoint_xfer_bulk(endpoint)) {
-			if (j >= ARRAY_SIZE(rtwusb->out_ep)) {
+			if (rtwusb->num_out_pipes >=
+			    ARRAY_SIZE(rtwusb->out_ep)) {
+				rtw_err(rtwdev, "OUT pipes overflow\n");
 				ret = -EINVAL;
 				goto exit;
 			}
 
-			rtwusb->out_ep[j++] = num;
-			rtwusb->num_out_pipes++;
+			rtwusb->out_ep[rtwusb->num_out_pipes++] = num;
 		}
 	}
 
 	switch (usbd->speed) {
 	case USB_SPEED_LOW:
-		rtwusb->usb_speed = RTW_USB_SPEED_1_1;
-		break;
 	case USB_SPEED_FULL:
+		rtw_info(rtwdev, "USB: 1.1\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_1_1;
 		break;
 	case USB_SPEED_HIGH:
+		rtw_info(rtwdev, "USB: 2\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_2;
 		break;
 	case USB_SPEED_SUPER:
+		rtw_info(rtwdev, "USB: 3\n");
 		rtwusb->usb_speed = RTW_USB_SPEED_3;
 		break;
 	default:
