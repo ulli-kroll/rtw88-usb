@@ -27,13 +27,6 @@ struct rtw_hci_ops {
 	void (*write8)(struct rtw_dev *rtwdev, u32 addr, u8 val);
 	void (*write16)(struct rtw_dev *rtwdev, u32 addr, u16 val);
 	void (*write32)(struct rtw_dev *rtwdev, u32 addr, u32 val);
-
-	u8 (*read8_atomic)(struct rtw_dev *rtwdev, u32 addr);
-	u16 (*read16_atomic)(struct rtw_dev *rtwdev, u32 addr);
-	u32 (*read32_atomic)(struct rtw_dev *rtwdev, u32 addr);
-	void (*write8_atomic)(struct rtw_dev *rtwdev, u32 addr, u8 val);
-	void (*write16_atomic)(struct rtw_dev *rtwdev, u32 addr, u16 val);
-	void (*write32_atomic)(struct rtw_dev *rtwdev, u32 addr, u32 val);
 };
 
 static inline int rtw_hci_tx_write(struct rtw_dev *rtwdev,
@@ -105,21 +98,6 @@ static inline u32 rtw_read32(struct rtw_dev *rtwdev, u32 addr)
 	return rtwdev->hci.ops->read32(rtwdev, addr);
 }
 
-static inline u8 rtw_read8_atomic(struct rtw_dev *rtwdev, u32 addr)
-{
-	return rtwdev->hci.ops->read8_atomic(rtwdev, addr);
-}
-
-static inline u16 rtw_read16_atomic(struct rtw_dev *rtwdev, u32 addr)
-{
-	return rtwdev->hci.ops->read32_atomic(rtwdev, addr);
-}
-
-static inline u32 rtw_read32_atomic(struct rtw_dev *rtwdev, u32 addr)
-{
-	return rtwdev->hci.ops->read32_atomic(rtwdev, addr);
-}
-
 static inline void rtw_write8(struct rtw_dev *rtwdev, u32 addr, u8 val)
 {
 	rtwdev->hci.ops->write8(rtwdev, addr, val);
@@ -133,21 +111,6 @@ static inline void rtw_write16(struct rtw_dev *rtwdev, u32 addr, u16 val)
 static inline void rtw_write32(struct rtw_dev *rtwdev, u32 addr, u32 val)
 {
 	rtwdev->hci.ops->write32(rtwdev, addr, val);
-}
-
-static inline void rtw_write8_atomic(struct rtw_dev *rtwdev, u32 addr, u8 val)
-{
-	rtwdev->hci.ops->write8_atomic(rtwdev, addr, val);
-}
-
-static inline void rtw_write16_atomic(struct rtw_dev *rtwdev, u32 addr, u16 val)
-{
-	rtwdev->hci.ops->write16_atomic(rtwdev, addr, val);
-}
-
-static inline void rtw_write32_atomic(struct rtw_dev *rtwdev, u32 addr, u32 val)
-{
-	rtwdev->hci.ops->write32_atomic(rtwdev, addr, val);
 }
 
 static inline void rtw_write8_set(struct rtw_dev *rtwdev, u32 addr, u8 bit)
@@ -259,45 +222,6 @@ rtw_read8_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
 	return ret;
 }
 
-static inline
-u32 rtw_read32_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
-{
-	u32 shift = __ffs(mask);
-	u32 orig;
-	u32 ret;
-
-	orig = rtw_read32_atomic(rtwdev, addr);
-	ret = (orig & mask) >> shift;
-
-	return ret;
-}
-
-static inline
-u16 rtw_read16_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
-{
-	u32 shift = __ffs(mask);
-	u32 orig;
-	u32 ret;
-
-	orig = rtw_read16_atomic(rtwdev, addr);
-	ret = (orig & mask) >> shift;
-
-	return ret;
-}
-
-static inline
-u8 rtw_read8_atomic_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask)
-{
-	u32 shift = __ffs(mask);
-	u32 orig;
-	u32 ret;
-
-	orig = rtw_read8_atomic(rtwdev, addr);
-	ret = (orig & mask) >> shift;
-
-	return ret;
-}
-
 static inline void
 rtw_write32_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask, u32 data)
 {
@@ -324,36 +248,6 @@ rtw_write8_mask(struct rtw_dev *rtwdev, u32 addr, u32 mask, u8 data)
 	orig = rtw_read8(rtwdev, addr);
 	set = (orig & ~mask) | ((data << shift) & mask);
 	rtw_write8(rtwdev, addr, set);
-}
-
-static inline
-void rtw_write32_atomic_mask(struct rtw_dev *rtwdev,
-			     u32 addr, u32 mask, u32 data)
-{
-	u32 shift = __ffs(mask);
-	u32 orig;
-	u32 set;
-
-	WARN(addr & 0x3, "should be 4-byte aligned, addr = 0x%08x\n", addr);
-
-	orig = rtw_read32_atomic(rtwdev, addr);
-	set = (orig & ~mask) | ((data << shift) & mask);
-	rtw_write32_atomic(rtwdev, addr, set);
-}
-
-static inline
-void rtw_write8_atomic_mask(struct rtw_dev *rtwdev,
-			    u32 addr, u32 mask, u8 data)
-{
-	u32 shift;
-	u8 orig, set;
-
-	mask &= 0xff;
-	shift = __ffs(mask);
-
-	orig = rtw_read8_atomic(rtwdev, addr);
-	set = (orig & ~mask) | ((data << shift) & mask);
-	rtw_write8_atomic(rtwdev, addr, set);
 }
 
 static inline enum rtw_hci_type rtw_hci_type(struct rtw_dev *rtwdev)

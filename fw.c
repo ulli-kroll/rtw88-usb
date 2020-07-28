@@ -232,37 +232,17 @@ static void rtw_fw_send_h2c_command(struct rtw_dev *rtwdev,
 		goto out;
 	}
 
-	switch (rtw_hci_type(rtwdev)) {
-	case RTW_HCI_TYPE_USB:
-		ret = read_poll_timeout_atomic(rtw_read8_atomic, box_state,
-					       !((box_state >> box) & 0x1), 100,
-					       3000, false, rtwdev, REG_HMETFR);
-		break;
-	case RTW_HCI_TYPE_PCIE:
-	default:
-		ret = read_poll_timeout_atomic(rtw_read8, box_state,
-					       !((box_state >> box) & 0x1), 100,
-					       3000, false, rtwdev, REG_HMETFR);
-		break;
-	}
+	ret = read_poll_timeout_atomic(rtw_read8, box_state,
+				       !((box_state >> box) & 0x1), 100,
+				       3000, false, rtwdev, REG_HMETFR);
 
 	if (ret) {
 		rtw_err(rtwdev, "failed to send h2c command\n");
 		goto out;
 	}
 
-	switch (rtw_hci_type(rtwdev)) {
-	case RTW_HCI_TYPE_USB:
-		rtw_write32_atomic(rtwdev, box_ex_reg,
-				   le32_to_cpu(h2c_cmd->msg_ext));
-		rtw_write32_atomic(rtwdev, box_reg, le32_to_cpu(h2c_cmd->msg));
-		break;
-	case RTW_HCI_TYPE_PCIE:
-	default:
-		rtw_write32(rtwdev, box_ex_reg, le32_to_cpu(h2c_cmd->msg_ext));
-		rtw_write32(rtwdev, box_reg, le32_to_cpu(h2c_cmd->msg));
-		break;
-	}
+	rtw_write32(rtwdev, box_ex_reg, le32_to_cpu(h2c_cmd->msg_ext));
+	rtw_write32(rtwdev, box_reg, le32_to_cpu(h2c_cmd->msg));
 
 	if (++rtwdev->h2c.last_box_num >= 4)
 		rtwdev->h2c.last_box_num = 0;

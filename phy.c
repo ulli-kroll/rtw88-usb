@@ -49,25 +49,21 @@ static const u32 db_invert_table[12][8] = {
 };
 
 u8 rtw_cck_rates[] = { DESC_RATE1M, DESC_RATE2M, DESC_RATE5_5M, DESC_RATE11M };
-
 u8 rtw_ofdm_rates[] = {
 	DESC_RATE6M,  DESC_RATE9M,  DESC_RATE12M,
 	DESC_RATE18M, DESC_RATE24M, DESC_RATE36M,
 	DESC_RATE48M, DESC_RATE54M
 };
-
 u8 rtw_ht_1s_rates[] = {
 	DESC_RATEMCS0, DESC_RATEMCS1, DESC_RATEMCS2,
 	DESC_RATEMCS3, DESC_RATEMCS4, DESC_RATEMCS5,
 	DESC_RATEMCS6, DESC_RATEMCS7
 };
-
 u8 rtw_ht_2s_rates[] = {
 	DESC_RATEMCS8,  DESC_RATEMCS9,  DESC_RATEMCS10,
 	DESC_RATEMCS11, DESC_RATEMCS12, DESC_RATEMCS13,
 	DESC_RATEMCS14, DESC_RATEMCS15
 };
-
 u8 rtw_vht_1s_rates[] = {
 	DESC_RATEVHT1SS_MCS0, DESC_RATEVHT1SS_MCS1,
 	DESC_RATEVHT1SS_MCS2, DESC_RATEVHT1SS_MCS3,
@@ -75,7 +71,6 @@ u8 rtw_vht_1s_rates[] = {
 	DESC_RATEVHT1SS_MCS6, DESC_RATEVHT1SS_MCS7,
 	DESC_RATEVHT1SS_MCS8, DESC_RATEVHT1SS_MCS9
 };
-
 u8 rtw_vht_2s_rates[] = {
 	DESC_RATEVHT2SS_MCS0, DESC_RATEVHT2SS_MCS1,
 	DESC_RATEVHT2SS_MCS2, DESC_RATEVHT2SS_MCS3,
@@ -767,15 +762,7 @@ u32 rtw_phy_read_rf(struct rtw_dev *rtwdev, enum rtw_rf_path rf_path,
 	direct_addr = base_addr[rf_path] + (addr << 2);
 	mask &= RFREG_MASK;
 
-	switch (rtw_hci_type(rtwdev)) {
-	case RTW_HCI_TYPE_USB:
-		val = rtw_read32_atomic_mask(rtwdev, direct_addr, mask);
-		break;
-	case RTW_HCI_TYPE_PCIE:
-	default:
-		val = rtw_read32_mask(rtwdev, direct_addr, mask);
-		break;
-	}
+	val = rtw_read32_mask(rtwdev, direct_addr, mask);
 
 	return val;
 }
@@ -808,53 +795,23 @@ u32 rtw_phy_read_rf_sipi(struct rtw_dev *rtwdev, enum rtw_rf_path rf_path,
 
 	addr &= 0xff;
 
-	switch (rtw_hci_type(rtwdev)) {
-	case RTW_HCI_TYPE_USB:
-		val32 = rtw_read32_atomic(rtwdev, rf_sipi_addr->hssi_2);
-		val32 = (val32 & ~LSSI_READ_ADDR_MASK) | (addr << 23);
-		rtw_write32_atomic(rtwdev, rf_sipi_addr->hssi_2, val32);
+	val32 = rtw_read32(rtwdev, rf_sipi_addr->hssi_2);
+	val32 = (val32 & ~LSSI_READ_ADDR_MASK) | (addr << 23);
+	rtw_write32(rtwdev, rf_sipi_addr->hssi_2, val32);
 
-		/* toggle read edge of path A */
-		val32 = rtw_read32_atomic(rtwdev, rf_sipi_addr_a->hssi_2);
-		rtw_write32_atomic(rtwdev, rf_sipi_addr_a->hssi_2,
-				   val32 & ~LSSI_READ_EDGE_MASK);
-		rtw_write32_atomic(rtwdev, rf_sipi_addr_a->hssi_2,
-				   val32 | LSSI_READ_EDGE_MASK);
-		break;
-	case RTW_HCI_TYPE_PCIE:
-	default:
-		val32 = rtw_read32(rtwdev, rf_sipi_addr->hssi_2);
-		val32 = (val32 & ~LSSI_READ_ADDR_MASK) | (addr << 23);
-		rtw_write32(rtwdev, rf_sipi_addr->hssi_2, val32);
-
-		/* toggle read edge of path A */
-		val32 = rtw_read32(rtwdev, rf_sipi_addr_a->hssi_2);
-		rtw_write32(rtwdev, rf_sipi_addr_a->hssi_2,
-			    val32 & ~LSSI_READ_EDGE_MASK);
-		rtw_write32(rtwdev, rf_sipi_addr_a->hssi_2,
-			    val32 | LSSI_READ_EDGE_MASK);
-		break;
-	}
+	/* toggle read edge of path A */
+	val32 = rtw_read32(rtwdev, rf_sipi_addr_a->hssi_2);
+	rtw_write32(rtwdev, rf_sipi_addr_a->hssi_2,
+		    val32 & ~LSSI_READ_EDGE_MASK);
+	rtw_write32(rtwdev, rf_sipi_addr_a->hssi_2,
+		    val32 | LSSI_READ_EDGE_MASK);
 
 	udelay(120);
 
-	switch (rtw_hci_type(rtwdev)) {
-	case RTW_HCI_TYPE_USB:
-		en_pi = rtw_read32_atomic_mask(rtwdev, rf_sipi_addr->hssi_1,
-					       BIT(8));
-		r_addr = en_pi ? rf_sipi_addr->lssi_read_pi
-			       : rf_sipi_addr->lssi_read;
-		val32 = rtw_read32_atomic_mask(rtwdev, r_addr,
-					       LSSI_READ_DATA_MASK);
-		break;
-	case RTW_HCI_TYPE_PCIE:
-	default:
-		en_pi = rtw_read32_mask(rtwdev, rf_sipi_addr->hssi_1, BIT(8));
-		r_addr = en_pi ? rf_sipi_addr->lssi_read_pi
-			       : rf_sipi_addr->lssi_read;
-		val32 = rtw_read32_mask(rtwdev, r_addr, LSSI_READ_DATA_MASK);
-		break;
-	}
+	en_pi = rtw_read32_mask(rtwdev, rf_sipi_addr->hssi_1, BIT(8));
+	r_addr = en_pi ? rf_sipi_addr->lssi_read_pi
+		       : rf_sipi_addr->lssi_read;
+	val32 = rtw_read32_mask(rtwdev, r_addr, LSSI_READ_DATA_MASK);
 
 	shift = __ffs(mask);
 
@@ -894,15 +851,7 @@ bool rtw_phy_write_rf_reg_sipi(struct rtw_dev *rtwdev, enum rtw_rf_path rf_path,
 
 	data_and_addr = ((addr << 20) | (data & 0x000fffff)) & 0x0fffffff;
 
-	switch (rtw_hci_type(rtwdev)) {
-	case RTW_HCI_TYPE_USB:
-		rtw_write32_atomic(rtwdev, sipi_addr[rf_path], data_and_addr);
-		break;
-	case RTW_HCI_TYPE_PCIE:
-	default:
-		rtw_write32(rtwdev, sipi_addr[rf_path], data_and_addr);
-		break;
-	}
+	rtw_write32(rtwdev, sipi_addr[rf_path], data_and_addr);
 
 	udelay(13);
 
@@ -927,15 +876,7 @@ bool rtw_phy_write_rf_reg(struct rtw_dev *rtwdev, enum rtw_rf_path rf_path,
 	direct_addr = base_addr[rf_path] + (addr << 2);
 	mask &= RFREG_MASK;
 
-	switch (rtw_hci_type(rtwdev)) {
-	case RTW_HCI_TYPE_USB:
-		rtw_write32_atomic_mask(rtwdev, direct_addr, mask, data);
-		break;
-	case RTW_HCI_TYPE_PCIE:
-	default:
-		rtw_write32_mask(rtwdev, direct_addr, mask, data);
-		break;
-	}
+	rtw_write32_mask(rtwdev, direct_addr, mask, data);
 
 	udelay(1);
 
