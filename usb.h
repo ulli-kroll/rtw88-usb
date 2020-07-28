@@ -60,7 +60,6 @@ struct rx_usb_ctrl_block {
 	u8 *data;
 	struct urb *rx_urb;
 	struct sk_buff *rx_skb;
-	u8 ep_num;
 };
 
 struct rtw_usb_work_data {
