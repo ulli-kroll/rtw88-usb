@@ -574,22 +574,16 @@ static void rtw_usb_tx_handler(struct work_struct *work)
 	struct rtw_dev *rtwdev = work_data->rtwdev;
 	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
 	struct sk_buff *skb;
-	bool is_empty = true;
-	int index;
+	int index, limit;
 
 	index = RTK_MAX_TX_QUEUE_NUM - 1;
-	while (index >= 0) {
-		skb = skb_dequeue(&rtwusb->tx_queue[index]);
-		if (skb) {
-			rtw_usb_tx_agg(rtwusb, skb);
-			is_empty = false;
-		} else {
-			index--;
-		}
-
-		if (index < 0 && !is_empty) {
-			index = RTK_MAX_TX_QUEUE_NUM - 1;
-			is_empty = true;
+	for (index = RTK_MAX_TX_QUEUE_NUM - 1; index >= 0; index--) {
+		for (limit = 0; limit < 200; limit++) {
+			skb = skb_dequeue(&rtwusb->tx_queue[index]);
+			if (skb)
+				rtw_usb_tx_agg(rtwusb, skb);
+			else
+				break;
 		}
 	}
 }
