@@ -238,6 +238,7 @@ static void rtw_usb_write32_atomic(struct rtw_dev *rtwdev, u32 addr, u32 val)
 	kfree(buf);
 }
 
+#if 0
 static u8 rtw_usb_read8(struct rtw_dev *rtwdev, u32 addr)
 {
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
@@ -354,28 +355,19 @@ static void rtw_usb_write32(struct rtw_dev *rtwdev, u32 addr, u32 val)
 			RTW_USB_CONTROL_MSG_TIMEOUT);
 	kfree(buf);
 }
+#endif
 
 static int rtw_usb_parse(struct rtw_dev *rtwdev,
 			 struct usb_interface *interface)
 {
-	struct rtw_usb *rtwusb;
-	struct usb_interface_descriptor *interface_desc;
-	struct usb_host_interface *host_interface;
+	struct rtw_usb *rtwusb = rtw_get_usb_priv(rtwdev);
+	struct usb_host_interface *host_interface = &interface->altsetting[0];
+	struct usb_interface_descriptor *interface_desc = &host_interface->desc;
 	struct usb_endpoint_descriptor *endpoint;
-	struct device *dev;
-	struct usb_device *usbd;
-	int i, j = 0, endpoints;
+	struct usb_device *usbd = interface_to_usbdev(interface);
+	int endpoints = interface_desc->bNumEndpoints;
+	int i, j = 0, ret = 0;
 	u8 dir, xtype, num;
-	int ret = 0;
-
-	rtwusb = rtw_get_usb_priv(rtwdev);
-
-	dev = &rtwusb->udev->dev;
-
-	usbd = interface_to_usbdev(interface);
-	host_interface = &interface->altsetting[0];
-	interface_desc = &host_interface->desc;
-	endpoints = interface_desc->bNumEndpoints;
 
 	rtwusb->num_in_pipes = 0;
 	rtwusb->num_out_pipes = 0;
@@ -435,7 +427,6 @@ static int rtw_usb_parse(struct rtw_dev *rtwdev,
 		rtw_err(rtwdev, "failed to detect usb speed\n");
 		break;
 	}
-
 exit:
 	return ret;
 }
