@@ -137,8 +137,7 @@ void fill_txdesc_checksum_common(u8 *txdesc, size_t words)
 	SET_TX_DESC_TXDESC_CHECKSUM(txdesc, __le16_to_cpu(chksum));
 }
 
-static inline
-u8 rtw_tx_queue_to_qsel(struct sk_buff *skb, u8 queue)
+static inline u8 rtw_tx_queue_to_qsel(struct sk_buff *skb, u8 queue)
 {
 	switch (queue) {
 	case RTW_TX_QUEUE_BCN:
@@ -154,8 +153,7 @@ u8 rtw_tx_queue_to_qsel(struct sk_buff *skb, u8 queue)
 	}
 }
 
-static inline
-u8 rtw_tx_qsel_to_queue(u8 qsel)
+static inline u8 rtw_tx_qsel_to_queue(u8 qsel)
 {
 	switch (qsel) {
 	case TX_DESC_QSEL_BEACON:
