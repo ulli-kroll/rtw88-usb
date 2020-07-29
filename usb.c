@@ -867,7 +867,7 @@ static int rtw_usb_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
 	desclen = chip->tx_pkt_desc_sz;
 	len = desclen + size;
 	if (len % rtwusb->bulkout_size == 0) {
-		len = len + RTW_USB_PACKET_OFFSET_SZ;
+		len += RTW_USB_PACKET_OFFSET_SZ;
 		pkt_info.offset = desclen + RTW_USB_PACKET_OFFSET_SZ;
 		pkt_info.pkt_offset = 1;
 	} else {
