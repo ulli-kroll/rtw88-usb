@@ -181,4 +181,13 @@ static inline u8 rtw_tx_qsel_to_queue(u8 qsel)
 	}
 }
 
+static inline void rtw_tx_fill_txdesc_checksum(struct rtw_dev *rtwdev,
+					       struct rtw_tx_pkt_info *pkt_info,
+					       u8 *txdesc)
+{
+	struct rtw_chip_info *chip = rtwdev->chip;
+
+	chip->ops->fill_txdesc_checksum(rtwdev, pkt_info, txdesc);
+}
+
 #endif

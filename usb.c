@@ -45,12 +45,11 @@ static void rtw_usb_fill_tx_checksum(struct rtw_usb *rtwusb,
 				     struct sk_buff *skb, int agg_num)
 {
 	struct rtw_dev *rtwdev = rtwusb->rtwdev;
-	struct rtw_chip_info *chip = rtwdev->chip;
 	struct rtw_tx_pkt_info pkt_info;
 
 	SET_TX_DESC_DMA_TXAGG_NUM(skb->data, agg_num);
 	pkt_info.pkt_offset = GET_TX_DESC_PKT_OFFSET(skb->data);
-	chip->ops->fill_txdesc_checksum(rtwdev, &pkt_info, skb->data);
+	rtw_tx_fill_txdesc_checksum(rtwdev, &pkt_info, skb->data);
 }
 
 static void rtw_usb_ctrl_atomic_cb(struct urb *urb)
@@ -836,7 +835,7 @@ static int rtw_usb_write_data(struct rtw_dev *rtwdev,
 	skb_push(skb, headsize);
 	memset(skb->data, 0, headsize);
 	rtw_tx_fill_tx_desc(pkt_info, skb);
-	chip->ops->fill_txdesc_checksum(rtwdev, pkt_info, skb->data);
+	rtw_tx_fill_txdesc_checksum(rtwdev, pkt_info, skb->data);
 	queue = rtw_tx_qsel_to_queue(qsel);
 	ret = rtw_usb_write_port(rtwdev, queue, len, skb,
 				 rtw_usb_write_port_complete, skb);
@@ -906,9 +905,7 @@ static int rtw_usb_tx_write(struct rtw_dev *rtwdev,
 	memset(pkt_desc, 0, chip->tx_pkt_desc_sz);
 	pkt_info->qsel = rtw_tx_queue_to_qsel(skb, queue);
 	rtw_tx_fill_tx_desc(pkt_info, skb);
-
-	chip->ops->fill_txdesc_checksum(rtwdev, pkt_info, skb->data);
-
+	rtw_tx_fill_txdesc_checksum(rtwdev, pkt_info, skb->data);
 	tx_data = rtw_usb_get_tx_data(skb);
 	tx_data->sn = pkt_info->sn;
 
