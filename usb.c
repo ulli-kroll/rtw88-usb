@@ -647,9 +647,6 @@ static void rtw_usb_write_port_tx_complete(struct urb *urb)
 {
 	struct rtw_usb_txcb_t *txcb;
 
-	if (!urb)
-		return;
-
 	txcb = urb->context;
 	rtw_usb_txcb_ack(txcb);
 	kfree(txcb);
