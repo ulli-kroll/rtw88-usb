@@ -705,9 +705,12 @@ static void rtw_usb_txcb_ack(struct rtw_usb_txcb_t *txcb)
 {
 	struct rtw_dev *rtwdev = txcb->rtwdev;
 	struct sk_buff *skb;
+	u8 qsel, queue;
+	int limit;
 
-	while ((skb = skb_dequeue(&txcb->tx_ack_queue))) {
-		u8 qsel, queue;
+	for (limit = 0; limit < 200; limit++) {
+		skb = skb_dequeue(&txcb->tx_ack_queue);
+		if (!skb) break;
 
 		qsel = GET_TX_DESC_QSEL(skb->data);
 		queue = rtw_tx_qsel_to_queue(qsel);
@@ -931,8 +934,12 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 	u32 pkt_desc_sz = chip->rx_pkt_desc_sz;
 	u32 pkt_offset;
 	u8 *rx_desc;
+	int limit;
 
-	while ((skb = skb_dequeue(&rtwusb->rx_queue)) != NULL) {
+	for (limit = 0; limit < 200; limit++) {
+		skb = skb_dequeue(&rtwusb->rx_queue);
+		if (!skb) break;
+
 		rx_desc = skb->data;
 		chip->ops->query_rx_desc(rtwdev, rx_desc, &pkt_stat,
 					 &rx_status);
