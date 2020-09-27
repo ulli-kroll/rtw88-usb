@@ -1924,6 +1924,14 @@ static void rtw8723d_pwr_track(struct rtw_dev *rtwdev)
 	rtw8723d_phy_pwrtrack(rtwdev);
 	dm_info->pwr_trk_triggered = false;
 }
+static void rtw8723d_fill_txdesc_checksum(struct rtw_dev *rtwdev,
+					  struct rtw_tx_pkt_info *pkt_info,
+					  u8 *txdesc)
+{
+	size_t words = 32 / 2; /* calculate the first 32 bytes (16 words) */
+
+	fill_txdesc_checksum_common(txdesc, words);
+}
 
 static struct rtw_chip_ops rtw8723d_ops = {
 	.phy_set_param		= rtw8723d_phy_set_param,
@@ -1944,6 +1952,7 @@ static struct rtw_chip_ops rtw8723d_ops = {
 	.config_bfee		= NULL,
 	.set_gid_table		= NULL,
 	.cfg_csi_rate		= NULL,
+	.fill_txdesc_checksum	= rtw8723d_fill_txdesc_checksum,
 
 	.coex_set_init		= rtw8723d_coex_cfg_init,
 	.coex_set_ant_switch	= NULL,
