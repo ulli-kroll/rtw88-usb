@@ -6,7 +6,6 @@ CONFIG_RTW88_CORE=m
 CONFIG_RTW88_PCI=m
 CONFIG_RTW88_USB=m
 CONFIG_RTW88_8822BE=m
-CONFIG_RTW88_8821BU=m
 CONFIG_RTW88_8822BU=m
 CONFIG_RTW88_8822B=m
 CONFIG_RTW88_8822CE=m
@@ -18,9 +17,6 @@ CONFIG_RTW88_8723D=m
 
 ifneq ($(CONFIG_RTW88_8822BE),m)
 ccflags-y += -DCONFIG_RTW88_8822BE=y
-endif
-ifneq ($(CONFIG_RTW88_8821BU),m)
-ccflags-y += -DCONFIG_RTW88_8821BU=y
 endif
 ifneq ($(CONFIG_RTW88_8822BU),m)
 ccflags-y += -DCONFIG_RTW88_8822BU=y
@@ -71,9 +67,6 @@ rtw88_8822b-objs		:= rtw8822b.o rtw8822b_table.o
 
 obj-$(CONFIG_RTW88_8822BE)	+= rtw88_8822be.o
 rtw88_8822be-objs		:= rtw8822be.o
-
-obj-$(CONFIG_RTW88_8821BU)	+= rtw88_8821bu.o
-rtw88_8821bu-objs		:= rtw8821bu.o
 
 obj-$(CONFIG_RTW88_8822BU)	+= rtw88_8822bu.o
 rtw88_8822bu-objs		:= rtw8822bu.o
