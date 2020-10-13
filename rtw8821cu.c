@@ -42,6 +42,8 @@ static const struct usb_device_id rtw_8821cu_id_table[] = {
 	/*=== Customer ID ===*/
 	{ USB_DEVICE(0x0bda, 0x2006),
 	  .driver_info = (kernel_ulong_t)&(rtw8821c_hw_spec) }, /* Totolink */
+	{ USB_DEVICE(0x0bda, 0xc811),
+	  .driver_info = (kernel_ulong_t)&(rtw8821c_hw_spec) }, /* Simplecom NW602 */
 	{},
 };
 MODULE_DEVICE_TABLE(usb, rtw_8821cu_id_table);
