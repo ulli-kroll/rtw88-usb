@@ -125,6 +125,17 @@ load:
 		rtw88_8822c.ko rtw88_8822ce.ko rtw88_8822cu.ko; \
 		do insmod "$$m"; done;
 
+install:
+	@echo "WARNING:"
+	@echo "=========================================="
+	@echo "you are about to install rtw88-usb drivers"
+	@echo "Wait 5 sec or CTRL-C"
+	@sleep 5
+	@cp *.ko /lib/modules/$(shell uname -r)/kernel/drivers/net/wireless/realtek/rtw88 
+	@depmod -a
+	@echo
+	@echo "rtw88-usb drivers installed"
+
 cscope:
 	find ./ -name "*.[ch]" > cscope.files
 	cscope -Rbq -i cscope.files

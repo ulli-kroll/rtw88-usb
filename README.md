@@ -35,6 +35,13 @@ $ make
 $ sudo make load
 ```
 
+## install drivers
+did you have run make load ?
+
+```console
+$ sudo make install
+```
+
 ## NOTE
 This driver will naturally clash with upstream rtw88 drivers  
 For PCI based device you need the drivers from this location  
