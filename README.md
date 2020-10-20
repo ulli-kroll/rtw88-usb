@@ -29,6 +29,12 @@ $ make clean
 $ make
 ```
 
+## load drivers, preferred
+
+```console
+$ sudo make load
+```
+
 ## NOTE
 This driver will naturally clash with upstream rtw88 drivers  
 For PCI based device you need the drivers from this location  

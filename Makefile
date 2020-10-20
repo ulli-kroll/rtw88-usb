@@ -111,6 +111,20 @@ rtw88_usb-objs			:= usb.o
 all:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD)
 
+load:
+	echo "Unload upstream driver(s)"
+	for m in rtw88_8723de rtw88_8723d rtw88_8822be rtw88_8822b \
+		rtw88_8821ce rtw88_8821c rtw88_8822ce rtw88_8821c \
+		rtw88_pci rtw88_core; \
+		do rmmod "$$m" 2> /dev/null; done;
+	echo "Load rtw88-usb driver(s)"
+	for m in rtw88_core.ko rtw88_pci.ko rtw88_usb.ko \
+		rtw88_8723d.ko rtw88_8723de.ko rtw88_8723du.ko \
+		rtw88_8822b.ko rtw88_8822be.ko rtw88_8822bu.ko \
+		rtw88_8821c.ko rtw88_8821ce.ko rtw88_8821cu.ko \
+		rtw88_8822c.ko rtw88_8822ce.ko rtw88_8822cu.ko; \
+		do insmod "$$m"; done;
+
 cscope:
 	find ./ -name "*.[ch]" > cscope.files
 	cscope -Rbq -i cscope.files
