@@ -1789,11 +1789,17 @@ struct rtw_hal {
 		     [DESC_RATE_MAX];
 };
 
+struct rtw_module_param {
+	bool disable_ps;
+	bool disable_idle;
+};
+
 struct rtw_dev {
 	struct ieee80211_hw *hw;
 	struct device *dev;
 
 	struct rtw_hci hci;
+	struct rtw_module_param param;
 
 	struct rtw_chip_info *chip;
 	struct rtw_hal hal;

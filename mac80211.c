@@ -76,31 +76,36 @@ static int rtw_ops_config(struct ieee80211_hw *hw, u32 changed)
 
 	rtw_leave_lps_deep(rtwdev);
 
-	if ((changed & IEEE80211_CONF_CHANGE_IDLE) &&
-	    !(hw->conf.flags & IEEE80211_CONF_IDLE)) {
-		ret = rtw_leave_ips(rtwdev);
-		if (ret) {
-			rtw_err(rtwdev, "failed to leave idle state\n");
-			goto out;
+	if (!rtwdev->param.disable_idle) {
+		if ((changed & IEEE80211_CONF_CHANGE_IDLE) &&
+		    !(hw->conf.flags & IEEE80211_CONF_IDLE)) {
+			ret = rtw_leave_ips(rtwdev);
+			if (ret) {
+				rtw_err(rtwdev, "failed to leave idle state\n");
+				goto out;
+			}
 		}
 	}
 
-	if (changed & IEEE80211_CONF_CHANGE_PS) {
-		if (hw->conf.flags & IEEE80211_CONF_PS) {
-			rtwdev->ps_enabled = true;
-		} else {
-			rtwdev->ps_enabled = false;
-			rtw_leave_lps(rtwdev);
+	if (!rtwdev->param.disable_idle) {
+		if (changed & IEEE80211_CONF_CHANGE_PS) {
+			if (hw->conf.flags & IEEE80211_CONF_PS) {
+				rtwdev->ps_enabled = true;
+			} else {
+				rtwdev->ps_enabled = false;
+				rtw_leave_lps(rtwdev);
+			}
 		}
 	}
 
 	if (changed & IEEE80211_CONF_CHANGE_CHANNEL)
 		rtw_set_channel(rtwdev);
 
-	if ((changed & IEEE80211_CONF_CHANGE_IDLE) &&
-	    (hw->conf.flags & IEEE80211_CONF_IDLE))
-		rtw_enter_ips(rtwdev);
-
+	if (!rtwdev->param.disable_idle) {
+		if ((changed & IEEE80211_CONF_CHANGE_IDLE) &&
+		    (hw->conf.flags & IEEE80211_CONF_IDLE))
+			rtw_enter_ips(rtwdev);
+	}
 out:
 	mutex_unlock(&rtwdev->mutex);
 	return ret;
