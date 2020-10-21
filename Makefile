@@ -125,6 +125,17 @@ load:
 		rtw88_8822c.ko rtw88_8822ce.ko rtw88_8822cu.ko; \
 		do insmod "$$m"; done;
 
+firmware:
+	@echo "WARNING:"
+	@echo "=========================================="
+	@echo "you are about to install rtw88-usb firmware"
+	@echo "Wait 5 sec or CTRL-C"
+	@sleep 5
+	@mkdir -p /lib/firmware/rtw88
+	@cp fw/* /lib/firmware/rtw88/
+	@echo
+	@echo "rtw88-usb firmware installed"
+
 install:
 	@echo "WARNING:"
 	@echo "=========================================="
@@ -135,6 +146,8 @@ install:
 	@depmod -a
 	@echo
 	@echo "rtw88-usb drivers installed"
+
+
 
 cscope:
 	find ./ -name "*.[ch]" > cscope.files
