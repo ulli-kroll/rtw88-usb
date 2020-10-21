@@ -4,6 +4,7 @@
 
 #include <linux/module.h>
 #include <linux/usb.h>
+#include "main.h"
 #include "rtw8822cu.h"
 
 static const struct usb_device_id rtw_8822cu_id_table[] = {
@@ -19,10 +20,28 @@ static const struct usb_device_id rtw_8822cu_id_table[] = {
 };
 MODULE_DEVICE_TABLE(usb, rtw_8822cu_id_table);
 
+static struct rtw_module_param rtw8822cu_mod_params = {
+	.disable_idle = true,
+	.disable_ps = true,
+};
+
+module_param_named(disable_idle, rtw8822cu_mod_params.disable_idle, bool, 0444);
+module_param_named(disable_ps, rtw8822cu_mod_params.disable_ps, bool, 0644);
+
+MODULE_PARM_DESC(disable_idle, "mac80211 power save: (default 1)");
+MODULE_PARM_DESC(disable_ps, "mac80211 idle: (default 1)");
+
+static int rtw8822bu_probe(struct usb_interface *intf,
+			    const struct usb_device_id *id)
+{
+	return rtw_usb_probe(intf, id, &rtw8822cu_mod_params);
+}
+
+
 static struct usb_driver rtw_8822cu_driver = {
 	.name = "rtw_8822cu",
 	.id_table = rtw_8822cu_id_table,
-	.probe = rtw_usb_probe,
+	.probe = rtw8822bu_probe,
 	.disconnect = rtw_usb_disconnect,
 };
 module_usb_driver(rtw_8822cu_driver);

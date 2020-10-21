@@ -12,7 +12,8 @@
 
 extern const struct dev_pm_ops rtw_pm_ops;
 extern struct rtw_chip_info rtw8822c_hw_spec;
-int rtw_usb_probe(struct usb_interface *intf, const struct usb_device_id *id);
+int rtw_usb_probe(struct usb_interface *intf, const struct usb_device_id *id,
+		  struct rtw_module_param *param);
 void rtw_usb_disconnect(struct usb_interface *intf);
 
 #endif

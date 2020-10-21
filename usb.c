@@ -1244,7 +1244,7 @@ static void rtw_usb_intf_deinit(struct rtw_dev *rtwdev,
 }
 
 int rtw_usb_probe(struct usb_interface *intf,
-		  const struct usb_device_id *id)
+		  const struct usb_device_id *id, struct rtw_module_param *param)
 {
 	struct rtw_dev *rtwdev;
 	struct ieee80211_hw *hw;
@@ -1262,6 +1262,9 @@ int rtw_usb_probe(struct usb_interface *intf,
 	rtwdev->chip = (struct rtw_chip_info *)id->driver_info;
 	rtwdev->hci.ops = &rtw_usb_ops;
 	rtwdev->hci.type = RTW_HCI_TYPE_USB;
+
+	rtwdev->param.disable_ps = param->disable_ps;
+	rtwdev->param.disable_idle = param->disable_idle;
 
 	ret = rtw_core_init(rtwdev);
 	if (ret)
