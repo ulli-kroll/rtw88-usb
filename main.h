@@ -1871,6 +1871,7 @@ struct rtw_dev {
 	/* lps power state & handler work */
 	struct rtw_lps_conf lps_conf;
 	bool ps_enabled;
+	struct completion lps_leave_check;
 
 	struct dentry *debugfs;
 
