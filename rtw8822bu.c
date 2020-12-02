@@ -36,6 +36,8 @@ static const struct usb_device_id rtw_8822bu_id_table[] = {
 	  .driver_info = (kernel_ulong_t)&(rtw8822b_hw_spec) },
 	{ USB_DEVICE(0x2357, 0x012D),	/* TP-Link AC1300 T3U */
 	  .driver_info = (kernel_ulong_t)&(rtw8822b_hw_spec) },
+	{ USB_DEVICE(0x2357, 0x0138),	/* TP-Link AC1300 T3U */
+	  .driver_info = (kernel_ulong_t)&(rtw8822b_hw_spec) },
 	{},
 };
 MODULE_DEVICE_TABLE(usb, rtw_8822bu_id_table);
