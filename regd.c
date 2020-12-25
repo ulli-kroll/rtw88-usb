@@ -406,18 +406,10 @@ rtw_regd_init_wiphy(struct rtw_dev *rtwdev, struct wiphy *wiphy,
 		    void (*reg_notifier)(struct wiphy *wiphy,
 					 struct regulatory_request *request))
 {
-	struct rtw_regulatory *reg = &rtwdev->regd;
-
 	wiphy->reg_notifier = reg_notifier;
 
-	if (rtw_regd_is_ww(reg)) {
-		rtwdev->efuse.country_worldwide = true;
-		wiphy->regulatory_flags |= REGULATORY_CUSTOM_REG;
-		wiphy_apply_custom_regulatory(wiphy, &rtw88_world_regdom);
-	} else {
-		rtwdev->efuse.country_worldwide = false;
-	}
-	wiphy->regulatory_flags |= REGULATORY_STRICT_REG;
+	wiphy->regulatory_flags &= ~REGULATORY_CUSTOM_REG;
+	wiphy->regulatory_flags &= ~REGULATORY_STRICT_REG;
 
 	rtw_regd_apply_hw_cap_flags(wiphy);
 
