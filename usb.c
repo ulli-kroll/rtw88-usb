@@ -969,7 +969,7 @@ static void rtw_usb_rx_handler(struct work_struct *work)
 static void rtw_usb_read_port_complete(struct urb *urb)
 {
 	struct rx_usb_ctrl_block *rxcb = urb->context;
-	struct rtw_dev *rtwdev = (struct rtw_dev *)rxcb->data;
+	struct rtw_dev *rtwdev = rxcb->rtwdev;
 	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
 	struct sk_buff *skb = rxcb->rx_skb;
 
@@ -1028,7 +1028,7 @@ static void rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr,
 	if (!urb)
 		return;
 
-	rxcb->data = (void *)rtwdev;
+	rxcb->rtwdev = rtwdev;
 	pipe = rtw_usb_get_pipe(rtwusb, RTW_USB_BULK_IN_ADDR);
 	len = RTW_USB_MAX_RECVBUF_SZ + RTW_USB_RECVBUFF_ALIGN_SZ;
 	skb = dev_alloc_skb(len);

@@ -57,7 +57,7 @@ enum rtw_usb_speed {
 };
 
 struct rx_usb_ctrl_block {
-	u8 *data;
+	struct rtw_dev *rtwdev;
 	struct urb *rx_urb;
 	struct sk_buff *rx_skb;
 };
