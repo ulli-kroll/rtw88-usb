@@ -1615,6 +1615,9 @@ enum rtw_edcca_mode {
 	RTW_EDCCA_ADAPTIVITY	= 1,
 };
 
+#define RRSR_INIT_2G 0x15f
+#define RRSR_INIT_5G 0x150
+
 struct rtw_dm_info {
 	u32 cck_fa_cnt;
 	u32 ofdm_fa_cnt;
@@ -1646,6 +1649,8 @@ struct rtw_dm_info {
 
 	u8 fix_rate;
 	u8 tx_rate;
+	u32 rrsr_val_init;
+	u32 rrsr_mask_min;
 	u8 thermal_avg[RTW_RF_PATH_MAX];
 	u8 thermal_meter_k;
 	s8 delta_power_index[RTW_RF_PATH_MAX];
