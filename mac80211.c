@@ -154,11 +154,15 @@ static int rtw_ops_add_interface(struct ieee80211_hw *hw,
 {
 	struct rtw_dev *rtwdev = hw->priv;
 	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
+	struct rtw_fw_state *fw = &rtwdev->fw;
 	enum rtw_net_type net_type;
 	u32 config = 0;
 	u8 port = 0;
 	u8 bcn_ctrl = 0;
 
+	if (fw->feature & FW_FEATURE_BCN_FILTER)
+		vif->driver_flags |= IEEE80211_VIF_BEACON_FILTER |
+				     IEEE80211_VIF_SUPPORTS_CQM_RSSI;
 	rtwvif->port = port;
 	rtwvif->stats.tx_unicast = 0;
 	rtwvif->stats.rx_unicast = 0;
@@ -376,6 +380,8 @@ static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
 		if (ieee80211_vif_type_p2p(vif) == NL80211_IFTYPE_STATION)
 			coex_stat->wl_beacon_interval = conf->beacon_int;
 	}
+	if (changed & BSS_CHANGED_CQM)
+		rtw_fw_beacon_filter_config(rtwdev, true, vif);
 
 	if (changed & BSS_CHANGED_BEACON)
 		rtw_fw_download_rsvd_page(rtwdev);
@@ -430,6 +436,7 @@ static int rtw_ops_sta_remove(struct ieee80211_hw *hw,
 {
 	struct rtw_dev *rtwdev = hw->priv;
 
+	rtw_fw_beacon_filter_config(rtwdev, false, vif);
 	mutex_lock(&rtwdev->mutex);
 	rtw_sta_remove(rtwdev, sta, true);
 	mutex_unlock(&rtwdev->mutex);
