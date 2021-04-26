@@ -936,7 +936,11 @@ struct rtw_chip_ops {
 			     u8 fixrate_en, u8 *new_rate);
 	void (*cfo_init)(struct rtw_dev *rtwdev);
 	void (*cfo_track)(struct rtw_dev *rtwdev);
- 	void (*adaptivity_init)(struct rtw_dev *rtwdev);
+	void (*config_tx_path)(struct rtw_dev *rtwdev, u8 tx_path,
+			       enum rtw_bb_path tx_path_1ss,
+			       enum rtw_bb_path tx_path_cck,
+			       bool is_tx2_path);
+	void (*adaptivity_init)(struct rtw_dev *rtwdev);
 	void (*adaptivity)(struct rtw_dev *rtwdev);
 
 	/* for USB/SDIO only */
@@ -1238,7 +1242,9 @@ struct rtw_chip_info {
 	u8 max_power_index;
 
 	u16 fw_fifo_addr[RTW_FW_FIFO_MAX];
+	u8 default_1ss_tx_path;
 
+	bool path_div_supported;
 	bool ht_supported;
 	bool vht_supported;
 	u8 lps_deep_mode_supported;
@@ -1910,6 +1916,14 @@ struct rtw_module_param {
 	bool disable_idle;
 };
 
+struct rtw_path_div {
+	enum rtw_bb_path current_tx_path;
+	u32 path_a_sum;
+	u32 path_b_sum;
+	u16 path_a_cnt;
+	u16 path_b_cnt;
+};
+
 struct rtw_dev {
 	struct ieee80211_hw *hw;
 	struct device *dev;
@@ -1979,6 +1993,7 @@ struct rtw_dev {
 	DECLARE_BITMAP(flags, NUM_OF_RTW_FLAGS);
 
 	u8 mp_mode;
+	struct rtw_path_div dm_path_div;
 
 	struct rtw_fw_state wow_fw;
 	struct rtw_wow_param wow;
