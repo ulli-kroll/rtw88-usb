@@ -179,6 +179,17 @@ int rtw_parse_efuse_map(struct rtw_dev *rtwdev)
 		goto out_free;
 	}
 
+	if (efuse->rfe_option >= chip->rfe_defs_size) {
+		rtw_err(rtwdev, "dump physical map\n");
+		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_OFFSET,
+			       16, 1, phy_map, phy_size,
+			       1);
+		rtw_err(rtwdev, "dump locial map\n");
+		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_OFFSET,
+			       16, 1, log_map, log_size,
+			       1);
+	}
+
 out_free:
 	kfree(log_map);
 	kfree(phy_map);
