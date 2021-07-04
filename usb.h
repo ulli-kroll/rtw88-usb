@@ -5,9 +5,18 @@
 #ifndef __RTW_USB_H_
 #define __RTW_USB_H_
 
+#define FW_8192C_START_ADDRESS		0x1000
+#define FW_8192C_END_ADDRESS            0x5FFF
+
+#define RTW_USB_MAX_RX_COUNT		100
+#define RTW_USB_VENQT_MAX_BUF_SIZE	254
+#define MAX_USBCTRL_VENDORREQ_TIMES	10
+
 #define RTW_USB_CMD_READ		0xc0
 #define RTW_USB_CMD_WRITE		0x40
 #define RTW_USB_CMD_REQ			0x05
+
+#define	RTW_USB_VENQT_CMD_IDX		0x00
 
 #define RTW_USB_IS_FULL_SPEED_USB(rtwusb) \
 	((rtwusb)->usb_speed == RTW_USB_SPEED_1_1)
@@ -74,6 +83,10 @@ struct rtw_usb_tx_data {
 struct rtw_usb {
 	struct rtw_dev *rtwdev;
 	struct usb_device *udev;
+
+	spinlock_t usb_lock;
+	__le32 *usb_data;
+	int usb_data_index;
 
 	u32 bulkout_size;
 	u8 num_in_pipes;
