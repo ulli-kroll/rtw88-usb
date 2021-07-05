@@ -1143,6 +1143,9 @@ int rtw_usb_probe(struct usb_interface *intf,
 	if (ret)
 		goto err_release_hw;
 
+	rtw_info(rtwdev, "Device idVendor %04x idProduct %04x probed\n",
+		 id->idVendor, id->idProduct);
+
 	ret = rtw_usb_intf_init(rtwdev, intf);
 	if (ret) {
 		rtw_err(rtwdev, "failed to init USB interface\n");
