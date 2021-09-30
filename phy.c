@@ -202,7 +202,7 @@ void rtw_phy_init(struct rtw_dev *rtwdev)
 	rtw_phy_cck_pd_init(rtwdev);
 
 	dm_info->iqk.done = false;
-	dm_info->iqk.done = false;
+	rtw_phy_cfo_init(rtwdev);
 	rtw_phy_adaptivity_init(rtwdev);
 }
 EXPORT_SYMBOL(rtw_phy_init);
