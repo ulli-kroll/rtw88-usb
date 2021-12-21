@@ -932,8 +932,8 @@ static void __rtw_mac_flush_prio_queue(struct rtw_dev *rtwdev,
 	addr = &chip->prioq_addrs->prio[prio_queue];
 	wsize = chip->prioq_addrs->wsize;
 
-	/* check if all of the reserved pages are available for 100 msecs */
-	wait_end = jiffies + msecs_to_jiffies(110);
+	/* check if all of the reserved pages are available for 1000 msecs */
+	wait_end = jiffies + msecs_to_jiffies(1000);
 	for (; time_before(jiffies, wait_end); msleep(20)) {
 		rsvd_page = wsize ? rtw_read16(rtwdev, addr->rsvd) :
 				     rtw_read8(rtwdev, addr->rsvd);
