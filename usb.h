@@ -85,6 +85,7 @@ struct rtw_usb {
 	u8 queue_to_pipe[8];
 	u8 usb_speed;
 	u8 usb_txagg_num;
+	u8 usb_removed;
 
 	struct workqueue_struct *txwq, *rxwq;
 
