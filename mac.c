@@ -924,7 +924,7 @@ static void __rtw_mac_flush_prio_queue(struct rtw_dev *rtwdev,
 	const struct rtw_prioq_addr *addr;
 	bool wsize;
 	u16 avail_page, rsvd_page;
-	int i;
+	unsigned long wait_end;
 
 	if (prio_queue >= RTW_DMA_MAPPING_MAX)
 		return;
@@ -933,15 +933,14 @@ static void __rtw_mac_flush_prio_queue(struct rtw_dev *rtwdev,
 	wsize = chip->prioq_addrs->wsize;
 
 	/* check if all of the reserved pages are available for 100 msecs */
-	for (i = 0; i < 5; i++) {
+	wait_end = jiffies + msecs_to_jiffies(110);
+	for (; time_before(jiffies, wait_end); msleep(20)) {
 		rsvd_page = wsize ? rtw_read16(rtwdev, addr->rsvd) :
 				     rtw_read8(rtwdev, addr->rsvd);
 		avail_page = wsize ? rtw_read16(rtwdev, addr->avail) :
 				      rtw_read8(rtwdev, addr->avail);
 		if (rsvd_page == avail_page)
 			return;
-
-		msleep(20);
 	}
 
 	/* priority queue is still not empty, throw a warning,
