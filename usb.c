@@ -74,12 +74,15 @@ static int rtw_usb_ctrl_atomic(struct rtw_dev *rtwdev,
 			       __u8 req_type, __u16 value, __u16 index,
 			       void *databuf, __u16 size)
 {
+	struct rtw_usb *rtwusb = (struct rtw_usb *)rtwdev->priv;
 	struct usb_ctrlrequest *dr = NULL;
 	struct rtw_usb_ctrlcb_t *ctx = NULL;
 	struct urb *urb = NULL;
 	bool done;
 	int ret = -ENOMEM;
 
+	if (rtwusb->usb_removed)
+		return -ENODEV;
 	ctx = kmalloc(sizeof(*ctx), GFP_ATOMIC);
 	if (!ctx)
 		goto out;
@@ -102,7 +105,11 @@ static int rtw_usb_ctrl_atomic(struct rtw_dev *rtwdev,
 	usb_fill_control_urb(urb, dev, pipe, (unsigned char *)dr, databuf, size,
 			     rtw_usb_ctrl_atomic_cb, ctx);
 	ret = usb_submit_urb(urb, GFP_ATOMIC);
-	if (unlikely(ret)) {
+	if (unlikely(ret == -ENODEV) || unlikely(ret == -ENOENT)) {
+		rtwusb->usb_removed = 1;
+		rtw_warn(rtwdev, "usb device removed");
+		goto err_free_urb;
+	} else if (unlikely(ret)) {
 		rtw_err(rtwdev, "failed to submit urb, ret=%d\n", ret);
 		goto err_free_urb;
 	}
@@ -628,6 +635,8 @@ static int rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 	unsigned int pipe;
 	int ret;
 
+	if (rtwusb->usb_removed)
+		return -ENODEV;
 	pipe = rtw_usb_get_pipe(rtwusb, addr);
 	urb = usb_alloc_urb(0, GFP_ATOMIC);
 	if (!urb)
@@ -636,7 +645,10 @@ static int rtw_usb_write_port(struct rtw_dev *rtwdev, u8 addr, u32 cnt,
 	usb_fill_bulk_urb(urb, usbd, pipe, skb->data, (int)cnt,
 			  cb, context);
 	ret = usb_submit_urb(urb, GFP_ATOMIC);
-	if (unlikely(ret))
+	if (unlikely(ret == -ENODEV) || unlikely(ret == -ENOENT)) {
+		rtwusb->usb_removed = 1;
+		rtw_warn(rtwdev, "usb device removed");
+	} else if (unlikely(ret))
 		rtw_err(rtwdev, "failed to submit write urb, ret=%d\n", ret);
 	usb_free_urb(urb);
 
@@ -1024,6 +1036,8 @@ static void rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr,
 	u32 len;
 	int ret;
 
+	if (rtwusb->usb_removed)
+		return;
 	urb = usb_alloc_urb(0, GFP_ATOMIC);
 	if (!urb)
 		return;
@@ -1048,7 +1062,10 @@ static void rtw_usb_read_port(struct rtw_dev *rtwdev, u8 addr,
 			  rtw_usb_read_port_complete,
 			  rxcb);
 	ret = usb_submit_urb(urb, GFP_ATOMIC);
-	if (ret)
+	if (unlikely(ret == -ENODEV) || unlikely(ret == -ENOENT)) {
+		rtwusb->usb_removed = 1;
+		rtw_warn(rtwdev, "usb device removed");
+	} else if (ret)
 		rtw_err(rtwdev, "failed to submit USB urb, ret=%d\n", ret);
 
 	usb_free_urb(urb);
